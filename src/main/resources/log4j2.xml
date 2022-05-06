@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Properties>
+        <Property name="path">logs</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <ThresholdFilter level="trace" onMatch="ACCEPT" onMisMatch="DENY"/>
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level [%t] %logger{36} - %msg%n"/>
+        </Console>
+        <RandomAccessFile name="RandomAccessFile" filename="${path}/async.log" immediateFlush="false" append="false">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level [%t] %logger{36} - %msg%n"/>
+        </RandomAccessFile>
+    </Appenders>
+    <Loggers>
+        <!-- avoid duplicated logs with additivity=false -->
+        <Logger name="moe.kurenai" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RandomAccessFile"/>
+        </Logger>
+        <Root level="info" includeLocation="true">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RandomAccessFile"/>
+        </Root>
+        <!--        <asyncRoot level="debug" includeLocation="false">-->
+        <!--            <AppenderRef ref="Console"/>-->
+        <!--            <AppenderRef ref="RandomAccessFile"/>-->
+        <!--        </asyncRoot>-->
+    </Loggers>
+</Configuration>
