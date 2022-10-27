@@ -12,14 +12,14 @@ services:
     deploy:
       resources:
         limits:
-          memory: 200m
+          memory: 150m
     logging:
       driver: "json-file"
       options:
         max-size: "200m"
         max-file: "1"
     volumes:
-      - ./config:/app/config
+      - ./config:/deployments/config
     depends_on:
       - redis
 

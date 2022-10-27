@@ -6,51 +6,43 @@ import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.github.kurenairyu.cache.redis.lettuce.jackson.JacksonCodec
-import io.lettuce.core.RedisClient
-import io.lettuce.core.RedisURI
 import io.vertx.core.Vertx
-import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpServerOptions
 import io.vertx.ext.web.Router
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import moe.kurenai.bgm.BgmClient
 import moe.kurenai.bgm.model.auth.AccessToken
 import moe.kurenai.bgm.model.character.CharacterDetail
-import moe.kurenai.bgm.model.character.CharacterPerson
 import moe.kurenai.bgm.model.person.PersonDetail
 import moe.kurenai.bgm.model.subject.*
 import moe.kurenai.bgm.request.Request
 import moe.kurenai.bgm.request.charater.GetCharacterDetail
-import moe.kurenai.bgm.request.charater.GetCharacterRelatedPersons
-import moe.kurenai.bgm.request.charater.GetCharacterRelatedSubjects
 import moe.kurenai.bgm.request.person.GetPersonDetail
-import moe.kurenai.bgm.request.person.GetPersonRelatedCharacters
-import moe.kurenai.bgm.request.person.GetPersonRelatedSubjects
 import moe.kurenai.bgm.request.subject.GetSubject
-import moe.kurenai.bgm.request.subject.GetSubjectCharacters
 import moe.kurenai.bgm.request.subject.GetSubjectPersons
 import moe.kurenai.bot.Config.Companion.CONFIG
 import moe.kurenai.bot.config.JsonJacksonKotlinCodec
 import moe.kurenai.bot.config.RecordNamingStrategyPatchModule
-import moe.kurenai.tdlight.LongPollingTelegramBot
-import moe.kurenai.tdlight.client.TDLightClient
+import moe.kurenai.tdlight.LongPollingCoroutineTelegramBot
+import moe.kurenai.tdlight.client.TDLightCoroutineClient
+import moe.kurenai.tdlight.model.MessageEntityType
 import moe.kurenai.tdlight.model.ResponseWrapper
 import moe.kurenai.tdlight.model.inline.InlineQuery
 import moe.kurenai.tdlight.model.message.Message
+import moe.kurenai.tdlight.model.message.MessageEntity
 import moe.kurenai.tdlight.request.message.AnswerInlineQuery
 import moe.kurenai.tdlight.request.message.SendMessage
-import moe.kurenai.tdlight.util.MarkdownUtil.fm2md
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.redisson.Redisson
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import moe.kurenai.tdlight.request.Request as TDRequest
 
 object BangumiBot {
 
@@ -67,6 +59,7 @@ object BangumiBot {
     const val TOKEN = "TOKEN"
     const val TOKEN_TTL = "TOKEN_TTL"
     const val AUTH_LOCK = "AUTH_LOCK"
+    val MAPPER = jacksonObjectMapper().setDefaultPropertyInclusion(JsonInclude.Include.NON_ABSENT)
 
     private val CACHE_TTL = Duration.ofMinutes(10)
 
@@ -77,23 +70,35 @@ object BangumiBot {
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
         .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-        .activateDefaultTyping(BasicPolymorphicTypeValidator.builder().allowIfBaseType(Any::class.java).build(), ObjectMapper.DefaultTyping.EVERYTHING)
+        .activateDefaultTyping(
+            BasicPolymorphicTypeValidator.builder().allowIfBaseType(Any::class.java).build(),
+            ObjectMapper.DefaultTyping.EVERYTHING
+        )
 
     val redisson = Redisson.create(org.redisson.config.Config().also {
         it.codec = JsonJacksonKotlinCodec(redisMapper)
-        it.useSingleServer().setAddress("redis://${CONFIG.redis.host}:${CONFIG.redis.port}").setDatabase(CONFIG.redis.database)
-    }).reactive()
-    val lettuce = RedisClient
-        .create(RedisURI.builder().withHost(CONFIG.redis.host).withPort(CONFIG.redis.port).withDatabase(CONFIG.redis.database).build())
-        .connect(JacksonCodec<Any>(redisMapper))
-        .reactive()
-    val bgmClient = BgmClient(CONFIG.bgm.appId, CONFIG.bgm.appSecret, CONFIG.bgm.redirectUrl, isDebugEnabled = CONFIG.debug).reactive()
-    val tdClient = TDLightClient(CONFIG.telegram.baseUrl, CONFIG.telegram.token, CONFIG.telegram.userMode, isDebugEnabled = CONFIG.debug, updateBaseUrl = CONFIG.telegram.updateBaseUrl)
-    val tgBot = LongPollingTelegramBot(listOf(UpdateSubscribe()), tdClient)
+        it.useSingleServer().setAddress("redis://${CONFIG.redis.host}:${CONFIG.redis.port}")
+            .setDatabase(CONFIG.redis.database)
+    })
+
+    val bgmClient = BgmClient(
+        CONFIG.bgm.appId,
+        CONFIG.bgm.appSecret,
+        CONFIG.bgm.redirectUrl,
+        isDebugEnabled = CONFIG.debug
+    ).coroutine()
+    val tdClient = TDLightCoroutineClient(
+        CONFIG.telegram.baseUrl,
+        CONFIG.telegram.token,
+        CONFIG.telegram.userMode,
+        isDebugEnabled = CONFIG.debug,
+        updateBaseUrl = CONFIG.telegram.updateBaseUrl
+    )
+    lateinit var tgBot: LongPollingCoroutineTelegramBot
 
 
-    val tokens = redisson.getMap<String, AccessToken>(TOKEN)
-    val tokenTTLList = redisson.getScoredSortedSet<String>(TOKEN_TTL)
+    val tokens = redisson.getMap<Long, AccessToken>(TOKEN)
+    val tokenTTLList = redisson.getScoredSortedSet<Long>(TOKEN_TTL)
 
     val scheduledThreadPool = Executors.newScheduledThreadPool(1)
 
@@ -101,28 +106,47 @@ object BangumiBot {
 
     private val log: Logger = LogManager.getLogger()
 
-    fun start() {
-//        starttWebServer()
+    suspend fun start() {
+        startWebServer()
         startRefreshTask()
+        tgBot = LongPollingCoroutineTelegramBot(listOf(UpdateSubscribe()), tdClient)
+        tgBot.start()
     }
 
+    @OptIn(FlowPreview::class)
     private fun startRefreshTask() {
         scheduledThreadPool.scheduleAtFixedRate({
-            tokenTTLList.valueRange(0.0, true, LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond().toDouble(), true)
-                .flatMapMany { Flux.fromIterable(it) }
-                .flatMap(tokens::get)
-                .flatMap { token ->
-                    bgmClient.refreshToken(token.refreshToken)
-                }.flatMap { new ->
-                    tokenTTLList.add(new.expiresIn.toDouble(), new.userId.toString())
-                        .zipWith(Mono.defer {
-                            tokens.put(new.userId.toString(), new)
-                        })
-                }.subscribe()
+            runBlocking {
+                val list = tokenTTLList.valueRange(
+                    0.0,
+                    true,
+                    LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond().toDouble(),
+                    true
+                )
+                channelFlow {
+                    launch {
+                        list.forEach { id ->
+                            tokens[id]?.let { send(it) }
+                        }
+                    }
+                }.collect { token ->
+                    val result = kotlin.runCatching {
+                        bgmClient.refreshToken(token.refreshToken)
+                    }.onFailure {
+                        log.error("Refresh token failed", it)
+                        launch { tokens.remove(token.userId) }
+                        launch { tokenTTLList.remove(token.userId) }
+                    }
+                    result.getOrNull()?.let {
+                        launch { tokenTTLList.add(it.expiresIn.toDouble(), it.userId) }
+                        launch { tokens.put(it.userId, it) }
+                    }
+                }
+            }
         }, 1, TimeUnit.DAYS.toMinutes(1), TimeUnit.MINUTES)
     }
 
-    private fun starttWebServer() {
+    private fun startWebServer() {
         val vertx = Vertx.vertx()
         val router = Router.router(vertx)
         router.get("/callback").handler { ctx ->
@@ -132,37 +156,34 @@ object BangumiBot {
                     val randomCode = ctx.queryParam("state")?.first()
 
                     if (randomCode != null) {
-                        val lock = redisson.getLock(AUTH_LOCK.appendKey(randomCode))
-                        val userId = redisson.getBucket<Long>(RANDOM_CODE.appendKey(randomCode))
-                        userId.get().flatMap { id ->
-                            lock.tryLock(30, TimeUnit.SECONDS)
-                                .flatMap { locked ->
-                                    if (locked) {
-                                        bgmClient.getToken(code)
-                                            .flatMap { token ->
-                                                tokenTTLList.add(token.expiresIn.toDouble(), token.userId.toString())
-                                                    .zipWith(tokens.put(token.userId.toString(), token))
-                                            }.flatMap {
-                                                ctx.redirect("https://t.me/${tdClient.me.username}?start=success")
-                                                userId.delete()
-                                            }
-                                    } else {
-                                        ctx.response()
-                                            .putHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8")
-                                            .send(Buffer.buffer("<p>处理中，请稍后</p>"))
-                                        Mono.just(true)
-                                    }
+                        val randomCodeBucket = redisson.getBucket<Long>(RANDOM_CODE.appendKey(randomCode))
+                        runBlocking {
+                            randomCodeBucket.get()?.let { userId ->
+                                kotlin.runCatching {
+                                    log.debug("Attempt bind user: $userId")
+                                    val token = bgmClient.getToken(code)
+                                    log.debug("Bind success: $userId : ${token.userId}")
+                                    tokenTTLList.add(
+                                        LocalDateTime.now().atZone(ZoneId.systemDefault())
+                                            .toEpochSecond() + token.expiresIn.toDouble(), token.userId
+                                    )
+                                    log.debug("Add token: $userId : ${token.userId}")
+                                    tokens.put(userId, token)
+                                    log.debug("Redirect to bot")
+                                    ctx.redirect("https://t.me/${tdClient.getMe().username}?start=success")
+                                    randomCodeBucket.delete()
+                                }.onFailure {
+                                    log.error(it)
+                                    ctx.response()
+                                        .putHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8")
+                                        .send("<p>Error: \n${it.message}</p>")
                                 }
-                        }.switchIfEmpty(Mono.defer {
-                            ctx.response()
-                                .putHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8")
-                                .send("<p>请重新发送 /start 命令查看信息</p>")
-                            Mono.empty()
-                        }).doOnError { ex ->
-                            ctx.response()
-                                .putHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8")
-                                .send("<p>Error: \n${ex.message}</p>")
-                        }.subscribe()
+                            } ?: kotlin.run {
+                                ctx.response()
+                                    .putHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8")
+                                    .send("<p>请重新发送 /start 命令查看信息</p>")
+                            }
+                        }
                     } else {
                         ctx.response()
                             .putHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8")
@@ -180,7 +201,7 @@ object BangumiBot {
             log.debug("${ctx.request().localAddress()}: ${ctx.request().path()}")
             ctx.response()
                 .putHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8")
-                .send("</p>Bangumi Bot. power by kurenai</p>")
+                .send("</p>Bangumi Bot. power by Kurenai</p>")
         }
         val port = System.getProperty("PORT")?.toInt() ?: 8080
         vertx.createHttpServer(HttpServerOptions().apply {
@@ -190,270 +211,272 @@ object BangumiBot {
         }
     }
 
-    fun Message.token(): Mono<AccessToken> {
-        return tokens[this.from!!.id.toString()]
+    fun Message.token(): AccessToken? {
+        return tokens[this.from!!.id]
     }
 
-    fun InlineQuery.token(): Mono<AccessToken> {
-        return tokens[this.from.id.toString()]
+    fun InlineQuery.token(): AccessToken? {
+        return tokens[this.from.id]
     }
 
-    fun getToken(tgId: Long): Mono<AccessToken> {
-        return tokens[tgId.toString()]
+    fun getToken(tgId: Long): AccessToken? {
+        return tokens[tgId]
     }
 
-    fun AccessToken.check() {
-        //TODO check expire
-        this.expiresIn
+    suspend fun send(chatId: String, msg: String): Message {
+        return tdClient.send(SendMessage(chatId, msg))
     }
 
-    fun send(chatId: String, msg: String): Mono<Message> {
-        return Mono.fromCompletionStage(tdClient.send(SendMessage(chatId, msg)))
-    }
-
-    fun getSubjects(subs: Collection<SubjectSmall>, cacheEnabled: Boolean = true): Flux<Subject> {
+    suspend fun getSubjects(subs: Collection<SubjectSmall>, cacheEnabled: Boolean = true): Flow<Subject> {
         return getSubjects(subs.map { it.id }, cacheEnabled)
     }
 
-    fun getSubjects(ids: List<Int>, cacheEnabled: Boolean = true): Flux<Subject> {
-        return Flux.fromIterable(ids)
-            .log()
-            .flatMap { id ->
-                val bucket = redisson.getBucket<Subject>(SUBJECT_KEY.appendKey(id))
-                bucket.get()
-                    .switchIfEmpty(Mono.defer {
-                        bgmClient.send(GetSubject(id))
-                            .flatMap { sub ->
-                                bucket.set(sub)
-                                    .then(bucket.expireIfNotSet(CACHE_TTL))
-                                    .map { sub }
-                            }
-                    }).doOnError { case ->
-                        log.error("Get subject $id error: ${case.message}")
-                    }
-            }.sort { a, b ->
-                a.id - b.id
+    suspend fun getSubjects(ids: List<Int>, cacheEnabled: Boolean = true): Flow<Subject> {
+        return channelFlow {
+            ids.forEach { id ->
+                launch {
+                    val bucket = redisson.getBucket<Subject>(SUBJECT_KEY.appendKey(id))
+                    kotlin.runCatching {
+                        bucket.get() ?: bgmClient.send(GetSubject(id)).also {
+                            bucket.set(it)
+                            bucket.expireIfNotSet(CACHE_TTL)
+                        }
+                    }.onFailure {
+                        log.error("Get subject $id error: ${it.message}")
+                    }.getOrNull()?.let { send(it) }
+                }
             }
-
+        }
     }
 
-    fun getPersons(persons: Collection<RelatedPerson>, token: String? = null, cacheEnabled: Boolean = true): Flux<PersonDetail> {
+    fun getPersons(
+        persons: Collection<RelatedPerson>,
+        token: String? = null,
+        cacheEnabled: Boolean = true
+    ): Flow<PersonDetail> {
         return getPersons(persons.map { it.id }, token, cacheEnabled)
     }
 
-    fun getPersons(ids: List<Int>, token: String? = null, cacheEnabled: Boolean = true): Flux<PersonDetail> {
-        return Flux.fromIterable(ids)
-            .flatMap { id ->
-                val bucket = redisson.getBucket<PersonDetail>(PERSON_KEY.appendKey(id))
-                bucket.get()
-                    .switchIfEmpty(Mono.defer {
-                        bgmClient.send(GetPersonDetail(id).apply { this.token = token })
-                            .flatMap { detail ->
-                                bucket.set(detail)
-                                    .then(bucket.expireIfNotSet(CACHE_TTL))
-                                    .map { detail }
-                            }
-                    })
-                    .onErrorResume { case ->
-                        log.error("Get persion $id error: ${case.message}")
-                        Mono.empty()
+    fun getPersons(ids: List<Int>, token: String? = null, cacheEnabled: Boolean = true): Flow<PersonDetail> {
+        return channelFlow {
+            ids.forEach { id ->
+                launch {
+                    val bucket = redisson.getBucket<PersonDetail>(PERSON_KEY.appendKey(id))
+                    val result = kotlin.runCatching {
+                        bucket.get() ?: kotlin.run {
+                            val detail = bgmClient.send(GetPersonDetail(id).apply { this.token = token })
+                            bucket.set(detail)
+                            bucket.expireIfNotSet(CACHE_TTL)
+                            detail
+                        }
+                    }.onFailure {
+                        log.error("Get persion $id error: ${it.message}")
                     }
-            }.sort { a, b ->
-                a.id - b.id
+                    result.getOrNull()?.let { send(it) }
+                }
             }
+        }
     }
 
-    fun getCharacters(characters: Collection<RelatedCharacter>, token: String? = null, cacheEnabled: Boolean = true): Flux<CharacterDetail> {
+    fun getCharacters(
+        characters: Collection<RelatedCharacter>,
+        token: String? = null,
+        cacheEnabled: Boolean = true
+    ): Flow<CharacterDetail> {
         return getCharacters(characters.map { it.id }, token, cacheEnabled)
     }
 
-    fun getCharacters(ids: List<Int>, token: String? = null, cacheEnabled: Boolean = true): Flux<CharacterDetail> {
-        return Flux.fromIterable(ids)
-            .flatMap { id ->
+    fun getCharacters(ids: List<Int>, token: String? = null, cacheEnabled: Boolean = true): Flow<CharacterDetail> = channelFlow {
+        ids.forEach { id ->
+            launch {
                 val bucket = redisson.getBucket<CharacterDetail>(CHARACTER_KEY.appendKey(id))
-                bucket.get().switchIfEmpty(Mono.defer {
-                    bgmClient.send(GetCharacterDetail(id).apply { this.token = token })
-                        .flatMap { detail ->
-                            bucket.set(detail)
-                                .then(bucket.expireIfNotSet(CACHE_TTL))
-                                .map { detail }
-                        }
-                }).onErrorResume { case ->
-                    log.error("Get character $id error: ${case.message}")
-                    Mono.empty()
+                val result = kotlin.runCatching {
+                    bucket.get() ?: kotlin.run {
+                        val detail = bgmClient.send(GetCharacterDetail(id).apply { this.token = token })
+                        bucket.set(detail)
+                        bucket.expireIfNotSet(CACHE_TTL)
+                        detail
+                    }
+                }.onFailure {
+                    log.error("Get character $id error: ${it.message}")
                 }
-            }.sort { a, b ->
-                a.id - b.id
+                result.getOrNull()?.let { send(it) }
             }
+        }
     }
 
-    fun getSubjectPersons(id: Int): Flux<RelatedPerson> {
+    suspend fun getSubjectPersons(id: Int): List<RelatedPerson>? {
         val bucket = redisson.getBucket<List<RelatedPerson>>(SUBJECT_PERSON_KEY.appendKey(id))
-        return bucket.get()
-            .switchIfEmpty(Mono.defer {
-                bgmClient.send(GetSubjectPersons(id))
-                    .flatMap { item ->
-                        bucket.set(item)
-                            .then(bucket.expireIfNotSet(CACHE_TTL))
-                            .map { item }
-                    }.onErrorResume { case ->
-                        log.error("Get subject-persons $id error: ${case.message}")
-                        Mono.empty()
-                    }
-            }).flatMapMany {
-                Flux.fromIterable(it)
-            }.sort { a, b ->
-                a.id - b.id
+        return kotlin.runCatching {
+            bucket.get() ?: kotlin.run {
+                bgmClient.send(GetSubjectPersons(id)).also {
+                    bucket.set(it)
+                    bucket.expireIfNotSet(CACHE_TTL)
+                }
             }
+        }.onFailure {
+            log.error("Get subject-persons $id error: ${it.message}")
+        }.getOrNull()
     }
 
-    fun getSubjectCharacter(id: Int): Flux<RelatedCharacter> {
-        val bucket = redisson.getBucket<List<RelatedCharacter>>(SUBJECT_CHARACTER_KEY.appendKey(id))
-        return bucket.get()
-            .switchIfEmpty(Mono.defer {
-                bgmClient.send(GetSubjectCharacters(id))
-                    .flatMap { item ->
-                        bucket.set(item)
-                            .then(bucket.expireIfNotSet(CACHE_TTL))
-                            .map { item }
-                    }.onErrorResume { case ->
-                        log.error("Get subject-characters $id error: ${case.message}")
-                        Mono.empty()
-                    }
-            }).flatMapMany {
-                Flux.fromIterable(it)
-            }.sort { a, b ->
-                a.id - b.id
-            }
+//    fun getSubjectCharacter(id: Int): Flux<RelatedCharacter> {
+//        val bucket = redisson.getBucket<List<RelatedCharacter>>(SUBJECT_CHARACTER_KEY.appendKey(id))
+//        return bucket.get()
+//            .switchIfEmpty(Mono.defer {
+//                bgmClient.send(GetSubjectCharacters(id))
+//                    .flatMap { item ->
+//                        bucket.set(item)
+//                            .then(bucket.expireIfNotSet(CACHE_TTL))
+//                            .map { item }
+//                    }.onErrorResume { case ->
+//                        log.error("Get subject-characters $id error: ${case.message}")
+//                        Mono.empty()
+//                    }
+//            }).flatMapMany {
+//                Flux.fromIterable(it)
+//            }.sort { a, b ->
+//                a.id - b.id
+//            }
+//    }
+
+//    fun getCharacterPersons(id: Int): Flux<CharacterPerson> {
+//        val bucket = redisson.getBucket<List<CharacterPerson>>(CHARACTER_PERSON_KEY.appendKey(id))
+//        return bucket.get()
+//            .switchIfEmpty(Mono.defer {
+//                bgmClient.send(GetCharacterRelatedPersons(id))
+//                    .flatMap { item ->
+//                        bucket.set(item)
+//                            .then(bucket.expireIfNotSet(CACHE_TTL))
+//                            .map { item }
+//                    }.onErrorResume { case ->
+//                        log.error("Get character-persons $id error: ${case.message}")
+//                        Mono.empty()
+//                    }
+//            }).flatMapMany {
+//                Flux.fromIterable(it)
+//            }.sort { a, b ->
+//                a.id - b.id
+//            }
+//    }
+
+//    fun getCharacterSubjects(id: Int): Flux<RelatedSubjects> {
+//        val bucket = redisson.getBucket<List<RelatedSubjects>>(CHARACTER_SUBJECT_KEY.appendKey(id))
+//        return bucket.get()
+//            .switchIfEmpty(Mono.defer {
+//                bgmClient.send(GetCharacterRelatedSubjects(id))
+//                    .flatMap { item ->
+//                        bucket.set(item)
+//                            .then(bucket.expireIfNotSet(CACHE_TTL))
+//                            .map { item }
+//                    }.onErrorResume { case ->
+//                        log.error("Get character-subjects $id error: ${case.message}")
+//                        Mono.empty()
+//                    }
+//            }).flatMapMany {
+//                Flux.fromIterable(it)
+//            }.sort { a, b ->
+//                a.id - b.id
+//            }
+//    }
+
+//    fun getPersonSubjects(id: Int): Flux<RelatedSubjects> {
+//        val bucket = redisson.getBucket<List<RelatedSubjects>>(PERSON_SUBJECT_KEY.appendKey(id))
+//        return bucket.get()
+//            .switchIfEmpty(Mono.defer {
+//                bgmClient.send(GetPersonRelatedSubjects(id))
+//                    .flatMap { item ->
+//                        bucket.set(item)
+//                            .then(bucket.expireIfNotSet(CACHE_TTL))
+//                            .map { item }
+//                    }.onErrorResume { case ->
+//                        log.error("Get person-subjects $id error: ${case.message}")
+//                        Mono.empty()
+//                    }
+//            }).flatMapMany {
+//                Flux.fromIterable(it)
+//            }.sort { a, b ->
+//                a.id - b.id
+//            }
+//    }
+
+//    fun getPersonCharacters(id: Int): Flux<CharacterPerson> {
+//        val bucket = redisson.getBucket<List<CharacterPerson>>(PERSON_CHARACTER_KEY.appendKey(id))
+//        return bucket.get()
+//            .switchIfEmpty(Mono.defer {
+//                bgmClient.send(GetPersonRelatedCharacters(id))
+//                    .flatMap { item ->
+//                        bucket.set(item)
+//                            .then(bucket.expireIfNotSet(CACHE_TTL))
+//                            .map { item }
+//                    }.onErrorResume { case ->
+//                        log.error("Get person-characters $id error: ${case.message}")
+//                        Mono.empty()
+//                    }
+//            }).flatMapMany {
+//                Flux.fromIterable(it)
+//            }.sort { a, b ->
+//                a.id - b.id
+//            }
+//    }
+
+    fun getSubjectContent(sub: Subject, link: String): Pair<String, List<MessageEntity>> {
+        val title = " [${sub.type.category()}]　${sub.name}"
+        val infoBox = sub.infobox?.formatInfoBox() ?: ""
+
+        val titleIndex = sub.type.category().length + 4
+        val entities = listOf(
+            MessageEntity(MessageEntityType.TEXT_LINK, 0, 1).apply { url = sub.images.getLarge() },
+            MessageEntity(MessageEntityType.TEXT_LINK, titleIndex, sub.name.length).apply { url = link },
+        )
+
+        return listOfNotNull(title, infoBox).joinToString("\n\n") to entities
     }
 
-    fun getCharacterPersons(id: Int): Flux<CharacterPerson> {
-        val bucket = redisson.getBucket<List<CharacterPerson>>(CHARACTER_PERSON_KEY.appendKey(id))
-        return bucket.get()
-            .switchIfEmpty(Mono.defer {
-                bgmClient.send(GetCharacterRelatedPersons(id))
-                    .flatMap { item ->
-                        bucket.set(item)
-                            .then(bucket.expireIfNotSet(CACHE_TTL))
-                            .map { item }
-                    }.onErrorResume { case ->
-                        log.error("Get character-persons $id error: ${case.message}")
-                        Mono.empty()
-                    }
-            }).flatMapMany {
-                Flux.fromIterable(it)
-            }.sort { a, b ->
-                a.id - b.id
-            }
+    fun getPersonContent(person: PersonDetail, link: String): Pair<String, List<MessageEntity>> {
+        val title = " ${person.name}"
+        val infoBox = person.infobox?.formatInfoBox() ?: ""
+
+        val entities = listOf(
+            MessageEntity(MessageEntityType.TEXT_LINK, 0, 1).apply { url = person.images.getLarge() },
+            MessageEntity(MessageEntityType.TEXT_LINK, 1, person.name.length).apply { url = link },
+        )
+
+        return listOfNotNull(title, infoBox).joinToString("\n\n") to entities
     }
 
-    fun getCharacterSubjects(id: Int): Flux<RelatedSubjects> {
-        val bucket = redisson.getBucket<List<RelatedSubjects>>(CHARACTER_SUBJECT_KEY.appendKey(id))
-        return bucket.get()
-            .switchIfEmpty(Mono.defer {
-                bgmClient.send(GetCharacterRelatedSubjects(id))
-                    .flatMap { item ->
-                        bucket.set(item)
-                            .then(bucket.expireIfNotSet(CACHE_TTL))
-                            .map { item }
-                    }.onErrorResume { case ->
-                        log.error("Get character-subjects $id error: ${case.message}")
-                        Mono.empty()
-                    }
-            }).flatMapMany {
-                Flux.fromIterable(it)
-            }.sort { a, b ->
-                a.id - b.id
-            }
+    fun getCharacterContent(character: CharacterDetail, link: String): Pair<String, List<MessageEntity>> {
+        val title = " ${character.name}"
+        val infoBox = character.infobox?.formatInfoBox() ?: ""
+
+        val entities = listOf(
+            MessageEntity(MessageEntityType.TEXT_LINK, 0, 1).apply { url = character.images.getLarge() },
+            MessageEntity(MessageEntityType.TEXT_LINK, 1, character.name.length).apply { url = link },
+        )
+        return listOfNotNull(title, infoBox).joinToString("\n\n") to entities
     }
 
-    fun getPersonSubjects(id: Int): Flux<RelatedSubjects> {
-        val bucket = redisson.getBucket<List<RelatedSubjects>>(PERSON_SUBJECT_KEY.appendKey(id))
-        return bucket.get()
-            .switchIfEmpty(Mono.defer {
-                bgmClient.send(GetPersonRelatedSubjects(id))
-                    .flatMap { item ->
-                        bucket.set(item)
-                            .then(bucket.expireIfNotSet(CACHE_TTL))
-                            .map { item }
-                    }.onErrorResume { case ->
-                        log.error("Get person-subjects $id error: ${case.message}")
-                        Mono.empty()
-                    }
-            }).flatMapMany {
-                Flux.fromIterable(it)
-            }.sort { a, b ->
-                a.id - b.id
-            }
+    suspend fun <T> Request<T>.send(): T = kotlin.runCatching {
+        bgmClient.send(this)
+    }.onFailure {
+        log.error("Bgm request error: ${it.message}", it)
+    }.getOrThrow()
+
+    suspend fun <T> TDRequest<ResponseWrapper<T>>.send(): T = tdClient.send(this)
+
+    fun getEmptyAnswer(inlineId: String): AnswerInlineQuery = AnswerInlineQuery(inlineId).apply {
+        inlineResults = emptyList()
+        cacheTime = 0
+        switchPmText = "搜索结果为空"
+        switchPmParameter = "help"
     }
 
-    fun getPersonCharacters(id: Int): Flux<CharacterPerson> {
-        val bucket = redisson.getBucket<List<CharacterPerson>>(PERSON_CHARACTER_KEY.appendKey(id))
-        return bucket.get()
-            .switchIfEmpty(Mono.defer {
-                bgmClient.send(GetPersonRelatedCharacters(id))
-                    .flatMap { item ->
-                        bucket.set(item)
-                            .then(bucket.expireIfNotSet(CACHE_TTL))
-                            .map { item }
-                    }.onErrorResume { case ->
-                        log.error("Get person-characters $id error: ${case.message}")
-                        Mono.empty()
-                    }
-            }).flatMapMany {
-                Flux.fromIterable(it)
-            }.sort { a, b ->
-                a.id - b.id
-            }
-    }
-
-    fun getSubjectContent(sub: Subject): String {
-        val title = "\\[${sub.type.category().fm2md()}\\][${sub.name.fm2md()}](${sub.images.getLarge().fm2md()})"
-        val infoBox = sub.infobox?.formatInfoBox()?.fm2md()
-
-        return listOfNotNull(title, infoBox).joinToString("\n\n")
-    }
-
-    fun getPersonContent(person: PersonDetail): String {
-        val title = "[${person.name.fm2md()}](${person.images.getLarge().fm2md()})"
-        val infoBox = person.infobox?.formatInfoBox()?.fm2md()
-
-        return listOfNotNull(title, infoBox).joinToString("\n\n")
-    }
-
-    fun getCharacterContent(character: CharacterDetail): String {
-        val title = "[${character.name.fm2md()}](${character.images.getLarge().fm2md()})"
-        val infoBox = character.infobox?.formatInfoBox()?.fm2md()
-
-        return listOfNotNull(title, infoBox).joinToString("\n\n")
-    }
-
-    fun <T> Request<T>.send(): Mono<T> {
-        return bgmClient.send(this)
-    }
-
-    fun <T> moe.kurenai.tdlight.request.Request<ResponseWrapper<T>>.send(): Mono<T> {
-        return Mono.fromFuture(tdClient.send(this))
-    }
-
-    fun getEmptyAnswer(inlineId: String): AnswerInlineQuery {
-        return AnswerInlineQuery(inlineId).apply {
-            inlineResults = emptyList()
-            cacheTime = 0
-            switchPmText = "搜索结果为空"
-            switchPmParameter = "help"
-        }
-    }
-
-    private fun Int.category(): String {
-        return when (this) {
-            1 -> "书籍" //book
-            2 -> "动画" //anime
-            3 -> "音乐" //music
-            4 -> "游戏" //game
-            6 -> "三次元" //real
-            else -> "？？"        //?
-        }
+    private fun Int.category(): String = when (this) {
+        1 -> "书籍" //book
+        2 -> "动画" //anime
+        3 -> "音乐" //music
+        4 -> "游戏" //game
+        6 -> "三次元" //real
+        else -> "？？"        //?
     }
 
     private fun JsonNode.formatInfoBox(): String {
@@ -462,7 +485,7 @@ object BangumiBot {
             val value = if (valueNode.isTextual) valueNode.textValue()
             else valueNode
                 .toList()
-                .joinToString("\n\t    ") { it.findValue("v").textValue() }
+                .joinToString("、") { it.findValue("v").textValue() }
             "${node.findValue("key").textValue()}: $value"
         }
     }

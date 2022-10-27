@@ -3,15 +3,11 @@ package moe.kurenai.bot.util
 /**
  * Copy to jodd.util
  *
- *
  * 字符串常量池，为避免硬编码
- *
- *
  * @author Kurenai
  * @since 2021-07-08
  */
 object StringPool {
-    const val JODD = "jodd"
     const val AMPERSAND = "&"
     const val AND = "and"
     const val AT = "@"

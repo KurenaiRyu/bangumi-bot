@@ -14,6 +14,9 @@ import moe.kurenai.tdlight.request.message.EditMessageText
 import moe.kurenai.tdlight.request.message.GetMessageInfo
 import org.junit.Test
 import org.redisson.Redisson
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileInputStream
 import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -59,16 +62,20 @@ class ReactorTest {
     }
 
     @Test
-    fun testUpdate() {
-        GetMessageInfo("-1001250114081", 97822).send()
-            .flatMap { msg ->
-                EditMessageText(msg.text!! + "\nedited").apply {
-                    this.messageId = msg.messageId
-                    this.chatId = msg.chatId
-                    this.entities = msg.entities
-                    this.replyMarkup = msg.replyMarkup
-                }.send()
-            }.block()
+    suspend fun testUpdate() {
+        File("123").outputStream()
+        val msg = GetMessageInfo("-1001250114081", 97822).send()
+        EditMessageText(msg.text!! + "\nedited").apply {
+            this.messageId = msg.messageId
+            this.chatId = msg.chatId
+            this.entities = msg.entities
+            this.replyMarkup = msg.replyMarkup
+        }.send()
+
+        File("test").outputStream().buffered()
+        BufferedInputStream(FileInputStream(File("test")))
+
+
     }
 
     @Test

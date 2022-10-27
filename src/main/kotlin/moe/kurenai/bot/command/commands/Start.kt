@@ -1,5 +1,7 @@
 package moe.kurenai.bot.command.commands
 
+import moe.kurenai.bgm.exception.BgmException
+import moe.kurenai.bgm.exception.UnauthorizedException
 import moe.kurenai.bgm.request.user.GetMe
 import moe.kurenai.bot.BangumiBot.RANDOM_CODE
 import moe.kurenai.bot.BangumiBot.bgmClient
@@ -17,7 +19,6 @@ import moe.kurenai.tdlight.request.message.SendMessage
 import moe.kurenai.tdlight.request.message.SendPhoto
 import moe.kurenai.tdlight.util.MarkdownUtil.fm2md
 import org.apache.logging.log4j.LogManager
-import reactor.core.publisher.Mono
 import java.time.Duration
 import java.util.*
 
@@ -28,32 +29,41 @@ class Start : CommandHandler() {
         private val log = LogManager.getLogger()
     }
 
-    override fun execute(update: Update, message: Message, args: List<String>): Mono<*> {
+    override suspend fun execute(update: Update, message: Message, args: List<String>) {
         val userId = message.from!!.id
-        return tokens[userId.toString()].flatMap { token ->
-            GetMe().apply { this.token = token.accessToken }.send()
-        }.flatMap { me ->
-            SendPhoto(message.chatId, InputFile(me.avatar.large)).apply {
-                caption = "已绑定`${me.nickname.fm2md()}`\\(`${me.username.takeIf { it.isNotBlank() } ?: me.id}`\\)"
-                parseMode = ParseMode.MARKDOWN_V2
-            }.send()
-        }.switchIfEmpty(Mono.defer {
-            val randomCode = UUID.randomUUID().toString().replace("-", "")
-            log.info("AUTH_RANDOM_CODE: $randomCode")
-            val bucket = redisson.getBucket<String>(RANDOM_CODE.appendKey(randomCode))
-            bucket
-                .set(userId.toString())
-                .then(bucket.expire(Duration.ofMinutes(10)))
-                .flatMap {
-                    SendMessage(message.chatId, "请点击该[链接](${bgmClient.getOauthUrl(randomCode).fm2md()})进行授权").apply {
-                        parseMode = ParseMode.MARKDOWN_V2
-                    }.send()
-                }.switchIfEmpty(Mono.defer {
-                    log.info("redis null")
-                    Mono.empty()
-                })
-        }).doOnError {
+        kotlin.runCatching {
+            tokens[userId]?.also { token ->
+                val me = GetMe().apply { this.token = token.accessToken }.send()
+                SendPhoto(message.chatId, InputFile(me.avatar.large)).apply {
+                    caption = "已绑定`${me.nickname.fm2md()}`\\(`${me.username.takeIf { it.isNotBlank() } ?: me.id}`\\)"
+                    parseMode = ParseMode.MARKDOWN_V2
+                }.send()
+            } ?: kotlin.run {
+                doBind(userId, message)
+            }
+        }.recoverCatching {
+            if (it is BgmException) {
+                if (it is UnauthorizedException) {
+                    doBind(userId, message)
+                } else {
+                    SendMessage(message.chatId, "请求bgm异常: [${it.code}] ${it.error} ${it.message ?: ""}").send()
+                }
+            } else {
+                SendMessage(message.chatId, "Bot内部异常").send()
+            }
+        }.onFailure {
             log.error("Get me $userId error: ${it.message}")
         }
+    }
+
+    private suspend fun doBind(userId: Long, message: Message) {
+        val randomCode = UUID.randomUUID().toString().replace("-", "")
+        log.info("AUTH_RANDOM_CODE: $randomCode")
+        val bucket = redisson.getBucket<Long>(RANDOM_CODE.appendKey(randomCode))
+        bucket.set(userId)
+        bucket.expire(Duration.ofMinutes(10))
+        SendMessage(message.chatId, "请点击该[链接](${bgmClient.getOauthUrl(randomCode).fm2md()})进行授权").apply {
+            parseMode = ParseMode.MARKDOWN_V2
+        }.send()
     }
 }

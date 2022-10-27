@@ -1,8 +1,10 @@
 package moe.kurenai.bot
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotlinx.coroutines.runBlocking
 import moe.kurenai.bgm.model.person.PersonDetail
 import moe.kurenai.bgm.model.subject.getGrid
+import moe.kurenai.bot.BangumiBot.MAPPER
 import moe.kurenai.bot.command.CommandDispatcher
 import moe.kurenai.tdlight.AbstractUpdateSubscriber
 import moe.kurenai.tdlight.model.MessageEntityType
@@ -31,13 +33,11 @@ class UpdateSubscribe : AbstractUpdateSubscriber() {
     }
 
     override fun onNext0(update: Update) {
-//        log.info("\n>>>>>>>${convertToString(update)}")
-
-        try {
-//            handleInlineQuery(update)
-            CommandDispatcher.handle(update)
-        } catch (e: Exception) {
-            log.error(e.message, e)
+        runBlocking {
+            kotlin.runCatching {
+                log.info("Received: ${MAPPER.writeValueAsString(update)}")
+                CommandDispatcher.handle(update)
+            }
         }
     }
 

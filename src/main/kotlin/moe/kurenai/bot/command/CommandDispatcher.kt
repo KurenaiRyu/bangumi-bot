@@ -1,5 +1,8 @@
 package moe.kurenai.bot.command
 
+import moe.kurenai.bot.BangumiBot
+import moe.kurenai.bot.BangumiBot.getEmptyAnswer
+import moe.kurenai.bot.BangumiBot.send
 import moe.kurenai.bot.command.inlines.Search
 import moe.kurenai.bot.command.inlines.SearchByURI
 import moe.kurenai.tdlight.model.MessageEntityType
@@ -7,7 +10,6 @@ import moe.kurenai.tdlight.model.inline.InlineQuery
 import moe.kurenai.tdlight.model.message.Update
 import org.apache.logging.log4j.LogManager
 import org.reflections.Reflections
-import reactor.core.publisher.Mono
 import java.net.URI
 
 object CommandDispatcher {
@@ -42,10 +44,12 @@ object CommandDispatcher {
         }
     }
 
-    fun handle(update: Update) {
+    suspend fun handle(update: Update) {
         val inlineQuery = update.inlineQuery
         val result = if (inlineQuery != null) {
-            handleInlineQuery(update, inlineQuery)
+            kotlin.runCatching {
+                handleInlineQuery(update, inlineQuery)
+            }
         } else {
             if (commands.isEmpty()) return
             val message = update.message
@@ -57,47 +61,51 @@ object CommandDispatcher {
                 val text = message.text?.trim()
 
                 commands[command.uppercase()]?.let {
-                    log.info("Match command ${javaClass.name}")
-                    it.execute(
-                        update,
-                        message,
-                        if (text == null || text.length <= commandText.length) emptyList() else text.substring(commandText.length).split(" ")
-                    )
+                    log.info("Match command ${it::class.simpleName}")
+                    kotlin.runCatching {
+                        it.execute(
+                            update,
+                            message,
+                            if (text == null || text.length <= commandText.length) emptyList() else text.substring(commandText.length).trim().split(" ")
+                        )
+                    }
                 } ?: return
             } else return
         }
 
-        result.log()
-            .onErrorResume {
-                log.error("Command handle error: ${it.message}", it)
-                Mono.empty()
-            }.subscribe()
-
+        result.onFailure {
+            log.error("Command handle error: ${it.message}", it)
+        }
     }
 
-    private fun handleInlineQuery(update: Update, inlineQuery: InlineQuery): Mono<*> {
-        if (inlineQuery.query.isBlank()) return Mono.empty<Any>()
+    private suspend fun handleInlineQuery(update: Update, inlineQuery: InlineQuery) {
+        if (inlineQuery.query.isBlank()) return
         val query = inlineQuery.query.trim()
         val offset = inlineQuery.offset.takeIf { it.isNotBlank() }?.toInt() ?: 0
-        if (offset < 0) return Mono.empty<Any>()
+        if (offset < 0) return
         val args = query.split(" ", limit = 2)
         when (args.size) {
-            0 -> return Mono.empty<Any>()
+            0 -> return
             1 -> {
-                if (query.contains("bgm.tv") || query.contains("bangumi.tv")) {
-                    return uriInlineCommandHandler.execute(update, inlineQuery, URI.create(query))
+                if (query.contains("https") || query.contains("http")) {
+                    uriInlineCommandHandler.execute(update, inlineQuery, URI.create(query))
+                } else {
+                    BangumiBot.getEmptyAnswer(inlineQuery.id).send()
                 }
             }
             2 -> {
                 val handler = inlineCommands[args[0]]
                 if (handler != null) {
                     log.info("Match command ${handler.javaClass.name}")
-                    return handler.execute(update, inlineQuery, args[1])
+                    handler.execute(update, inlineQuery, args[1])
+                } else {
+                    getEmptyAnswer(inlineQuery.id).send()
                 }
             }
+            else -> {
+                getEmptyAnswer(inlineQuery.id).send()
+            }
         }
-        log.info("Match command ${defaultInlineCommandHandler.javaClass.name}")
-        return defaultInlineCommandHandler.execute(update, inlineQuery, query)
     }
 
 }

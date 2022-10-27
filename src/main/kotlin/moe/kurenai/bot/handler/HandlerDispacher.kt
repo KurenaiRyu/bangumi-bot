@@ -13,7 +13,7 @@ import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
-object DelegatingHandler {
+object HandlerDispacher {
 
     private val privateHandler = HashMap<Long, Consumer<Update>>()
     private val removeSchedules = HashMap<Long, ScheduledFuture<*>>()
@@ -28,7 +28,7 @@ object DelegatingHandler {
         }
     }
 
-    fun handle(update: Update) {
+    suspend fun handle(update: Update) {
 
         if (update.message?.chat?.type == ChatType.PRIVATE) {
             privateHandler.remove(update.message?.from?.id)?.let {
@@ -66,7 +66,7 @@ object DelegatingHandler {
         removeSchedules[userId] = executorService.schedule({ privateHandler.remove(userId) }, 30, TimeUnit.SECONDS)
     }
 
-    private fun handleHelp(message: Message) {
+    private suspend fun handleHelp(message: Message) {
         val sb = StringBuilder("Command list")
         sb.append("\n----------------\n")
         sb.append("Inline mode:\n")
