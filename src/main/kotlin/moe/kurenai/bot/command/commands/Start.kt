@@ -5,9 +5,9 @@ import moe.kurenai.bgm.exception.UnauthorizedException
 import moe.kurenai.bgm.request.user.GetMe
 import moe.kurenai.bot.BangumiBot.RANDOM_CODE
 import moe.kurenai.bot.BangumiBot.bgmClient
+import moe.kurenai.bot.BangumiBot.getToken
 import moe.kurenai.bot.BangumiBot.redisson
 import moe.kurenai.bot.BangumiBot.send
-import moe.kurenai.bot.BangumiBot.tokens
 import moe.kurenai.bot.appendKey
 import moe.kurenai.bot.command.Command
 import moe.kurenai.bot.command.CommandHandler
@@ -32,7 +32,7 @@ class Start : CommandHandler() {
     override suspend fun execute(update: Update, message: Message, args: List<String>) {
         val userId = message.from!!.id
         kotlin.runCatching {
-            tokens[userId]?.also { token ->
+            getToken(userId)?.also { token ->
                 val me = GetMe().apply { this.token = token.accessToken }.send()
                 SendPhoto(message.chatId, InputFile(me.avatar.large)).apply {
                     caption = "已绑定`${me.nickname.fm2md()}`\\(`${me.username.takeIf { it.isNotBlank() } ?: me.id}`\\)"

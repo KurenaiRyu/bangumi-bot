@@ -28,12 +28,19 @@ fun gpr(url: String): (MavenArtifactRepository).() -> Unit {
 
 val vertxVersion = "4.2.3"
 val log4j = "2.19.0"
+val ktor = "2.1.2"
 dependencies {
     implementation("moe.kurenai.bgm", "bangumi-sdk", "0.0.1-SNAPSHOT")
     implementation("moe.kurenai.tdlight", "td-light-sdk", "0.1.0-SNAPSHOT")
 
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.6.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    implementation("io.ktor:ktor-client-core:$ktor")
+    implementation("io.ktor:ktor-server-netty:$ktor")
+    implementation("io.ktor:ktor-server-call-logging:$ktor")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor")
 
     implementation("org.redisson:redisson:3.17.7")
 
@@ -41,17 +48,11 @@ dependencies {
 
     implementation("org.reflections", "reflections", "0.10.2")
 
-    api("io.ktor:ktor-client-core:2.1.0")
-
 
     //logging
     implementation("org.apache.logging.log4j:log4j-core:$log4j")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4j")
     implementation("com.lmax:disruptor:3.4.4")
-
-    implementation(platform("io.vertx:vertx-stack-depchain:$vertxVersion"))
-    implementation("io.vertx:vertx-web")
-    implementation("io.vertx:vertx-lang-kotlin")
 
     implementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml", "2.13.0")
 

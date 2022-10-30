@@ -6,13 +6,19 @@ import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.vertx.core.Vertx
-import io.vertx.core.http.HttpHeaders
-import io.vertx.core.http.HttpServerOptions
-import io.vertx.ext.web.Router
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.runBlocking
 import moe.kurenai.bgm.BgmClient
+import moe.kurenai.bgm.exception.UnauthorizedException
 import moe.kurenai.bgm.model.auth.AccessToken
 import moe.kurenai.bgm.model.character.CharacterDetail
 import moe.kurenai.bgm.model.person.PersonDetail
@@ -25,6 +31,7 @@ import moe.kurenai.bgm.request.subject.GetSubjectPersons
 import moe.kurenai.bot.Config.Companion.CONFIG
 import moe.kurenai.bot.config.JsonJacksonKotlinCodec
 import moe.kurenai.bot.config.RecordNamingStrategyPatchModule
+import moe.kurenai.bot.util.getAwait
 import moe.kurenai.tdlight.LongPollingCoroutineTelegramBot
 import moe.kurenai.tdlight.client.TDLightCoroutineClient
 import moe.kurenai.tdlight.model.MessageEntityType
@@ -62,6 +69,7 @@ object BangumiBot {
     val MAPPER = jacksonObjectMapper().setDefaultPropertyInclusion(JsonInclude.Include.NON_ABSENT)
 
     private val CACHE_TTL = Duration.ofMinutes(10)
+    private val serverPort = System.getProperty("PORT")?.toInt() ?: 8080
 
     private val redisMapper = jacksonObjectMapper()
         .registerModules(Jdk8Module(), JavaTimeModule(), RecordNamingStrategyPatchModule())
@@ -80,6 +88,7 @@ object BangumiBot {
         it.useSingleServer().setAddress("redis://${CONFIG.redis.host}:${CONFIG.redis.port}")
             .setDatabase(CONFIG.redis.database)
     })
+    val redissonReactive = redisson.reactive()
 
     val bgmClient = BgmClient(
         CONFIG.bgm.appId,
@@ -97,8 +106,8 @@ object BangumiBot {
     lateinit var tgBot: LongPollingCoroutineTelegramBot
 
 
-    val tokens = redisson.getMap<Long, AccessToken>(TOKEN)
-    val tokenTTLList = redisson.getScoredSortedSet<Long>(TOKEN_TTL)
+    val tokens = redissonReactive.getMap<Long, AccessToken>(TOKEN)
+    val tokenTTLList = redissonReactive.getScoredSortedSet<Long>(TOKEN_TTL)
 
     val scheduledThreadPool = Executors.newScheduledThreadPool(1)
 
@@ -107,120 +116,117 @@ object BangumiBot {
     private val log: Logger = LogManager.getLogger()
 
     suspend fun start() {
-        startWebServer()
+        startWebServerByKtor()
         startRefreshTask()
         tgBot = LongPollingCoroutineTelegramBot(listOf(UpdateSubscribe()), tdClient)
         tgBot.start()
     }
 
-    @OptIn(FlowPreview::class)
     private fun startRefreshTask() {
         scheduledThreadPool.scheduleAtFixedRate({
             runBlocking {
-                val list = tokenTTLList.valueRange(
+                tokenTTLList.valueRange(
                     0.0,
                     true,
                     LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond().toDouble(),
                     true
-                )
-                channelFlow {
-                    launch {
+                ).awaitSingleOrNull()?.let { list ->
+                    channelFlow {
                         list.forEach { id ->
-                            tokens[id]?.let { send(it) }
+                            getToken(id)?.let { send(it) }
                         }
-                    }
-                }.collect { token ->
-                    val result = kotlin.runCatching {
-                        bgmClient.refreshToken(token.refreshToken)
-                    }.onFailure {
-                        log.error("Refresh token failed", it)
-                        launch { tokens.remove(token.userId) }
-                        launch { tokenTTLList.remove(token.userId) }
-                    }
-                    result.getOrNull()?.let {
-                        launch { tokenTTLList.add(it.expiresIn.toDouble(), it.userId) }
-                        launch { tokens.put(it.userId, it) }
+                    }.collect { token ->
+                        kotlin.runCatching {
+                            bgmClient.refreshToken(token.refreshToken)
+                        }.onFailure {
+                            if (it is UnauthorizedException) {
+                                log.warn("User ${token.userId} refresh token was unauthorized, remove", it)
+                                launch { removeToken(token.userId) }
+                            } else {
+                                log.warn("Refresh ${token.userId} token failed", it)
+                            }
+                        }.getOrNull()?.let {
+                            launch {
+                                putToken(it)
+                                log.info("Refresh ${token.userId} token success")
+                            }
+                        }
                     }
                 }
             }
         }, 1, TimeUnit.DAYS.toMinutes(1), TimeUnit.MINUTES)
     }
 
-    private fun startWebServer() {
-        val vertx = Vertx.vertx()
-        val router = Router.router(vertx)
-        router.get("/callback").handler { ctx ->
-            log.info("${ctx.request().localAddress()}: ${ctx.request().uri()}")
-            ctx.queryParam("code")?.firstOrNull()?.let { code ->
-                try {
-                    val randomCode = ctx.queryParam("state")?.first()
-
-                    if (randomCode != null) {
-                        val randomCodeBucket = redisson.getBucket<Long>(RANDOM_CODE.appendKey(randomCode))
-                        runBlocking {
-                            randomCodeBucket.get()?.let { userId ->
+    private fun startWebServerByKtor() {
+        embeddedServer(Netty, port = serverPort) {
+            val logger = this@embeddedServer.log
+            routing {
+                route("/callback") {
+                    get {
+                        logger.info("${call.request.local.host}: ${call.request.uri}")
+                        val code = call.parameters["code"]
+                        val randomCode = call.parameters["state"]
+                        if (randomCode != null && code != null) {
+                            val randomCodeBucket = redissonReactive.getBucket<Long>(RANDOM_CODE.appendKey(randomCode))
+                            randomCodeBucket.getAwait()?.let { userId: Long ->
                                 kotlin.runCatching {
-                                    log.debug("Attempt bind user: $userId")
+                                    logger.debug("Attempt bind user: $userId")
                                     val token = bgmClient.getToken(code)
-                                    log.debug("Bind success: $userId : ${token.userId}")
+                                    logger.debug("Bind success: $userId : ${token.userId}")
+                                    val tokenTTLList = redissonReactive.getScoredSortedSet<Long>(TOKEN_TTL)
                                     tokenTTLList.add(
                                         LocalDateTime.now().atZone(ZoneId.systemDefault())
                                             .toEpochSecond() + token.expiresIn.toDouble(), token.userId
-                                    )
-                                    log.debug("Add token: $userId : ${token.userId}")
-                                    tokens.put(userId, token)
-                                    log.debug("Redirect to bot")
-                                    ctx.redirect("https://t.me/${tdClient.getMe().username}?start=success")
+                                    ).awaitSingleOrNull()
+                                    logger.debug("Add token: $userId : ${token.userId}")
+                                    redissonReactive.getMap<Long, AccessToken>(TOKEN).put(userId, token).awaitSingleOrNull()
+                                    logger.debug("Redirect to bot")
+                                    call.respondRedirect("https://t.me/${tdClient.getMe().username}?start=success")
                                     randomCodeBucket.delete()
                                 }.onFailure {
-                                    log.error(it)
-                                    ctx.response()
-                                        .putHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8")
-                                        .send("<p>Error: \n${it.message}</p>")
+                                    BangumiBot.log.error(it)
+                                    call.respondText { "Error: ${it.message}" }
                                 }
                             } ?: kotlin.run {
-                                ctx.response()
-                                    .putHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8")
-                                    .send("<p>请重新发送 /start 命令查看信息</p>")
+                                call.respondText { "请求超时或异常，请重新发送 /start 命令查看信息" }
                             }
+                        } else {
+                            call.respondText { "Error: 缺少必要的请求参数" }
                         }
-                    } else {
-                        ctx.response()
-                            .putHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8")
-                            .send("<p>Error: 缺少必要的请求参数</p>")
                     }
-                } catch (e: Exception) {
-                    log.error(e)
-                    ctx.response()
-                        .putHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8")
-                        .send("<p>Error: \n${e.message}</p>")
+                }
+                route("/") {
+                    get {
+                        call.respondText { "Bangumi Bot. power by Kurenai" }
+                    }
                 }
             }
-        }
-        router.get("/").handler { ctx ->
-            log.debug("${ctx.request().localAddress()}: ${ctx.request().path()}")
-            ctx.response()
-                .putHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8")
-                .send("</p>Bangumi Bot. power by Kurenai</p>")
-        }
-        val port = System.getProperty("PORT")?.toInt() ?: 8080
-        vertx.createHttpServer(HttpServerOptions().apply {
-            host = "0.0.0.0"
-        }).requestHandler(router::handle).listen(port).onSuccess {
-            log.info("Web server listen to $port")
+        }.start(false).also {
+            log.info("Web server listen to $serverPort")
         }
     }
 
-    fun Message.token(): AccessToken? {
-        return tokens[this.from!!.id]
+    suspend fun Message.token(): AccessToken? {
+        return tokens[this.from!!.id].awaitSingleOrNull()
     }
 
-    fun InlineQuery.token(): AccessToken? {
-        return tokens[this.from.id]
+    suspend fun InlineQuery.token(): AccessToken? {
+        return tokens[this.from.id].awaitSingleOrNull()
     }
 
-    fun getToken(tgId: Long): AccessToken? {
-        return tokens[tgId]
+    suspend fun getToken(tgId: Long): AccessToken? {
+        return tokens[tgId].awaitSingleOrNull()
+    }
+
+    suspend fun removeToken(tgId: Long): AccessToken? {
+        return tokens.remove(tgId).awaitSingleOrNull().also {
+            tokenTTLList.remove(tgId).awaitSingleOrNull()
+        }
+    }
+
+    suspend fun putToken(token: AccessToken) {
+        tokenTTLList.add(token.expiresIn.toDouble(), token.userId).awaitSingleOrNull()
+        tokens.put(token.userId, token).awaitSingleOrNull()
     }
 
     suspend fun send(chatId: String, msg: String): Message {
