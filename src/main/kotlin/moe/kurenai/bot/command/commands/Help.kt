@@ -9,7 +9,7 @@ import moe.kurenai.tdlight.model.message.Update
 import moe.kurenai.tdlight.request.message.SendMessage
 
 @Command("help")
-class Help : CommandHandler() {
+class Help : CommandHandler {
 
     override suspend fun execute(update: Update, message: Message, args: List<String>) {
         val commands = CommandDispatcher.commands.map { it.key }.joinToString("\n\n")

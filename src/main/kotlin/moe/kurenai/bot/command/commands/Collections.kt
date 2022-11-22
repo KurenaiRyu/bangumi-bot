@@ -25,7 +25,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
 @Command(command = "collections", aliases = ["collect", "coll"])
-class Collections : CommandHandler() {
+class Collections : CommandHandler {
 
     companion object {
         private val log = LogManager.getLogger()

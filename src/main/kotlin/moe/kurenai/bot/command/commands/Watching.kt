@@ -19,7 +19,7 @@ import moe.kurenai.tdlight.util.MarkdownUtil.fm2md
 import org.apache.logging.log4j.LogManager
 
 @Command(command = "watching")
-class Watching : CommandHandler() {
+class Watching : CommandHandler {
 
     companion object {
         private val log = LogManager.getLogger()

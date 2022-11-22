@@ -14,6 +14,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.runBlocking
@@ -30,7 +31,6 @@ import moe.kurenai.bgm.request.subject.GetSubject
 import moe.kurenai.bgm.request.subject.GetSubjectPersons
 import moe.kurenai.bot.Config.Companion.CONFIG
 import moe.kurenai.bot.config.JsonJacksonKotlinCodec
-import moe.kurenai.bot.config.RecordNamingStrategyPatchModule
 import moe.kurenai.bot.util.getAwait
 import moe.kurenai.tdlight.LongPollingCoroutineTelegramBot
 import moe.kurenai.tdlight.client.TDLightCoroutineClient
@@ -72,7 +72,7 @@ object BangumiBot {
     private val serverPort = System.getProperty("PORT")?.toInt() ?: 8080
 
     private val redisMapper = jacksonObjectMapper()
-        .registerModules(Jdk8Module(), JavaTimeModule(), RecordNamingStrategyPatchModule())
+        .registerModules(Jdk8Module(), JavaTimeModule())
         .enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
         .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -312,12 +312,12 @@ object BangumiBot {
     }
 
     suspend fun getSubjectPersons(id: Int): List<RelatedPerson>? {
-        val bucket = redisson.getBucket<List<RelatedPerson>>(SUBJECT_PERSON_KEY.appendKey(id))
+        val bucket = redissonReactive.getBucket<List<RelatedPerson>>(SUBJECT_PERSON_KEY.appendKey(id))
         return kotlin.runCatching {
-            bucket.get() ?: kotlin.run {
+            bucket.get().toFuture().await() ?: kotlin.run {
                 bgmClient.send(GetSubjectPersons(id)).also {
-                    bucket.set(it)
-                    bucket.expireIfNotSet(CACHE_TTL)
+                    bucket.set(it).awaitSingleOrNull()
+                    bucket.expireIfNotSet(CACHE_TTL).awaitSingleOrNull()
                 }
             }
         }.onFailure {
@@ -436,6 +436,18 @@ object BangumiBot {
         )
 
         return listOfNotNull(title, infoBox).joinToString("\n\n") to entities
+    }
+
+    fun getSubjectContentSimple(sub: Subject, link: String): Pair<String, List<MessageEntity>> {
+        val title = " [${sub.type.category()}]　${sub.name}"
+
+        val titleIndex = sub.type.category().length + 4
+        val entities = listOf(
+            MessageEntity(MessageEntityType.TEXT_LINK, 0, 1).apply { url = sub.images.getLarge() },
+            MessageEntity(MessageEntityType.TEXT_LINK, titleIndex, sub.name.length).apply { url = link },
+        )
+
+        return listOfNotNull(title, sub.summary).joinToString("\n\n") to entities
     }
 
     fun getPersonContent(person: PersonDetail, link: String): Pair<String, List<MessageEntity>> {

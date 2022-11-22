@@ -23,7 +23,7 @@ import java.time.Duration
 import java.util.*
 
 @Command(command = "start")
-class Start : CommandHandler() {
+class Start : CommandHandler {
 
     companion object {
         private val log = LogManager.getLogger()

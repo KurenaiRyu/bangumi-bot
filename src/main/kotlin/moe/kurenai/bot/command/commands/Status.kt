@@ -8,7 +8,7 @@ import moe.kurenai.tdlight.model.message.Update
 
 
 @Command("status")
-class Status : CommandHandler() {
+class Status : CommandHandler {
 
     override suspend fun execute(update: Update, message: Message, args: List<String>) {
         val runtime = Runtime.getRuntime()

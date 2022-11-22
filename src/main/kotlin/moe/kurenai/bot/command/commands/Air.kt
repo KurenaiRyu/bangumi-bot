@@ -15,7 +15,7 @@ import moe.kurenai.tdlight.request.message.SendPhoto
 import java.time.LocalDate
 
 @Command(command = "air")
-class Air : CommandHandler() {
+class Air : CommandHandler {
 
     override suspend fun execute(update: Update, message: Message, args: List<String>) {
         val weekday = if (args.size == 1) args[0] else LocalDate.now().dayOfWeek.value
