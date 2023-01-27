@@ -1,0 +1,2858 @@
+[
+    {
+        "name": "com.github.benmanes.caffeine.cache.BBHeader$ReadAndWriteCounterRef",
+        "fields": [
+            {
+                "name": "writeCounter"
+            }
+        ]
+    },
+    {
+        "name": "com.github.benmanes.caffeine.cache.BBHeader$ReadCounterRef",
+        "fields": [
+            {
+                "name": "readCounter"
+            }
+        ]
+    },
+    {
+        "name": "com.github.benmanes.caffeine.cache.BLCHeader$DrainStatusRef",
+        "fields": [
+            {
+                "name": "drainStatus"
+            }
+        ]
+    },
+    {
+        "name": "com.github.benmanes.caffeine.cache.BaseMpscLinkedArrayQueueColdProducerFields",
+        "fields": [
+            {
+                "name": "producerLimit"
+            }
+        ]
+    },
+    {
+        "name": "com.github.benmanes.caffeine.cache.BaseMpscLinkedArrayQueueConsumerFields",
+        "fields": [
+            {
+                "name": "consumerIndex"
+            }
+        ]
+    },
+    {
+        "name": "com.github.benmanes.caffeine.cache.BaseMpscLinkedArrayQueueProducerFields",
+        "fields": [
+            {
+                "name": "producerIndex"
+            }
+        ]
+    },
+    {
+        "name": "com.github.benmanes.caffeine.cache.BoundedLocalCache",
+        "fields": [
+            {
+                "name": "refreshes"
+            }
+        ]
+    },
+    {
+        "name": "com.github.benmanes.caffeine.cache.PS",
+        "fields": [
+            {
+                "name": "key"
+            },
+            {
+                "name": "value"
+            }
+        ]
+    },
+    {
+        "name": "com.github.benmanes.caffeine.cache.PSA",
+        "fields": [
+            {
+                "name": "accessTime"
+            }
+        ]
+    },
+    {
+        "name": "com.github.benmanes.caffeine.cache.PSAW",
+        "fields": [
+            {
+                "name": "writeTime"
+            }
+        ]
+    },
+    {
+        "name": "com.github.benmanes.caffeine.cache.PSAWMW",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "com.github.benmanes.caffeine.cache.PSW",
+        "fields": [
+            {
+                "name": "writeTime"
+            }
+        ],
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "com.github.benmanes.caffeine.cache.SSSMSAW",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "com.github.benmanes.caffeine.cache.Caffeine",
+                    "com.github.benmanes.caffeine.cache.AsyncCacheLoader",
+                    "boolean"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.github.benmanes.caffeine.cache.SSW",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "com.github.benmanes.caffeine.cache.Caffeine",
+                    "com.github.benmanes.caffeine.cache.AsyncCacheLoader",
+                    "boolean"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.github.benmanes.caffeine.cache.StripedBuffer",
+        "fields": [
+            {
+                "name": "tableBusy"
+            }
+        ]
+    },
+    {
+        "name": "kotlin.reflect.jvm.internal.ReflectionFactoryImpl",
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "kotlin.KotlinVersion",
+        "allPublicMethods": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true,
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "kotlin.KotlinVersion[]"
+    },
+    {
+        "name": "kotlin.KotlinVersion$Companion"
+    },
+    {
+        "name": "kotlin.KotlinVersion$Companion[]"
+    },
+    {
+        "name": "kotlin.internal.jdk8.JDK8PlatformImplementations",
+        "allPublicMethods": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true,
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "moe.kurenai.tdlight.client.HttpMethod"
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.ReplyMarkup",
+        "queryAllDeclaredMethods": true
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.ResponseParameters",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Long",
+                    "java.lang.Integer"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.ResponseWrapper",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "boolean",
+                    "java.lang.Object",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.ResponseParameters"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.chat.Chat",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "long",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.chat.ChatPhoto",
+                    "java.lang.String",
+                    "boolean",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.message.Message",
+                    "moe.kurenai.tdlight.model.chat.ChatPermissions",
+                    "java.lang.Integer",
+                    "java.lang.Integer",
+                    "boolean",
+                    "java.lang.String",
+                    "java.lang.Boolean",
+                    "java.lang.Integer",
+                    "moe.kurenai.tdlight.model.chat.ChatLocation"
+                ]
+            },
+            {
+                "name": "component1",
+                "parameterTypes": []
+            },
+            {
+                "name": "component10",
+                "parameterTypes": []
+            },
+            {
+                "name": "component11",
+                "parameterTypes": []
+            },
+            {
+                "name": "component12",
+                "parameterTypes": []
+            },
+            {
+                "name": "component13",
+                "parameterTypes": []
+            },
+            {
+                "name": "component14",
+                "parameterTypes": []
+            },
+            {
+                "name": "component15",
+                "parameterTypes": []
+            },
+            {
+                "name": "component16",
+                "parameterTypes": []
+            },
+            {
+                "name": "component17",
+                "parameterTypes": []
+            },
+            {
+                "name": "component18",
+                "parameterTypes": []
+            },
+            {
+                "name": "component19",
+                "parameterTypes": []
+            },
+            {
+                "name": "component2",
+                "parameterTypes": []
+            },
+            {
+                "name": "component20",
+                "parameterTypes": []
+            },
+            {
+                "name": "component3",
+                "parameterTypes": []
+            },
+            {
+                "name": "component4",
+                "parameterTypes": []
+            },
+            {
+                "name": "component5",
+                "parameterTypes": []
+            },
+            {
+                "name": "component6",
+                "parameterTypes": []
+            },
+            {
+                "name": "component7",
+                "parameterTypes": []
+            },
+            {
+                "name": "component8",
+                "parameterTypes": []
+            },
+            {
+                "name": "component9",
+                "parameterTypes": []
+            },
+            {
+                "name": "copy",
+                "parameterTypes": [
+                    "long",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.chat.ChatPhoto",
+                    "java.lang.String",
+                    "boolean",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.message.Message",
+                    "moe.kurenai.tdlight.model.chat.ChatPermissions",
+                    "java.lang.Integer",
+                    "java.lang.Integer",
+                    "boolean",
+                    "java.lang.String",
+                    "java.lang.Boolean",
+                    "java.lang.Integer",
+                    "moe.kurenai.tdlight.model.chat.ChatLocation"
+                ]
+            },
+            {
+                "name": "equals",
+                "parameterTypes": [
+                    "java.lang.Object"
+                ]
+            },
+            {
+                "name": "getBio",
+                "parameterTypes": []
+            },
+            {
+                "name": "getCanSetStickerSet",
+                "parameterTypes": []
+            },
+            {
+                "name": "getDescription",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFirstName",
+                "parameterTypes": []
+            },
+            {
+                "name": "getHasPrivateForwards",
+                "parameterTypes": []
+            },
+            {
+                "name": "getHasProtectedContent",
+                "parameterTypes": []
+            },
+            {
+                "name": "getId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getInviteLink",
+                "parameterTypes": []
+            },
+            {
+                "name": "getLastName",
+                "parameterTypes": []
+            },
+            {
+                "name": "getLinkedChatId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getLocation",
+                "parameterTypes": []
+            },
+            {
+                "name": "getMessageAutoDeleteTime",
+                "parameterTypes": []
+            },
+            {
+                "name": "getPermissions",
+                "parameterTypes": []
+            },
+            {
+                "name": "getPhoto",
+                "parameterTypes": []
+            },
+            {
+                "name": "getPinnedMessage",
+                "parameterTypes": []
+            },
+            {
+                "name": "getSlowModeDelay",
+                "parameterTypes": []
+            },
+            {
+                "name": "getStickerSetName",
+                "parameterTypes": []
+            },
+            {
+                "name": "getTitle",
+                "parameterTypes": []
+            },
+            {
+                "name": "getType",
+                "parameterTypes": []
+            },
+            {
+                "name": "getUsername",
+                "parameterTypes": []
+            },
+            {
+                "name": "hashCode",
+                "parameterTypes": []
+            },
+            {
+                "name": "isChannelChat",
+                "parameterTypes": []
+            },
+            {
+                "name": "isGroupChat",
+                "parameterTypes": []
+            },
+            {
+                "name": "isSupperGroupChat",
+                "parameterTypes": []
+            },
+            {
+                "name": "isUserChat",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.chat.ChatInviteLink",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "boolean",
+                    "boolean",
+                    "boolean",
+                    "java.lang.String",
+                    "java.lang.Long",
+                    "java.lang.Integer",
+                    "java.lang.Integer"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.chat.ChatJoinRequest",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "moe.kurenai.tdlight.model.chat.Chat",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "long",
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.chat.ChatInviteLink"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.chat.ChatLocation",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "moe.kurenai.tdlight.model.media.Location",
+                    "java.lang.String"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.chat.ChatMember",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.chat.ChatMemberUpdated",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "moe.kurenai.tdlight.model.chat.Chat",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "long",
+                    "moe.kurenai.tdlight.model.chat.ChatMember",
+                    "moe.kurenai.tdlight.model.chat.ChatMember",
+                    "moe.kurenai.tdlight.model.chat.ChatInviteLink"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.chat.ChatPermissions",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Boolean",
+                    "java.lang.Boolean",
+                    "java.lang.Boolean",
+                    "java.lang.Boolean",
+                    "java.lang.Boolean",
+                    "java.lang.Boolean",
+                    "java.lang.Boolean",
+                    "java.lang.Boolean"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.chat.ChatPhoto",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.encrypt.EncryptedCredentials",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.encrypt.EncryptedCredentialsType",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "valueOf",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.encrypt.EncryptedPassportElement",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "moe.kurenai.tdlight.model.encrypt.EncryptedCredentialsType",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.util.List",
+                    "moe.kurenai.tdlight.model.media.PassportFile",
+                    "moe.kurenai.tdlight.model.media.PassportFile",
+                    "moe.kurenai.tdlight.model.media.PassportFile",
+                    "java.util.List",
+                    "java.util.List"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.inline.InlineQuery",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.media.Location"
+                ]
+            },
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.media.Location",
+                    "int",
+                    "kotlin.jvm.internal.DefaultConstructorMarker"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.keyboard.InlineKeyboardButton",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "getCallbackData",
+                "parameterTypes": []
+            },
+            {
+                "name": "getLoginUrl",
+                "parameterTypes": []
+            },
+            {
+                "name": "getPay",
+                "parameterTypes": []
+            },
+            {
+                "name": "getSwitchInlineQuery",
+                "parameterTypes": []
+            },
+            {
+                "name": "getSwitchInlineQueryCurrentChat",
+                "parameterTypes": []
+            },
+            {
+                "name": "getText",
+                "parameterTypes": []
+            },
+            {
+                "name": "getUrl",
+                "parameterTypes": []
+            },
+            {
+                "name": "setCallbackData",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setLoginUrl",
+                "parameterTypes": [
+                    "moe.kurenai.tdlight.model.message.LoginUrl"
+                ]
+            },
+            {
+                "name": "setPay",
+                "parameterTypes": [
+                    "java.lang.Boolean"
+                ]
+            },
+            {
+                "name": "setSwitchInlineQuery",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setSwitchInlineQueryCurrentChat",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setUrl",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.keyboard.InlineKeyboardMarkup",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.util.List"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.Animation",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "java.lang.String",
+                    "int",
+                    "int",
+                    "long",
+                    "moe.kurenai.tdlight.model.media.PhotoSize",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.Integer"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.Audio",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "java.lang.String",
+                    "long",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.Integer",
+                    "moe.kurenai.tdlight.model.media.PhotoSize"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.ChatMemberAdministrator"
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.ChatMemberBanned"
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.ChatMemberLeft"
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.ChatMemberMember"
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.ChatMemberOwner"
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.ChatMemberRestricted"
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.Contact",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "getFirstName",
+                "parameterTypes": []
+            },
+            {
+                "name": "getLastName",
+                "parameterTypes": []
+            },
+            {
+                "name": "getPhoneNumber",
+                "parameterTypes": []
+            },
+            {
+                "name": "getUserId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getVcard",
+                "parameterTypes": []
+            },
+            {
+                "name": "setFirstName",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setLastName",
+                "parameterTypes": [
+                    "java.util.Optional"
+                ]
+            },
+            {
+                "name": "setPhoneNumber",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setUserId",
+                "parameterTypes": [
+                    "java.util.OptionalInt"
+                ]
+            },
+            {
+                "name": "setVcard",
+                "parameterTypes": [
+                    "java.util.Optional"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.Dice",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "getEmoji",
+                "parameterTypes": []
+            },
+            {
+                "name": "getValue",
+                "parameterTypes": []
+            },
+            {
+                "name": "setEmoji",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setValue",
+                "parameterTypes": [
+                    "int"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.Document",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "getFileId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFileName",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFileSize",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFileUniqueId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getMimeType",
+                "parameterTypes": []
+            },
+            {
+                "name": "getThumb",
+                "parameterTypes": []
+            },
+            {
+                "name": "setFileId",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setFileName",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setFileSize",
+                "parameterTypes": [
+                    "java.lang.Integer"
+                ]
+            },
+            {
+                "name": "setFileUniqueId",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setMimeType",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setThumb",
+                "parameterTypes": [
+                    "moe.kurenai.tdlight.model.media.PhotoSize"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.Game",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "getAnimation",
+                "parameterTypes": []
+            },
+            {
+                "name": "getDescription",
+                "parameterTypes": []
+            },
+            {
+                "name": "getPhoto",
+                "parameterTypes": []
+            },
+            {
+                "name": "getText",
+                "parameterTypes": []
+            },
+            {
+                "name": "getTextEntities",
+                "parameterTypes": []
+            },
+            {
+                "name": "getTitle",
+                "parameterTypes": []
+            },
+            {
+                "name": "setAnimation",
+                "parameterTypes": [
+                    "moe.kurenai.tdlight.model.media.Animation"
+                ]
+            },
+            {
+                "name": "setDescription",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setPhoto",
+                "parameterTypes": [
+                    "java.util.List"
+                ]
+            },
+            {
+                "name": "setText",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setTextEntities",
+                "parameterTypes": [
+                    "java.util.List"
+                ]
+            },
+            {
+                "name": "setTitle",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.Invoice",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "getCurrency",
+                "parameterTypes": []
+            },
+            {
+                "name": "getDescription",
+                "parameterTypes": []
+            },
+            {
+                "name": "getStartParameter",
+                "parameterTypes": []
+            },
+            {
+                "name": "getTitle",
+                "parameterTypes": []
+            },
+            {
+                "name": "getTotalAmount",
+                "parameterTypes": []
+            },
+            {
+                "name": "setCurrency",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setDescription",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setStartParameter",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setTitle",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setTotalAmount",
+                "parameterTypes": [
+                    "int"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.Location",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "getHeading",
+                "parameterTypes": []
+            },
+            {
+                "name": "getHorizontalAccuracy",
+                "parameterTypes": []
+            },
+            {
+                "name": "getLatitude",
+                "parameterTypes": []
+            },
+            {
+                "name": "getLivePeriod",
+                "parameterTypes": []
+            },
+            {
+                "name": "getLongitude",
+                "parameterTypes": []
+            },
+            {
+                "name": "getProximityAlertRadius",
+                "parameterTypes": []
+            },
+            {
+                "name": "setHeading",
+                "parameterTypes": [
+                    "java.util.OptionalInt"
+                ]
+            },
+            {
+                "name": "setHorizontalAccuracy",
+                "parameterTypes": [
+                    "java.util.Optional"
+                ]
+            },
+            {
+                "name": "setLatitude",
+                "parameterTypes": [
+                    "float"
+                ]
+            },
+            {
+                "name": "setLivePeriod",
+                "parameterTypes": [
+                    "java.util.OptionalInt"
+                ]
+            },
+            {
+                "name": "setLongitude",
+                "parameterTypes": [
+                    "float"
+                ]
+            },
+            {
+                "name": "setProximityAlertRadius",
+                "parameterTypes": [
+                    "java.util.OptionalInt"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.MaskPosition",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "getPoint",
+                "parameterTypes": []
+            },
+            {
+                "name": "getScale",
+                "parameterTypes": []
+            },
+            {
+                "name": "getXShift",
+                "parameterTypes": []
+            },
+            {
+                "name": "getYShift",
+                "parameterTypes": []
+            },
+            {
+                "name": "setPoint",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setScale",
+                "parameterTypes": [
+                    "float"
+                ]
+            },
+            {
+                "name": "setXShift",
+                "parameterTypes": [
+                    "float"
+                ]
+            },
+            {
+                "name": "setYShift",
+                "parameterTypes": [
+                    "float"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.OrderInfo",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "getEmail",
+                "parameterTypes": []
+            },
+            {
+                "name": "getName",
+                "parameterTypes": []
+            },
+            {
+                "name": "getPhone_number",
+                "parameterTypes": []
+            },
+            {
+                "name": "getShippingAddress",
+                "parameterTypes": []
+            },
+            {
+                "name": "setEmail",
+                "parameterTypes": [
+                    "java.util.Optional"
+                ]
+            },
+            {
+                "name": "setName",
+                "parameterTypes": [
+                    "java.util.Optional"
+                ]
+            },
+            {
+                "name": "setPhone_number",
+                "parameterTypes": [
+                    "java.util.Optional"
+                ]
+            },
+            {
+                "name": "setShippingAddress",
+                "parameterTypes": [
+                    "java.util.Optional"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.PassportData",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "getCredentials",
+                "parameterTypes": []
+            },
+            {
+                "name": "getData",
+                "parameterTypes": []
+            },
+            {
+                "name": "setCredentials",
+                "parameterTypes": [
+                    "moe.kurenai.tdlight.model.encrypt.EncryptedCredentials"
+                ]
+            },
+            {
+                "name": "setData",
+                "parameterTypes": [
+                    "java.util.List"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.PassportFile",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "getFileDate",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFileId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFileSize",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFileUniqueId",
+                "parameterTypes": []
+            },
+            {
+                "name": "setFileDate",
+                "parameterTypes": [
+                    "int"
+                ]
+            },
+            {
+                "name": "setFileId",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setFileSize",
+                "parameterTypes": [
+                    "int"
+                ]
+            },
+            {
+                "name": "setFileUniqueId",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.PhotoSize",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "getFileId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFileSize",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFileUniqueId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getHeight",
+                "parameterTypes": []
+            },
+            {
+                "name": "getWidth",
+                "parameterTypes": []
+            },
+            {
+                "name": "setFileId",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setFileSize",
+                "parameterTypes": [
+                    "java.lang.Integer"
+                ]
+            },
+            {
+                "name": "setFileUniqueId",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setHeight",
+                "parameterTypes": [
+                    "int"
+                ]
+            },
+            {
+                "name": "setWidth",
+                "parameterTypes": [
+                    "int"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.PreCheckoutQuery",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "java.lang.String",
+                    "int",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.media.OrderInfo"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.ProximityAlertTriggered",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "getDistance",
+                "parameterTypes": []
+            },
+            {
+                "name": "getTraveler",
+                "parameterTypes": []
+            },
+            {
+                "name": "getWatcher",
+                "parameterTypes": []
+            },
+            {
+                "name": "setDistance",
+                "parameterTypes": [
+                    "moe.kurenai.tdlight.model.message.User"
+                ]
+            },
+            {
+                "name": "setTraveler",
+                "parameterTypes": [
+                    "moe.kurenai.tdlight.model.message.User"
+                ]
+            },
+            {
+                "name": "setWatcher",
+                "parameterTypes": [
+                    "moe.kurenai.tdlight.model.message.User"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.ShippingAddress",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "getCity",
+                "parameterTypes": []
+            },
+            {
+                "name": "getCountryCode",
+                "parameterTypes": []
+            },
+            {
+                "name": "getPostCode",
+                "parameterTypes": []
+            },
+            {
+                "name": "getState",
+                "parameterTypes": []
+            },
+            {
+                "name": "getStreetLine1",
+                "parameterTypes": []
+            },
+            {
+                "name": "getStreetLine2",
+                "parameterTypes": []
+            },
+            {
+                "name": "setCity",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setCountryCode",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setPostCode",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setState",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setStreetLine1",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setStreetLine2",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.ShippingQuery",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.media.ShippingAddress"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.Sticker",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "java.lang.String",
+                    "int",
+                    "int",
+                    "boolean",
+                    "boolean",
+                    "moe.kurenai.tdlight.model.media.PhotoSize",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.media.MaskPosition",
+                    "java.lang.Integer"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.SuccessfulPayment",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "getCurrency",
+                "parameterTypes": []
+            },
+            {
+                "name": "getInvoicePayload",
+                "parameterTypes": []
+            },
+            {
+                "name": "getOrderInfo",
+                "parameterTypes": []
+            },
+            {
+                "name": "getProviderPaymentChargeId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getShippingOptionId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getTelegramPaymentChargeId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getTotalAmount",
+                "parameterTypes": []
+            },
+            {
+                "name": "setCurrency",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setInvoicePayload",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setOrderInfo",
+                "parameterTypes": [
+                    "java.util.Optional"
+                ]
+            },
+            {
+                "name": "setProviderPaymentChargeId",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setShippingOptionId",
+                "parameterTypes": [
+                    "java.util.Optional"
+                ]
+            },
+            {
+                "name": "setTelegramPaymentChargeId",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setTotalAmount",
+                "parameterTypes": [
+                    "int"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.Video",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "getDuration",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFileId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFileName",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFileSize",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFileUniqueId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getHeight",
+                "parameterTypes": []
+            },
+            {
+                "name": "getMimeType",
+                "parameterTypes": []
+            },
+            {
+                "name": "getThumb",
+                "parameterTypes": []
+            },
+            {
+                "name": "getWidth",
+                "parameterTypes": []
+            },
+            {
+                "name": "setDuration",
+                "parameterTypes": [
+                    "int"
+                ]
+            },
+            {
+                "name": "setFileId",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setFileName",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setFileSize",
+                "parameterTypes": [
+                    "java.lang.Integer"
+                ]
+            },
+            {
+                "name": "setFileUniqueId",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setHeight",
+                "parameterTypes": [
+                    "int"
+                ]
+            },
+            {
+                "name": "setMimeType",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setThumb",
+                "parameterTypes": [
+                    "moe.kurenai.tdlight.model.media.PhotoSize"
+                ]
+            },
+            {
+                "name": "setWidth",
+                "parameterTypes": [
+                    "int"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.media.VideoNote",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "getDuration",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFileId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFileSize",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFileUniqueId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getLength",
+                "parameterTypes": []
+            },
+            {
+                "name": "getThumb",
+                "parameterTypes": []
+            },
+            {
+                "name": "setDuration",
+                "parameterTypes": [
+                    "int"
+                ]
+            },
+            {
+                "name": "setFileId",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setFileSize",
+                "parameterTypes": [
+                    "java.util.OptionalInt"
+                ]
+            },
+            {
+                "name": "setFileUniqueId",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setLength",
+                "parameterTypes": [
+                    "int"
+                ]
+            },
+            {
+                "name": "setThumb",
+                "parameterTypes": [
+                    "moe.kurenai.tdlight.model.media.PhotoSize"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.message.CallbackQuery",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "moe.kurenai.tdlight.model.message.Message",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.message.ChosenInlineResult",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "moe.kurenai.tdlight.model.media.Location",
+                    "java.lang.String",
+                    "java.lang.String"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.message.LoginUrl",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "java.util.Optional",
+                    "java.util.Optional",
+                    "java.util.Optional"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.message.Message",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Integer",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "moe.kurenai.tdlight.model.chat.Chat",
+                    "long",
+                    "moe.kurenai.tdlight.model.chat.Chat",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "moe.kurenai.tdlight.model.chat.Chat",
+                    "java.lang.Integer",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.Integer",
+                    "boolean",
+                    "moe.kurenai.tdlight.model.message.Message",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "java.lang.Integer",
+                    "boolean",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.util.List",
+                    "moe.kurenai.tdlight.model.media.Animation",
+                    "moe.kurenai.tdlight.model.media.Audio",
+                    "moe.kurenai.tdlight.model.media.Document",
+                    "java.util.List",
+                    "moe.kurenai.tdlight.model.media.Sticker",
+                    "moe.kurenai.tdlight.model.media.Video",
+                    "moe.kurenai.tdlight.model.media.VideoNote",
+                    "moe.kurenai.tdlight.model.voice.Voice",
+                    "java.lang.String",
+                    "java.util.List",
+                    "moe.kurenai.tdlight.model.media.Contact",
+                    "moe.kurenai.tdlight.model.media.Dice",
+                    "moe.kurenai.tdlight.model.media.Game",
+                    "moe.kurenai.tdlight.model.poll.Poll",
+                    "moe.kurenai.tdlight.model.media.Location",
+                    "java.util.List",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "java.lang.String",
+                    "java.util.List",
+                    "java.lang.Boolean",
+                    "java.lang.Boolean",
+                    "java.lang.Boolean",
+                    "moe.kurenai.tdlight.model.message.MessageAutoDeleteTimerChanged",
+                    "java.lang.Long",
+                    "java.lang.Long",
+                    "moe.kurenai.tdlight.model.message.Message",
+                    "moe.kurenai.tdlight.model.media.Invoice",
+                    "moe.kurenai.tdlight.model.media.SuccessfulPayment",
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.media.PassportData",
+                    "moe.kurenai.tdlight.model.media.ProximityAlertTriggered",
+                    "moe.kurenai.tdlight.model.voice.VoiceChatScheduled",
+                    "moe.kurenai.tdlight.model.voice.VoiceChatEnded",
+                    "moe.kurenai.tdlight.model.voice.VoiceChatParticipantsInvited",
+                    "moe.kurenai.tdlight.model.keyboard.InlineKeyboardMarkup"
+                ]
+            },
+            {
+                "name": "component1",
+                "parameterTypes": []
+            },
+            {
+                "name": "component10",
+                "parameterTypes": []
+            },
+            {
+                "name": "component11",
+                "parameterTypes": []
+            },
+            {
+                "name": "component12",
+                "parameterTypes": []
+            },
+            {
+                "name": "component13",
+                "parameterTypes": []
+            },
+            {
+                "name": "component14",
+                "parameterTypes": []
+            },
+            {
+                "name": "component15",
+                "parameterTypes": []
+            },
+            {
+                "name": "component16",
+                "parameterTypes": []
+            },
+            {
+                "name": "component17",
+                "parameterTypes": []
+            },
+            {
+                "name": "component18",
+                "parameterTypes": []
+            },
+            {
+                "name": "component19",
+                "parameterTypes": []
+            },
+            {
+                "name": "component2",
+                "parameterTypes": []
+            },
+            {
+                "name": "component20",
+                "parameterTypes": []
+            },
+            {
+                "name": "component21",
+                "parameterTypes": []
+            },
+            {
+                "name": "component22",
+                "parameterTypes": []
+            },
+            {
+                "name": "component23",
+                "parameterTypes": []
+            },
+            {
+                "name": "component24",
+                "parameterTypes": []
+            },
+            {
+                "name": "component25",
+                "parameterTypes": []
+            },
+            {
+                "name": "component26",
+                "parameterTypes": []
+            },
+            {
+                "name": "component27",
+                "parameterTypes": []
+            },
+            {
+                "name": "component28",
+                "parameterTypes": []
+            },
+            {
+                "name": "component29",
+                "parameterTypes": []
+            },
+            {
+                "name": "component3",
+                "parameterTypes": []
+            },
+            {
+                "name": "component30",
+                "parameterTypes": []
+            },
+            {
+                "name": "component31",
+                "parameterTypes": []
+            },
+            {
+                "name": "component32",
+                "parameterTypes": []
+            },
+            {
+                "name": "component33",
+                "parameterTypes": []
+            },
+            {
+                "name": "component34",
+                "parameterTypes": []
+            },
+            {
+                "name": "component35",
+                "parameterTypes": []
+            },
+            {
+                "name": "component36",
+                "parameterTypes": []
+            },
+            {
+                "name": "component37",
+                "parameterTypes": []
+            },
+            {
+                "name": "component38",
+                "parameterTypes": []
+            },
+            {
+                "name": "component39",
+                "parameterTypes": []
+            },
+            {
+                "name": "component4",
+                "parameterTypes": []
+            },
+            {
+                "name": "component40",
+                "parameterTypes": []
+            },
+            {
+                "name": "component41",
+                "parameterTypes": []
+            },
+            {
+                "name": "component42",
+                "parameterTypes": []
+            },
+            {
+                "name": "component43",
+                "parameterTypes": []
+            },
+            {
+                "name": "component44",
+                "parameterTypes": []
+            },
+            {
+                "name": "component45",
+                "parameterTypes": []
+            },
+            {
+                "name": "component46",
+                "parameterTypes": []
+            },
+            {
+                "name": "component47",
+                "parameterTypes": []
+            },
+            {
+                "name": "component48",
+                "parameterTypes": []
+            },
+            {
+                "name": "component49",
+                "parameterTypes": []
+            },
+            {
+                "name": "component5",
+                "parameterTypes": []
+            },
+            {
+                "name": "component50",
+                "parameterTypes": []
+            },
+            {
+                "name": "component51",
+                "parameterTypes": []
+            },
+            {
+                "name": "component52",
+                "parameterTypes": []
+            },
+            {
+                "name": "component53",
+                "parameterTypes": []
+            },
+            {
+                "name": "component54",
+                "parameterTypes": []
+            },
+            {
+                "name": "component55",
+                "parameterTypes": []
+            },
+            {
+                "name": "component6",
+                "parameterTypes": []
+            },
+            {
+                "name": "component7",
+                "parameterTypes": []
+            },
+            {
+                "name": "component8",
+                "parameterTypes": []
+            },
+            {
+                "name": "component9",
+                "parameterTypes": []
+            },
+            {
+                "name": "copy",
+                "parameterTypes": [
+                    "java.lang.Integer",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "moe.kurenai.tdlight.model.chat.Chat",
+                    "long",
+                    "moe.kurenai.tdlight.model.chat.Chat",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "moe.kurenai.tdlight.model.chat.Chat",
+                    "java.lang.Integer",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.Integer",
+                    "boolean",
+                    "moe.kurenai.tdlight.model.message.Message",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "java.lang.Integer",
+                    "boolean",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.util.List",
+                    "moe.kurenai.tdlight.model.media.Animation",
+                    "moe.kurenai.tdlight.model.media.Audio",
+                    "moe.kurenai.tdlight.model.media.Document",
+                    "java.util.List",
+                    "moe.kurenai.tdlight.model.media.Sticker",
+                    "moe.kurenai.tdlight.model.media.Video",
+                    "moe.kurenai.tdlight.model.media.VideoNote",
+                    "moe.kurenai.tdlight.model.voice.Voice",
+                    "java.lang.String",
+                    "java.util.List",
+                    "moe.kurenai.tdlight.model.media.Contact",
+                    "moe.kurenai.tdlight.model.media.Dice",
+                    "moe.kurenai.tdlight.model.media.Game",
+                    "moe.kurenai.tdlight.model.poll.Poll",
+                    "moe.kurenai.tdlight.model.media.Location",
+                    "java.util.List",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "java.lang.String",
+                    "java.util.List",
+                    "java.lang.Boolean",
+                    "java.lang.Boolean",
+                    "java.lang.Boolean",
+                    "moe.kurenai.tdlight.model.message.MessageAutoDeleteTimerChanged",
+                    "java.lang.Long",
+                    "java.lang.Long",
+                    "moe.kurenai.tdlight.model.message.Message",
+                    "moe.kurenai.tdlight.model.media.Invoice",
+                    "moe.kurenai.tdlight.model.media.SuccessfulPayment",
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.media.PassportData",
+                    "moe.kurenai.tdlight.model.media.ProximityAlertTriggered",
+                    "moe.kurenai.tdlight.model.voice.VoiceChatScheduled",
+                    "moe.kurenai.tdlight.model.voice.VoiceChatEnded",
+                    "moe.kurenai.tdlight.model.voice.VoiceChatParticipantsInvited",
+                    "moe.kurenai.tdlight.model.keyboard.InlineKeyboardMarkup"
+                ]
+            },
+            {
+                "name": "equals",
+                "parameterTypes": [
+                    "java.lang.Object"
+                ]
+            },
+            {
+                "name": "getAnimation",
+                "parameterTypes": []
+            },
+            {
+                "name": "getAudio",
+                "parameterTypes": []
+            },
+            {
+                "name": "getAuthorSignature",
+                "parameterTypes": []
+            },
+            {
+                "name": "getCaption",
+                "parameterTypes": []
+            },
+            {
+                "name": "getCaptionEntities",
+                "parameterTypes": []
+            },
+            {
+                "name": "getChat",
+                "parameterTypes": []
+            },
+            {
+                "name": "getChatId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getConnectedWebsite",
+                "parameterTypes": []
+            },
+            {
+                "name": "getContact",
+                "parameterTypes": []
+            },
+            {
+                "name": "getDate",
+                "parameterTypes": []
+            },
+            {
+                "name": "getDeleteChatPhoto",
+                "parameterTypes": []
+            },
+            {
+                "name": "getDice",
+                "parameterTypes": []
+            },
+            {
+                "name": "getDocument",
+                "parameterTypes": []
+            },
+            {
+                "name": "getEditDate",
+                "parameterTypes": []
+            },
+            {
+                "name": "getEntities",
+                "parameterTypes": []
+            },
+            {
+                "name": "getForwardDate",
+                "parameterTypes": []
+            },
+            {
+                "name": "getForwardFrom",
+                "parameterTypes": []
+            },
+            {
+                "name": "getForwardFromChat",
+                "parameterTypes": []
+            },
+            {
+                "name": "getForwardFromMessageId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getForwardSenderName",
+                "parameterTypes": []
+            },
+            {
+                "name": "getForwardSignature",
+                "parameterTypes": []
+            },
+            {
+                "name": "getFrom",
+                "parameterTypes": []
+            },
+            {
+                "name": "getGame",
+                "parameterTypes": []
+            },
+            {
+                "name": "getGroupChatCreated",
+                "parameterTypes": []
+            },
+            {
+                "name": "getHasProtectedContent",
+                "parameterTypes": []
+            },
+            {
+                "name": "getInvoice",
+                "parameterTypes": []
+            },
+            {
+                "name": "getLeftChatMember",
+                "parameterTypes": []
+            },
+            {
+                "name": "getLocation",
+                "parameterTypes": []
+            },
+            {
+                "name": "getMediaGroupId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getMessageAutoDeleteTimerChanged",
+                "parameterTypes": []
+            },
+            {
+                "name": "getMessageId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getMigrateFromChatId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getMigrateToChatId",
+                "parameterTypes": []
+            },
+            {
+                "name": "getNewChatMembers",
+                "parameterTypes": []
+            },
+            {
+                "name": "getNewChatPhoto",
+                "parameterTypes": []
+            },
+            {
+                "name": "getNewChatTitle",
+                "parameterTypes": []
+            },
+            {
+                "name": "getPassportData",
+                "parameterTypes": []
+            },
+            {
+                "name": "getPhoto",
+                "parameterTypes": []
+            },
+            {
+                "name": "getPinnedMessage",
+                "parameterTypes": []
+            },
+            {
+                "name": "getPoll",
+                "parameterTypes": []
+            },
+            {
+                "name": "getProximityAlertTriggered",
+                "parameterTypes": []
+            },
+            {
+                "name": "getReplyMarkup",
+                "parameterTypes": []
+            },
+            {
+                "name": "getReplyToMessage",
+                "parameterTypes": []
+            },
+            {
+                "name": "getSenderChat",
+                "parameterTypes": []
+            },
+            {
+                "name": "getSticker",
+                "parameterTypes": []
+            },
+            {
+                "name": "getSuccessfulPayment",
+                "parameterTypes": []
+            },
+            {
+                "name": "getSupergroupChatCreated",
+                "parameterTypes": []
+            },
+            {
+                "name": "getText",
+                "parameterTypes": []
+            },
+            {
+                "name": "getViaBot",
+                "parameterTypes": []
+            },
+            {
+                "name": "getVideo",
+                "parameterTypes": []
+            },
+            {
+                "name": "getVideo_note",
+                "parameterTypes": []
+            },
+            {
+                "name": "getVoice",
+                "parameterTypes": []
+            },
+            {
+                "name": "getVoiceChatEnded",
+                "parameterTypes": []
+            },
+            {
+                "name": "getVoiceChatParticipantsInvited",
+                "parameterTypes": []
+            },
+            {
+                "name": "getVoiceChatScheduled",
+                "parameterTypes": []
+            },
+            {
+                "name": "hasAnimation",
+                "parameterTypes": []
+            },
+            {
+                "name": "hasAudio",
+                "parameterTypes": []
+            },
+            {
+                "name": "hasDocument",
+                "parameterTypes": []
+            },
+            {
+                "name": "hasPhoto",
+                "parameterTypes": []
+            },
+            {
+                "name": "hasReplyMarkup",
+                "parameterTypes": []
+            },
+            {
+                "name": "hasSticker",
+                "parameterTypes": []
+            },
+            {
+                "name": "hasText",
+                "parameterTypes": []
+            },
+            {
+                "name": "hasVideo",
+                "parameterTypes": []
+            },
+            {
+                "name": "hasVoice",
+                "parameterTypes": []
+            },
+            {
+                "name": "hashCode",
+                "parameterTypes": []
+            },
+            {
+                "name": "isAutomaticForward",
+                "parameterTypes": []
+            },
+            {
+                "name": "isChannelMessage",
+                "parameterTypes": []
+            },
+            {
+                "name": "isCommand",
+                "parameterTypes": []
+            },
+            {
+                "name": "isGroupMessage",
+                "parameterTypes": []
+            },
+            {
+                "name": "isReply",
+                "parameterTypes": []
+            },
+            {
+                "name": "isSuperGroupMessage",
+                "parameterTypes": []
+            },
+            {
+                "name": "isUserMessage",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.message.MessageAutoDeleteTimerChanged",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "long"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.message.MessageEntity",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "int",
+                    "int"
+                ]
+            },
+            {
+                "name": "getLanguage",
+                "parameterTypes": []
+            },
+            {
+                "name": "getLength",
+                "parameterTypes": []
+            },
+            {
+                "name": "getOffset",
+                "parameterTypes": []
+            },
+            {
+                "name": "getText",
+                "parameterTypes": []
+            },
+            {
+                "name": "getType",
+                "parameterTypes": []
+            },
+            {
+                "name": "getUrl",
+                "parameterTypes": []
+            },
+            {
+                "name": "getUser",
+                "parameterTypes": []
+            },
+            {
+                "name": "setLanguage",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setLength",
+                "parameterTypes": [
+                    "int"
+                ]
+            },
+            {
+                "name": "setOffset",
+                "parameterTypes": [
+                    "int"
+                ]
+            },
+            {
+                "name": "setText",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setType",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setUrl",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "setUser",
+                "parameterTypes": [
+                    "moe.kurenai.tdlight.model.message.User"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.message.Update",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "long",
+                    "moe.kurenai.tdlight.model.message.Message",
+                    "moe.kurenai.tdlight.model.message.Message",
+                    "moe.kurenai.tdlight.model.message.Message",
+                    "moe.kurenai.tdlight.model.message.Message",
+                    "moe.kurenai.tdlight.model.inline.InlineQuery",
+                    "moe.kurenai.tdlight.model.message.ChosenInlineResult",
+                    "moe.kurenai.tdlight.model.message.CallbackQuery",
+                    "moe.kurenai.tdlight.model.media.ShippingQuery",
+                    "moe.kurenai.tdlight.model.media.PreCheckoutQuery",
+                    "moe.kurenai.tdlight.model.poll.Poll",
+                    "moe.kurenai.tdlight.model.poll.PollAnswer",
+                    "moe.kurenai.tdlight.model.chat.ChatMemberUpdated",
+                    "moe.kurenai.tdlight.model.chat.ChatMemberUpdated",
+                    "moe.kurenai.tdlight.model.chat.ChatJoinRequest"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.message.UpdateTypes"
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.message.User",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "long",
+                    "boolean",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.Boolean",
+                    "java.lang.Boolean",
+                    "java.lang.Boolean"
+                ]
+            },
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "long",
+                    "boolean",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.Boolean",
+                    "java.lang.Boolean",
+                    "java.lang.Boolean",
+                    "int",
+                    "kotlin.jvm.internal.DefaultConstructorMarker"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.poll.Poll",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.util.List",
+                    "int",
+                    "boolean",
+                    "boolean",
+                    "java.lang.String",
+                    "boolean",
+                    "java.lang.Integer",
+                    "java.lang.String",
+                    "java.util.List",
+                    "java.lang.Integer",
+                    "java.lang.Integer"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.poll.PollAnswer",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "moe.kurenai.tdlight.model.message.User",
+                    "java.util.List"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.poll.PollOption",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "int"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.voice.Voice",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "java.lang.String",
+                    "long",
+                    "java.lang.String",
+                    "java.lang.Integer"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.voice.VoiceChatEnded",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "long"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.voice.VoiceChatParticipantsInvited",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.util.List"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.model.voice.VoiceChatScheduled",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "long"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moe.kurenai.tdlight.request.GetMe",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true
+    },
+    {
+        "name": "moe.kurenai.tdlight.request.Request",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true
+    },
+    {
+        "name": "moe.kurenai.tdlight.request.chat.GetUpdates",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Long",
+                    "java.lang.Integer",
+                    "java.lang.Integer",
+                    "java.util.List"
+                ]
+            },
+            {
+                "name": "getAllowedUpdates",
+                "parameterTypes": []
+            },
+            {
+                "name": "getHttpMethod",
+                "parameterTypes": []
+            },
+            {
+                "name": "getLimit",
+                "parameterTypes": []
+            },
+            {
+                "name": "getMethod",
+                "parameterTypes": []
+            },
+            {
+                "name": "getOffset",
+                "parameterTypes": []
+            },
+            {
+                "name": "getResponseType",
+                "parameterTypes": []
+            },
+            {
+                "name": "getTimeout",
+                "parameterTypes": []
+            }
+        ]
+    }
+]

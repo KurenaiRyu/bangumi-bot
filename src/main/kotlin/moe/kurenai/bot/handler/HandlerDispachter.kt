@@ -1,23 +1,23 @@
 package moe.kurenai.bot.handler
 
 import moe.kurenai.bot.BangumiBot.tdClient
+import moe.kurenai.bot.util.getLogger
 import moe.kurenai.tdlight.model.MessageEntityType
 import moe.kurenai.tdlight.model.chat.ChatType
 import moe.kurenai.tdlight.model.message.Message
 import moe.kurenai.tdlight.model.message.Update
 import moe.kurenai.tdlight.request.message.SendMessage
-import org.apache.logging.log4j.LogManager
 import org.reflections.Reflections
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
-object HandlerDispacher {
+object HandlerDispatcher {
 
     private val privateHandler = HashMap<Long, Consumer<Update>>()
     private val removeSchedules = HashMap<Long, ScheduledFuture<*>>()
-    private val log = LogManager.getLogger()
+    private val log = getLogger()
     private val handlers = ArrayList<AbstractHandler>()
     private val executorService = Executors.newSingleThreadScheduledExecutor()
 

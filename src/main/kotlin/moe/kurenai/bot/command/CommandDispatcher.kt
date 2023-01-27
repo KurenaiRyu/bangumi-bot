@@ -1,25 +1,24 @@
 package moe.kurenai.bot.command
 
-import moe.kurenai.bot.BangumiBot
-import moe.kurenai.bot.BangumiBot.getEmptyAnswer
 import moe.kurenai.bot.BangumiBot.send
 import moe.kurenai.bot.command.inlines.Search
 import moe.kurenai.bot.command.inlines.SearchByURI
+import moe.kurenai.bot.util.getEmptyAnswer
+import moe.kurenai.bot.util.getLogger
 import moe.kurenai.tdlight.model.MessageEntityType
 import moe.kurenai.tdlight.model.inline.InlineQuery
 import moe.kurenai.tdlight.model.message.Update
-import org.apache.logging.log4j.LogManager
 import org.reflections.Reflections
 import java.net.URI
 
 object CommandDispatcher {
 
-    private val log = LogManager.getLogger()
+    private val log = getLogger()
 
     val commands = HashMap<String, CommandHandler>()
     val inlineCommands = HashMap<String, InlineCommandHandler>()
     val defaultInlineCommandHandler = Search()
-    val uriInlineCommandHandler = SearchByURI()
+    val uriInlineCommandHandler = SearchByURI
 
     init {
         for (reflection in Reflections("moe.kurenai.bot.command.commands").getSubTypesOf(CommandHandler::class.java)) {
@@ -88,9 +87,9 @@ object CommandDispatcher {
             0 -> return
             1 -> {
                 if (query.contains("https") || query.contains("http")) {
-                    uriInlineCommandHandler.execute(update, inlineQuery, URI.create(query))
+                    uriInlineCommandHandler.execute(inlineQuery, URI.create(query))
                 } else {
-                    BangumiBot.getEmptyAnswer(inlineQuery.id).send()
+                    getEmptyAnswer(inlineQuery.id).send()
                 }
             }
             2 -> {

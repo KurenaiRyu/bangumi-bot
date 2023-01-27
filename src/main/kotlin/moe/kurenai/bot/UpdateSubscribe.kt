@@ -6,6 +6,7 @@ import moe.kurenai.bgm.model.person.PersonDetail
 import moe.kurenai.bgm.model.subject.getGrid
 import moe.kurenai.bot.BangumiBot.MAPPER
 import moe.kurenai.bot.command.CommandDispatcher
+import moe.kurenai.bot.util.getLogger
 import moe.kurenai.tdlight.AbstractUpdateSubscriber
 import moe.kurenai.tdlight.model.MessageEntityType
 import moe.kurenai.tdlight.model.inline.InlineQueryResultArticle
@@ -15,12 +16,11 @@ import moe.kurenai.tdlight.model.keyboard.InlineKeyboardMarkup
 import moe.kurenai.tdlight.model.message.MessageEntity
 import moe.kurenai.tdlight.model.message.Update
 import moe.kurenai.tdlight.request.message.AnswerInlineQuery
-import org.apache.logging.log4j.LogManager
 import kotlin.math.min
 
 class UpdateSubscribe : AbstractUpdateSubscriber() {
     companion object {
-        private val log = LogManager.getLogger()
+        private val log = getLogger()
         const val DEFAULT_IMAGE_URL = "https://bgm.tv/img/no_icon_subject.png"
         const val DEFAULT_SIZE = 30
     }

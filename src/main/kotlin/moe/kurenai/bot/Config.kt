@@ -1,11 +1,11 @@
 package moe.kurenai.bot
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import com.fasterxml.jackson.module.kotlin.kotlinModule
+import kotlinx.serialization.Serializable
+import net.mamoe.yamlkt.Yaml
 import java.io.File
 
-class Config(
+@Serializable
+data class Config(
     var redis: Redis = Redis(),
     var telegram: Telegram = Telegram(),
     var bgm: Bgm = Bgm(),
@@ -13,7 +13,9 @@ class Config(
 ) {
 
     companion object {
-        private val MAPPER = ObjectMapper(YAMLFactory()).registerModules(kotlinModule())
+        private val yaml = Yaml {
+            encodeDefaultValues = false
+        }
         private val file = File("config/config.yml")
         var CONFIG: Config = Config()
 
@@ -21,22 +23,24 @@ class Config(
             if (!file.exists()) {
                 file.parentFile.mkdirs()
                 file.createNewFile()
-                MAPPER.writeValue(file, CONFIG)
+                yaml.encodeToString(serializer(), CONFIG)
                 throw Exception("请填写配置文件。")
             } else {
-                CONFIG = MAPPER.readValue(file, Config::class.java)
+                CONFIG = yaml.decodeFromString(serializer(), file.readText())
             }
         }
     }
 
 }
 
+@Serializable
 data class Redis(
     var host: String = "localhost",
     var port: Int = 6379,
     var database: Int = 0,
 )
 
+@Serializable
 data class Telegram(
     var baseUrl: String = "https://api.telegram.org",
     var token: String = "",
@@ -44,6 +48,7 @@ data class Telegram(
     var updateBaseUrl: String = baseUrl
 )
 
+@Serializable
 data class Bgm(
     var appId: String = "",
     var appSecret: String = "",

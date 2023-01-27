@@ -41,7 +41,7 @@ class ReactorTest {
             it.useSingleServer().setAddress("redis://${Config.CONFIG.redis.host}:${Config.CONFIG.redis.port}").setDatabase(Config.CONFIG.redis.database)
         })
 
-        println(redisson.getMap<String, AccessToken>(BangumiBot.TOKEN)["161589"])
+        println(redisson.getMap<String, AccessToken>("TOKEN")["161589"])
     }
 
     @Test

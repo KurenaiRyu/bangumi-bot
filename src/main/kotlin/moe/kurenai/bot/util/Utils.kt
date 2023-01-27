@@ -1,8 +1,8 @@
 package moe.kurenai.bot.util
 
-import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.apache.logging.log4j.util.StackLocatorUtil
-import org.redisson.api.RBucketReactive
+import kotlinx.serialization.json.Json
+import moe.kurenai.tdlight.request.message.AnswerInlineQuery
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 /**
@@ -10,6 +10,19 @@ import org.slf4j.LoggerFactory
  * @since 2022/10/27 16:20
  */
 
-fun getLogger() = LoggerFactory.getLogger(StackLocatorUtil.getCallerClass(2))
+fun getLogger(name: String = Thread.currentThread().stackTrace[2].className): Logger {
+    return LoggerFactory.getILoggerFactory().getLogger(name)
+}
 
-suspend fun <T> RBucketReactive<out T>.getAwait(): T? = get().awaitSingleOrNull()
+fun getEmptyAnswer(inlineId: String): AnswerInlineQuery = AnswerInlineQuery(inlineId).apply {
+    inlineResults = emptyList()
+    cacheTime = 0
+    switchPmText = "搜索结果为空"
+    switchPmParameter = "help"
+}
+
+val json = Json {
+    encodeDefaults = false
+    ignoreUnknownKeys = true
+    isLenient = true
+}
