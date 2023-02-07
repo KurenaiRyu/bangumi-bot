@@ -3,10 +3,7 @@ package moe.kurenai.bot.command.inlines
 import moe.kurenai.bgm.model.subject.getGrid
 import moe.kurenai.bgm.model.subject.getMedium
 import moe.kurenai.bot.BangumiBot.send
-import moe.kurenai.bot.repository.CharacterRepository
-import moe.kurenai.bot.repository.PersonRepository
-import moe.kurenai.bot.repository.SakugabooruRepository
-import moe.kurenai.bot.repository.SubjectRepository
+import moe.kurenai.bot.repository.*
 import moe.kurenai.bot.util.getEmptyAnswer
 import moe.kurenai.bot.util.getLogger
 import moe.kurenai.tdlight.model.inline.InlineQuery
@@ -34,10 +31,11 @@ object SearchByURI {
 
     private suspend fun handleBgm(params: List<String>, inlineQuery: InlineQuery, uri: URI) {
         val id = params[2].toInt()
-        inlineQuery.from.id
+        val userId = inlineQuery.from.id
+        val token = TokenRepository.findById(userId)?.accessToken
         when (params[1]) {
             "subject" -> {
-                SubjectRepository.findById(id).let { sub ->
+                SubjectRepository.findById(id, token).let { sub ->
                     AnswerInlineQuery(inlineQuery.id).apply {
                         this.inlineResults = listOf(InlineQueryResultArticle("S${sub.id}", sub.name).apply {
                             this.thumbUrl = sub.images.getMedium()
@@ -51,7 +49,7 @@ object SearchByURI {
             }
 
             "person" -> {
-                PersonRepository.findById(id).let { person ->
+                PersonRepository.findById(id, token).let { person ->
                     AnswerInlineQuery(inlineQuery.id).apply {
                         this.inlineResults = listOf(InlineQueryResultArticle("P${person.id}", person.name).apply {
                             this.thumbUrl = person.images.getGrid()
@@ -65,17 +63,19 @@ object SearchByURI {
             }
 
             "character" -> {
-                CharacterRepository.findById(id).let { character ->
-                    AnswerInlineQuery(inlineQuery.id).apply {
-                        this.inlineResults = listOf(InlineQueryResultArticle("P${character.id}", character.name).apply {
+                val character = CharacterRepository.findById(id, token)
+                val persons = CharacterRepository.findPersons(id, token)
+                val (content, entities) = CharacterRepository.getContent(character, uri.toString(), persons)
+                AnswerInlineQuery(inlineQuery.id).apply {
+                    this.inlineResults = listOf(
+                        InlineQueryResultArticle("C${character.id}", character.name).apply {
                             this.thumbUrl = character.images.getGrid()
-                            val (content, entities) = CharacterRepository.getContent(character, uri.toString())
                             this.inputMessageContent = InputTextMessageContent(content).apply {
                                 this.entities = entities
                             }
-                        })
-                    }.send()
-                }
+                        }
+                    )
+                }.send()
             }
 
             else -> {

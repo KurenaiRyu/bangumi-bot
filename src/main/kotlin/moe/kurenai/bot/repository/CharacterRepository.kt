@@ -6,8 +6,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import moe.kurenai.bgm.model.character.CharacterDetail
+import moe.kurenai.bgm.model.character.CharacterPerson
 import moe.kurenai.bgm.model.subject.getLarge
 import moe.kurenai.bgm.request.charater.GetCharacterDetail
+import moe.kurenai.bgm.request.charater.GetCharacterRelatedPersons
 import moe.kurenai.bot.BangumiBot
 import moe.kurenai.bot.util.BgmUtil.formatInfoBox
 import moe.kurenai.tdlight.model.MessageEntityType
@@ -20,16 +22,30 @@ import kotlin.time.Duration.Companion.days
  */
 object CharacterRepository {
 
+    val cacheStats = ConcurrentStatsCounter()
     private val cache = caffeineBuilder<Int, CharacterDetail> {
         maximumSize = 200
         expireAfterWrite = 7.days
         expireAfterAccess = 1.days
-        statsCounter = ConcurrentStatsCounter()
+        statsCounter = cacheStats
+    }.build()
+
+    private val personCache = caffeineBuilder<Int, List<CharacterPerson>> {
+        maximumSize = 200
+        expireAfterWrite = 7.days
+        expireAfterAccess = 1.days
+        statsCounter = cacheStats
     }.build()
 
     suspend fun findById(id: Int, token: String? = null): CharacterDetail {
         return cache.get(id) { k ->
             BangumiBot.bgmClient.send(GetCharacterDetail(k).apply { this.token = token })
+        }
+    }
+
+    suspend fun findPersons(id: Int, token: String? = null): List<CharacterPerson> {
+        return personCache.get(id) { k ->
+            BangumiBot.bgmClient.send(GetCharacterRelatedPersons(k).apply { this.token = token })
         }
     }
 
@@ -46,15 +62,21 @@ object CharacterRepository {
         }.values
     }
 
-    fun getContent(character: CharacterDetail, link: String): Pair<String, List<MessageEntity>> {
+    fun getContent(character: CharacterDetail, link: String, persons: List<CharacterPerson>? = null): Pair<String, List<MessageEntity>> {
         val title = " ${character.name}"
-        val infoBox = character.infobox?.formatInfoBox() ?: ""
+        var content = character.infobox?.formatInfoBox() ?: ""
+        persons?.let {
+            val personStr = persons.joinToString("\n") {
+                "${it.subjectName}: ${it.name}"
+            }
+            content = "$content\n\n$personStr"
+        }
 
         val entities = listOf(
             MessageEntity(MessageEntityType.TEXT_LINK, 0, 1).apply { url = character.images.getLarge() },
             MessageEntity(MessageEntityType.TEXT_LINK, 1, character.name.length).apply { url = link },
         )
-        return listOfNotNull(title, infoBox).joinToString("\n\n") to entities
+        return listOfNotNull(title, content).joinToString("\n\n") to entities
     }
 
 }

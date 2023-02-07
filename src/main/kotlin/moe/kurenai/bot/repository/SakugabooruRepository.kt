@@ -22,11 +22,12 @@ object SakugabooruRepository {
 
     val client = HttpClient()
 
+    val cacheStats = ConcurrentStatsCounter()
     private val cache = caffeineBuilder<URI, InlineQueryResult> {
         maximumSize = 200
         expireAfterWrite = 7.days
         expireAfterAccess = 1.days
-        statsCounter = ConcurrentStatsCounter()
+        statsCounter = cacheStats
     }.build()
 
     suspend fun findOne(id: String, uri: URI): InlineQueryResult {

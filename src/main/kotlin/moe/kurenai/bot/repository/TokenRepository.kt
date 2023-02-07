@@ -39,7 +39,7 @@ object TokenRepository {
     data class TokenEntity(
         val userId: Long,
         val accessToken: AccessToken,
-        val expires: Long = accessToken.expiresIn + getNowSeconds()
+        val expires: Long
     )
 
     private val tokens: ConcurrentHashMap<Long, TokenEntity> = ConcurrentHashMap(loadToken().associateBy { it.userId })
@@ -88,7 +88,7 @@ object TokenRepository {
         lock.withLock {
             val old = tokens[userId]
             tokens[userId] = if (old == null) {
-                TokenEntity(userId, accessToken)
+                TokenEntity(userId, accessToken, accessToken.computeExpires())
             } else {
                 old.copy(accessToken = accessToken, expires = accessToken.expiresIn + getNowSeconds())
             }
@@ -97,11 +97,13 @@ object TokenRepository {
     }
 
     fun putIfAbsent(userId: Long, accessToken: AccessToken) {
-        tokens.putIfAbsent(userId, TokenEntity(userId, accessToken))
+        tokens.putIfAbsent(userId, TokenEntity(userId, accessToken, accessToken.computeExpires()))
         save()
     }
 
     private fun getNowSeconds(): Long = LocalDateTime.now().atOffset(ZoneOffset.ofHours(8)).toEpochSecond()
+
+    private fun AccessToken.computeExpires() = this.expiresIn + getNowSeconds()
 
 }
 

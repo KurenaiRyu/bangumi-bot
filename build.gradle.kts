@@ -19,19 +19,17 @@ repositories {
 
 val vertxVersion = "4.2.3"
 val log4j = "2.19.0"
-val ktor = "2.1.2"
+val ktor = "2.2.2"
 dependencies {
+    implementation("org.slf4j:slf4j-api:2.0.6")
     implementation("com.github.kurenairyu:bangumi-sdk:0.0.1")
     implementation("moe.kurenai.tdlight", "td-light-sdk", "0.1.0-SNAPSHOT")
-    implementation("moe.kurenai", "kt-telegram-bot", "2.1.8.1")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation("io.ktor:ktor-client-core:$ktor")
     implementation("io.ktor:ktor-server-cio:$ktor")
-    implementation("io.ktor:ktor-server-call-logging:$ktor")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor")
 
     //serialization
@@ -39,8 +37,6 @@ dependencies {
     implementation("net.mamoe.yamlkt:yamlkt-jvm:0.12.0")
 
     //cache
-//    implementation("org.redisson:redisson:3.19.1")
-//    implementation("com.github.ben-manes.caffeine:caffeine:3.1.2")
     implementation("com.sksamuel.aedile:aedile-core:1.2.0")
 
     implementation("org.jsoup:jsoup:1.15.3")
@@ -49,10 +45,7 @@ dependencies {
 
 
     //logging
-//    implementation("org.apache.logging.log4j:log4j-core:$log4j")
-//    implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4j")
-//    implementation("com.lmax:disruptor:3.4.4")
-    implementation("ch.qos.logback:logback-classic:1.2.11")
+    implementation("ch.qos.logback:logback-classic:1.3.0-alpha16")
 
     testImplementation(kotlin("test"))
 }
@@ -76,18 +69,18 @@ tasks.register<Copy>("copyLib") {
     into("$buildDir/libs/lib")
 }
 
-//tasks.jar {
-//    dependsOn("clearLib")
-//    dependsOn("copyLib")
-//    exclude("**/*.jar")
-//    manifest {
-//        attributes["Manifest-Version"] = "1.0"
-//        attributes["Multi-Release"] = "true"
-//        attributes["Main-Class"] = main
-//        attributes["Class-Path"] = configurations.runtimeClasspath.get().files.map { "lib/${it.name}" }.joinToString(" ")
-//    }
-//    archiveFileName.set("${rootProject.name}.jar")
-//}
+tasks.jar {
+    dependsOn("clearLib")
+    dependsOn("copyLib")
+    exclude("**/*.jar")
+    manifest {
+        attributes["Manifest-Version"] = "1.0"
+        attributes["Multi-Release"] = "true"
+        attributes["Main-Class"] = main
+        attributes["Class-Path"] = configurations.runtimeClasspath.get().files.map { "lib/${it.name}" }.joinToString(" ")
+    }
+    archiveFileName.set("${rootProject.name}.jar")
+}
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
@@ -121,8 +114,9 @@ graalvmNative {
                     "com.fasterxml.jackson," +
                     "org.yaml.snakeyaml," +
                     "net.mamoe.yamlkt," +
-                    "com.github.benmanes.caffeine," +
-                    "ch.qos.logback.classic.Logger"
+                    "ch.qos.logback," +
+                    "org.slf4j," +
+                    "com.github.benmanes.caffeine"
             )
 
             buildArgs.add(
@@ -151,7 +145,7 @@ graalvmNative {
 
 //            buildArgs.add("--trace-class-initialization=com.fasterxml.jackson.core.util.VersionUtil")
 
-
+            buildArgs.add("--enable-url-protocols=http")
             buildArgs.add("-H:+InstallExitHandlers")
             buildArgs.add("-H:+ReportExceptionStackTraces")
             buildArgs.add("-H:-CheckToolchain")

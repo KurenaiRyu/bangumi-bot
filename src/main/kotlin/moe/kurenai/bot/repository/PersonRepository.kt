@@ -20,11 +20,12 @@ import kotlin.time.Duration.Companion.days
  */
 object PersonRepository {
 
+    val cacheStats = ConcurrentStatsCounter()
     private val cache = caffeineBuilder<Int, PersonDetail> {
         maximumSize = 200
         expireAfterWrite = 7.days
         expireAfterAccess = 1.days
-        statsCounter = ConcurrentStatsCounter()
+        statsCounter = cacheStats
     }.build()
 
     suspend fun findById(id: Int, token: String? = null): PersonDetail {

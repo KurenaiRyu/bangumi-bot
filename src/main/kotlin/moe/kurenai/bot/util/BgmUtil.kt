@@ -10,13 +10,24 @@ import com.fasterxml.jackson.databind.JsonNode
 object BgmUtil {
     fun JsonNode.formatInfoBox(): String {
         return this.joinToString("\n") { node ->
-            val valueNode = node.findValue("value")
-            val value = if (valueNode.isTextual) valueNode.textValue()
-            else valueNode
-                .toList()
-                .joinToString("、") { it.findValue("v").textValue() }
-            "${node.findValue("key").textValue()}: $value"
+            val (k, v) = formatInfoBox(node)
+            "$k: $v"
         }
+    }
+
+    fun JsonNode.formatInfoBoxToList(): List<Pair<String, String>> {
+        return this.map { node ->
+            formatInfoBox(node)
+        }
+    }
+
+    private fun formatInfoBox(node: JsonNode): Pair<String, String> {
+        val valueNode = node.findValue("value")
+        val value = if (valueNode.isTextual) valueNode.textValue()
+        else valueNode
+            .toList()
+            .joinToString("、") { it.findValue("v").textValue() }
+        return node.findValue("key").textValue() to value
     }
 
     fun Int.category(): String = when (this) {

@@ -8,6 +8,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import moe.kurenai.bot.BgmAuthServer.authCache
+import moe.kurenai.bot.repository.TokenRepository
 import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.time.Duration.Companion.minutes
@@ -24,7 +25,7 @@ object BgmAuthServer {
     internal var serverPort: Int = 8080
 
     internal val authCache = caffeineBuilder<String, Long> {
-        expireAfterWrite = 1.minutes
+        expireAfterWrite = 10.minutes
     }.build()
 
     fun start() {
@@ -41,29 +42,32 @@ object BgmAuthServer {
     }
 }
 
-private fun Application.authModule() {
+fun Application.authModule() {
     val log = this.log
     routing {
         route("/callback") {
             get {
-                log.info("${call.request.local.host}: ${call.request.uri}")
+                log.info("${call.request.local.localHost}: ${call.request.uri}")
                 val code = call.parameters["code"]
                 val randomCode = call.parameters["state"]
                 if (randomCode != null && code != null) {
-                    authCache.getIfPresent(randomCode).let { userId ->
+                    authCache.getIfPresent(randomCode)?.also { userId ->
                         kotlin.runCatching {
-                            log.debug("Attempt bind user: $userId")
+                            log.info("Attempt bind user: $userId")
                             val token = BangumiBot.bgmClient.getToken(code)
-                            log.debug("Bind success: $userId : ${token.userId}")
+                            TokenRepository.put(userId, token)
+                            log.info("Bind telegram id $userId to bangumi id ${token.userId}")
                             call.respondRedirect("https://t.me/${BangumiBot.tdClient.getMe().username}?start=success")
                             authCache.invalidate(randomCode)
                         }.onFailure {
                             log.error(it.message, it)
-                            call.respondText { "Error: ${it.message}" }
+                            call.respondText { "Error: ${it.message} \n请从新发送指令进行绑定！" }
                         }
+                    } ?: kotlin.run {
+                        call.respondText { "随机码失效，请从新发送指令进行绑定！" }
                     }
                 } else {
-                    call.respondText { "Error: 缺少必要的请求参数" }
+                    call.respondText { "Error: 缺少必要的请求参数，请从新发送指令进行绑定！" }
                 }
             }
         }

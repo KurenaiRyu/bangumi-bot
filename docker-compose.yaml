@@ -5,32 +5,16 @@ services:
     image: kurenai9/bgm-bot:nightly
     container_name: bgm-bot
     restart: always
-    environment:
-      REDIS_HOST: redis
     ports:
-      - "18080:8080"
+        - "22052:8080"
     deploy:
       resources:
         limits:
-          memory: 150m
+            memory: 100m
     logging:
       driver: "json-file"
       options:
-        max-size: "200m"
+          max-size: "10m"
         max-file: "1"
     volumes:
       - ./config:/deployments/config
-    depends_on:
-      - redis
-
-  redis:
-    image: redis:alpine
-    container_name: redis
-    restart: always
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200m"
-        max-file: "1"
-    volumes:
-      - ./redis:/usr/local/etc/redis

@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
  */
 
 fun getLogger(name: String = Thread.currentThread().stackTrace[2].className): Logger {
-    return LoggerFactory.getILoggerFactory().getLogger(name)
+    return LoggerFactory.getLogger(name)
 }
 
 fun getEmptyAnswer(inlineId: String): AnswerInlineQuery = AnswerInlineQuery(inlineId).apply {
