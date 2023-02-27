@@ -5,6 +5,7 @@ import com.sksamuel.aedile.core.caffeineBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import moe.kurenai.bgm.model.SubjectType
 import moe.kurenai.bgm.model.subject.Subject
 import moe.kurenai.bgm.model.subject.getLarge
 import moe.kurenai.bgm.request.subject.GetSubject
@@ -52,9 +53,9 @@ object SubjectRepository {
 
     fun getContent(sub: Subject, link: String): Pair<String, List<MessageEntity>> {
         val title = " [${sub.type.category()}]　${sub.name}"
-        val infoBox = sub.infobox?.formatInfoBoxToList()?.filter {
-            mainInfoProperties.contains(it.first)
-        }?.joinToString("\n") { (k, v) ->
+        var infoBox = sub.infobox?.formatInfoBoxToList()
+        if (sub.type == SubjectType.ANIME) infoBox = infoBox?.filter { mainInfoProperties.contains(it.first) }
+        val content = infoBox?.joinToString("\n") { (k, v) ->
             "$k: $v"
         } ?: ""
 
@@ -64,7 +65,7 @@ object SubjectRepository {
             MessageEntity(MessageEntityType.TEXT_LINK, titleIndex, sub.name.length).apply { url = link },
         )
 
-        return listOfNotNull(title, infoBox).joinToString("\n\n") to entities
+        return listOfNotNull(title, content).joinToString("\n\n") to entities
     }
 
 }
