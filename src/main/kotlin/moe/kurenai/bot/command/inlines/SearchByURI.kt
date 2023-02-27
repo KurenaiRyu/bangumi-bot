@@ -1,15 +1,16 @@
 package moe.kurenai.bot.command.inlines
 
+import io.ktor.http.*
 import moe.kurenai.bgm.model.subject.getGrid
 import moe.kurenai.bgm.model.subject.getMedium
 import moe.kurenai.bot.BangumiBot.send
 import moe.kurenai.bot.repository.*
 import moe.kurenai.bot.util.getEmptyAnswer
 import moe.kurenai.bot.util.getLogger
-import moe.kurenai.tdlight.model.inline.InlineQuery
-import moe.kurenai.tdlight.model.inline.InlineQueryResultArticle
-import moe.kurenai.tdlight.model.inline.InputTextMessageContent
+import moe.kurenai.tdlight.model.ParseMode
+import moe.kurenai.tdlight.model.inline.*
 import moe.kurenai.tdlight.request.message.AnswerInlineQuery
+import moe.kurenai.tdlight.util.MarkdownUtil.fm2md
 import java.net.URI
 
 object SearchByURI {
@@ -17,14 +18,18 @@ object SearchByURI {
     private val log = getLogger()
 
     suspend fun execute(inlineQuery: InlineQuery, uri: URI) {
-        if (uri.host == "www.sakugabooru.com") {
-            handleSakuga(inlineQuery, uri)
-        } else {
-            val params = uri.path.split("/")
-            if (params.size != 3) {
-                fallback(inlineQuery)
-            } else {
-                handleBgm(params, inlineQuery, uri)
+        when (uri.host) {
+            "www.sakugabooru.com" -> handleSakuga(inlineQuery, uri)
+            "b23.wtf" -> handleBiliBili(inlineQuery, URI.create(uri.toString().replace("b23.wtf", "b23.tv")))
+            "b23.tv" -> handleBiliBiliShortLink(inlineQuery, uri)
+            "www.bilibili.com" -> handleBiliBili(inlineQuery, uri)
+            else -> {
+                val params = uri.path.split("/")
+                if (params.size != 3) {
+                    fallback(inlineQuery)
+                } else {
+                    handleBgm(params, inlineQuery, uri)
+                }
             }
         }
     }
@@ -100,6 +105,43 @@ object SearchByURI {
                 }
             }
         }
+    }
+
+    private suspend fun handleBiliBili(inlineQuery: InlineQuery, uri: URI) {
+        log.info("Handle BiliBili")
+        // https://www.bilibili.com/video/BV1Fx4y1w78G/?p=1
+        val url = Url(uri)
+        val segments = Url(uri).pathSegments
+        val id = segments.last().takeIf { it.isNotBlank() } ?: segments[segments.lastIndex - 1]
+        val p = url.parameters["p"]?.toInt() ?: 1
+        handleBiliBili(inlineQuery, id, p)
+    }
+
+    private suspend fun handleBiliBiliShortLink(inlineQuery: InlineQuery, uri: URI) {
+        log.info("Handle BiliBili short link")
+        val (id, p) = BiliBiliRepository.getIdAndPByShortLink(uri)
+        handleBiliBili(inlineQuery, id, p)
+    }
+
+    private suspend fun handleBiliBili(inlineQuery: InlineQuery, id: String, p: Int) {
+        val videoInfo = BiliBiliRepository.getVideoInfo(id)
+        val desc = videoInfo.data.desc
+        val page = videoInfo.data.pages.find { it.page == p } ?: run {
+            fallback(inlineQuery)
+            return
+        }
+        val streamInfo = BiliBiliRepository.getPlayUrl(videoInfo.data.bvid, page.cid)
+        val link = "https://www.bilibili.com/video/${videoInfo.data.bvid}?p=$p"
+        AnswerInlineQuery(inlineQuery.id).apply {
+            this.inlineResults = listOf(InlineQueryResultVideo(videoInfo.data.bvid, videoInfo.data.title).apply {
+                this.videoUrl = streamInfo.data.durl.first().url
+                this.mimeType = MIMEType.MP4
+                this.thumbUrl = videoInfo.data.pic
+                this.caption =
+                    "[${page.part.fm2md()}]($link)\nUP: [${videoInfo.data.owner.name.fm2md()}](https://space.bilibili.com/${videoInfo.data.owner.mid})\n\n${desc.fm2md()}"
+                this.parseMode = ParseMode.MARKDOWN_V2
+            })
+        }.send()
     }
 
     private suspend fun fallback(inlineQuery: InlineQuery): Boolean {
