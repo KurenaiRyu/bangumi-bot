@@ -1,10 +1,10 @@
 package moe.kurenai.bot.command
 
-import moe.kurenai.tdlight.model.inline.InlineQuery
-import moe.kurenai.tdlight.model.message.Update
+import com.elbekd.bot.types.InlineQuery
+import com.elbekd.bot.types.UpdateInlineQuery
 
 interface InlineCommandHandler {
 
-    fun execute(update: Update, inlineQuery: InlineQuery, arg: String)
+    fun execute(update: UpdateInlineQuery, inlineQuery: InlineQuery, arg: String)
 
 }

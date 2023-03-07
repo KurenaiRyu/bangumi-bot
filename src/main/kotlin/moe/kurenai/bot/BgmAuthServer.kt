@@ -2,8 +2,8 @@ package moe.kurenai.bot
 
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.server.application.*
-import io.ktor.server.cio.*
 import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -29,7 +29,7 @@ object BgmAuthServer {
     }.build()
 
     fun start() {
-        embeddedServer(CIO, port = serverPort, module = Application::authModule).start(false).also {
+        embeddedServer(Netty, port = serverPort, module = Application::authModule).start(false).also {
             log.info("Web server listen to $serverPort")
         }
     }
@@ -57,7 +57,7 @@ fun Application.authModule() {
                             val token = BangumiBot.bgmClient.getToken(code)
                             TokenRepository.put(userId, token)
                             log.info("Bind telegram id $userId to bangumi id ${token.userId}")
-                            call.respondRedirect("https://t.me/${BangumiBot.tdClient.getMe().username}?start=success")
+                            call.respondRedirect("https://t.me/${BangumiBot.telegram.getMe().username}?start=success")
                             authCache.invalidate(randomCode)
                         }.onFailure {
                             log.error(it.message, it)

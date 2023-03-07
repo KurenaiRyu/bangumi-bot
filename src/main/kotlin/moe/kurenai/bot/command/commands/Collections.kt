@@ -1,5 +1,9 @@
 package moe.kurenai.bot.command.commands
 
+import com.elbekd.bot.model.toChatId
+import com.elbekd.bot.types.Message
+import com.elbekd.bot.types.UpdateMessage
+import com.elbekd.bot.util.SendingFile
 import com.sksamuel.aedile.core.caffeineBuilder
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -7,17 +11,13 @@ import moe.kurenai.bgm.exception.BgmException
 import moe.kurenai.bgm.model.user.UserCollection
 import moe.kurenai.bgm.request.user.GetCollections
 import moe.kurenai.bgm.request.user.GetMe
-import moe.kurenai.bot.BangumiBot.MAPPER
+import moe.kurenai.bgm.util.DefaultMapper.MAPPER
 import moe.kurenai.bot.BangumiBot.send
+import moe.kurenai.bot.BangumiBot.telegram
 import moe.kurenai.bot.command.Command
 import moe.kurenai.bot.command.CommandHandler
 import moe.kurenai.bot.repository.token
 import moe.kurenai.bot.util.getLogger
-import moe.kurenai.tdlight.model.media.InputFile
-import moe.kurenai.tdlight.model.message.Message
-import moe.kurenai.tdlight.model.message.Update
-import moe.kurenai.tdlight.request.message.SendDocument
-import moe.kurenai.tdlight.request.message.SendMessage
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -37,7 +37,7 @@ class Collections : CommandHandler {
         private val log = getLogger()
     }
 
-    override suspend fun execute(update: Update, message: Message, args: List<String>) {
+    override suspend fun execute(update: UpdateMessage, message: Message, args: List<String>) {
         kotlin.runCatching {
             message.token()?.also { token ->
                 val zipFile = File("temp/collections-${token.userId}.zip").also {
@@ -76,23 +76,21 @@ class Collections : CommandHandler {
                             out.putNextEntry(ZipEntry("collections-${token.userId}-${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMhh-HHmm"))}.json"))
                             out.write(bytes)
                         }
-                        SendDocument(message.chatId, InputFile(zipFile)).apply {
-                            caption = "导出成功！由于性能问题，接下来1小时内将不再响应该命令。"
-                        }.send()
+                        telegram.sendDocument(message.chat.id.toChatId(), SendingFile(zipFile), caption = "导出成功！由于性能问题，接下来1小时内将不再响应该命令。")
                         doneUsers[token.userId] = 1
                     }
                 }
                 zipFile.delete()
             } ?: kotlin.run {
-                send(message.chatId, "未授权，请私聊机器人发送/start进行授权")
+                telegram.sendMessage(message.chat.id.toChatId(), "未授权，请私聊机器人发送/start进行授权")
             }
         }.recover {
             log.error(it.message, it)
             if (it is BgmException) {
-                SendMessage(message.chatId, "请求Bgm异常: [${it.code}] ${it.error} ${it.message ?: ""}")
+                telegram.sendMessage(message.chat.id.toChatId(), "请求Bgm异常: [${it.code}] ${it.error} ${it.message ?: ""}")
             } else {
-                SendMessage(message.chatId, "Bot内部异常")
-            }.send()
+                telegram.sendMessage(message.chat.id.toChatId(), "Bot内部异常")
+            }
         }.getOrThrow()
     }
 }

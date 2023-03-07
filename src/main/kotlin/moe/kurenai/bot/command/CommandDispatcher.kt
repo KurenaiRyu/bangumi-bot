@@ -1,13 +1,10 @@
 package moe.kurenai.bot.command
 
-import moe.kurenai.bot.BangumiBot.send
+import com.elbekd.bot.types.*
 import moe.kurenai.bot.command.inlines.Search
 import moe.kurenai.bot.command.inlines.SearchByURI
-import moe.kurenai.bot.util.getEmptyAnswer
+import moe.kurenai.bot.util.TelegramUtil
 import moe.kurenai.bot.util.getLogger
-import moe.kurenai.tdlight.model.MessageEntityType
-import moe.kurenai.tdlight.model.inline.InlineQuery
-import moe.kurenai.tdlight.model.message.Update
 import org.reflections.Reflections
 import java.net.URI
 
@@ -44,32 +41,34 @@ object CommandDispatcher {
     }
 
     suspend fun handle(update: Update) {
-        val inlineQuery = update.inlineQuery
-        val result = if (inlineQuery != null) {
-            kotlin.runCatching {
-                handleInlineQuery(update, inlineQuery)
-            }
-        } else {
-            if (commands.isEmpty()) return
-            val message = update.message
-            val messageEntity = message?.entities?.firstOrNull { it.type == MessageEntityType.BOT_COMMAND }
-            if (messageEntity?.text != null) {
-                val commandText = messageEntity.text!!
+        val result = when (update) {
+            is UpdateInlineQuery ->
+                kotlin.runCatching {
+                    handleInlineQuery(update, update.inlineQuery)
+                }
+
+            is UpdateMessage -> {
+                val entity = update.message.entities.firstOrNull { it.type == MessageEntity.Type.BOT_COMMAND } ?: return
+                val commandText = update.message.text?.substring(entity.offset, entity.length) ?: return
                 val index = commandText.indexOf("@")
                 val command = if (index == -1) commandText.substring(1) else commandText.substring(1, index)
-                val text = message.text?.trim()
+                val text = update.message.text?.trim()
 
                 commands[command.uppercase()]?.let {
                     log.info("Match command ${it::class.simpleName}")
                     kotlin.runCatching {
                         it.execute(
                             update,
-                            message,
+                            update.message,
                             if (text == null || text.length <= commandText.length) emptyList() else text.substring(commandText.length).trim().split(" ")
                         )
                     }
                 } ?: return
-            } else return
+            }
+
+            else -> {
+                Result.success("")
+            }
         }
 
         result.onFailure {
@@ -77,7 +76,7 @@ object CommandDispatcher {
         }
     }
 
-    private suspend fun handleInlineQuery(update: Update, inlineQuery: InlineQuery) {
+    private suspend fun handleInlineQuery(update: UpdateInlineQuery, inlineQuery: InlineQuery) {
         if (inlineQuery.query.isBlank()) return
         val query = inlineQuery.query.trim()
         val offset = inlineQuery.offset.takeIf { it.isNotBlank() }?.toInt() ?: 0
@@ -86,24 +85,31 @@ object CommandDispatcher {
         when (args.size) {
             0 -> return
             1 -> {
-                if (query.contains("https") || query.contains("http")) {
-                    uriInlineCommandHandler.execute(inlineQuery, URI.create(query))
-                } else {
-                    getEmptyAnswer(inlineQuery.id).send()
-                }
+                handleUriInline(inlineQuery, query)
             }
+
             2 -> {
                 val handler = inlineCommands[args[0]]
                 if (handler != null) {
                     log.info("Match command ${handler.javaClass.name}")
                     handler.execute(update, inlineQuery, args[1])
                 } else {
-                    getEmptyAnswer(inlineQuery.id).send()
+                    handleUriInline(inlineQuery, query)
                 }
             }
+
             else -> {
-                getEmptyAnswer(inlineQuery.id).send()
+                handleUriInline(inlineQuery, query)
             }
+        }
+    }
+
+    private suspend fun handleUriInline(inlineQuery: InlineQuery, query: String) {
+        val index = query.indexOf("http")
+        if (index != -1) {
+            uriInlineCommandHandler.execute(inlineQuery, URI.create(query.substring(index)))
+        } else {
+            TelegramUtil.answerInlineQueryEmpty(inlineQuery)
         }
     }
 

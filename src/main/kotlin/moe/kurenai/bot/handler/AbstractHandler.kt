@@ -1,7 +1,7 @@
 package moe.kurenai.bot.handler
 
-import moe.kurenai.tdlight.model.message.Message
-import moe.kurenai.tdlight.model.message.Update
+import com.elbekd.bot.types.Message
+import com.elbekd.bot.types.Update
 
 abstract class AbstractHandler {
 

@@ -1,7 +1,9 @@
 package moe.kurenai.bot.repository
 
+import com.elbekd.bot.types.*
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
+import io.ktor.http.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -12,8 +14,9 @@ import moe.kurenai.bgm.request.charater.GetCharacterDetail
 import moe.kurenai.bgm.request.charater.GetCharacterRelatedPersons
 import moe.kurenai.bot.BangumiBot
 import moe.kurenai.bot.util.BgmUtil.formatInfoBox
-import moe.kurenai.tdlight.model.MessageEntityType
-import moe.kurenai.tdlight.model.message.MessageEntity
+import moe.kurenai.bot.util.BgmUtil.formatInfoBoxToList
+import moe.kurenai.bot.util.BgmUtil.toGrid
+import moe.kurenai.bot.util.HttpUtil
 import kotlin.time.Duration.Companion.days
 
 /**
@@ -62,9 +65,10 @@ object CharacterRepository {
         }.values
     }
 
-    fun getContent(character: CharacterDetail, link: String, persons: List<CharacterPerson>? = null): Pair<String, List<MessageEntity>> {
-        val title = " ${character.name}"
-        var content = character.infobox?.formatInfoBox() ?: ""
+    suspend fun getContent(character: CharacterDetail, link: String, persons: List<CharacterPerson>? = null): List<InlineQueryResult> {
+        val title = character.name
+        val infoBox = character.infobox?.formatInfoBoxToList() ?: emptyList()
+        var content = infoBox.formatInfoBox()
         persons?.let {
             val personStr = persons.joinToString("\n") {
                 "${it.subjectName}: ${it.name}"
@@ -73,10 +77,44 @@ object CharacterRepository {
         }
 
         val entities = listOf(
-            MessageEntity(MessageEntityType.TEXT_LINK, 0, 1).apply { url = character.images.getLarge() },
-            MessageEntity(MessageEntityType.TEXT_LINK, 1, character.name.length).apply { url = link },
+            MessageEntity(MessageEntity.Type.TEXT_LINK, 0, character.name.length, url = link),
         )
-        return listOfNotNull(title, content).joinToString("\n\n") to entities
+
+        val message = listOfNotNull(title, infoBox.formatInfoBox()).joinToString("\n\n")
+
+        val defaultResult = InlineQueryResultPhoto(
+            "C${character.id} - img",
+            photoUrl = character.images.getLarge(),
+            thumbUrl = character.images.getLarge(),
+            title = character.name,
+            caption = message,
+            captionEntities = entities,
+        )
+
+        val resultList = mutableListOf(
+            InlineQueryResultArticle(
+                "C${character.id} - txt",
+                thumbUrl = character.images.getLarge().toGrid(),
+                title = character.name,
+                inputMessageContent = InputTextMessageContent(
+                    messageText = " $message",
+                    entities = listOf(
+                        MessageEntity(MessageEntity.Type.TEXT_LINK, 0, 1, url = character.images.getLarge()),
+                        MessageEntity(MessageEntity.Type.TEXT_LINK, 1, character.name.length, url = link)
+                    )
+                )
+            ),
+            defaultResult,
+        )
+        infoBox.filter { it.second.startsWith("http") }.flatMap {
+            kotlin.runCatching {
+                HttpUtil.getOgImageUrl(Url(it.second))
+            }.getOrDefault(emptyList())
+        }.forEachIndexed { i, url ->
+            resultList.add(defaultResult.copy(id = "C${character.id} - ${i + 1}", photoUrl = url, thumbUrl = url))
+        }
+
+        return resultList
     }
 
 }

@@ -1,20 +1,21 @@
 package moe.kurenai.bot.command.commands
 
-import moe.kurenai.bot.BangumiBot.send
+import com.elbekd.bot.types.Message
+import com.elbekd.bot.types.UpdateMessage
+import moe.kurenai.bot.BangumiBot.telegram
 import moe.kurenai.bot.command.Command
 import moe.kurenai.bot.command.CommandHandler
 import moe.kurenai.bot.repository.CharacterRepository
 import moe.kurenai.bot.repository.PersonRepository
 import moe.kurenai.bot.repository.SakugabooruRepository
 import moe.kurenai.bot.repository.SubjectRepository
-import moe.kurenai.tdlight.model.message.Message
-import moe.kurenai.tdlight.model.message.Update
+import moe.kurenai.bot.util.TelegramUtil.chatId
 
 
 @Command("status")
 class Status : CommandHandler {
 
-    override suspend fun execute(update: Update, message: Message, args: List<String>) {
+    override suspend fun execute(update: UpdateMessage, message: Message, args: List<String>) {
         val runtime = Runtime.getRuntime()
         val arr = arrayOf(runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory(), runtime.maxMemory(), runtime.freeMemory(), runtime.totalMemory())
             .map { it / 1024 / 1024 }
@@ -37,6 +38,6 @@ class Status : CommandHandler {
         } (${SakugabooruRepository.cacheStats.snapshot().hitRate()})
         """.trimIndent()
 
-        send(message.chatId, msg)
+        telegram.sendMessage(message.chatId(), msg)
     }
 }

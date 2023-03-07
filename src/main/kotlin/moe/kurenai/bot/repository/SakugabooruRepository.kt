@@ -1,15 +1,15 @@
 package moe.kurenai.bot.repository
 
+import com.elbekd.bot.types.InlineQueryResult
+import com.elbekd.bot.types.InlineQueryResultVideo
+import com.elbekd.bot.types.ParseMode
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import moe.kurenai.tdlight.model.ParseMode
-import moe.kurenai.tdlight.model.inline.InlineQueryResult
-import moe.kurenai.tdlight.model.inline.InlineQueryResultVideo
-import moe.kurenai.tdlight.model.inline.MIMEType
-import moe.kurenai.tdlight.util.MarkdownUtil.fm2md
+import moe.kurenai.bot.util.MimeTypes
+import moe.kurenai.bot.util.TelegramUtil.fm2md
 import org.jsoup.Jsoup
 import java.net.URI
 import kotlin.time.Duration.Companion.days
@@ -41,13 +41,15 @@ object SakugabooruRepository {
                 val copyright = doc.select(".tag-type-copyright")
                     .joinToString("\n") { " \\- [${it.child(1).text().fm2md()}](${uri.host}${it.child(1).attr("href")}) ${it.child(2).text()}" }
 
-                InlineQueryResultVideo("SAKUGA-POST-$id", id).apply {
-                    this.videoUrl = url
-                    this.mimeType = MIMEType.MP4
-                    this.thumbUrl = "https://www.sakugabooru.com/data/preview/" + url.substringAfterLast('/').substringBeforeLast('.') + ".jpg"
-                    this.caption = "[$id](${uri})\nArtist\n$artist\nCopyright\n$copyright"
-                    this.parseMode = ParseMode.MARKDOWN_V2
-                }
+                InlineQueryResultVideo(
+                    "SAKUGA-POST-$id",
+                    title = id,
+                    videoUrl = url,
+                    mimeType = MimeTypes.Video.MP4,
+                    thumbUrl = "https://www.sakugabooru.com/data/preview/" + url.substringAfterLast('/').substringBeforeLast('.') + ".jpg",
+                    caption = "[$id](${uri})\nArtist\n$artist\nCopyright\n$copyright",
+                    parseMode = ParseMode.MarkdownV2
+                )
             }
         }
     }

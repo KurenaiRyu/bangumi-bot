@@ -1,7 +1,9 @@
 package moe.kurenai.bot.repository
 
+import com.elbekd.bot.types.*
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
+import io.ktor.http.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -12,8 +14,8 @@ import moe.kurenai.bgm.request.subject.GetSubject
 import moe.kurenai.bot.BangumiBot
 import moe.kurenai.bot.util.BgmUtil.category
 import moe.kurenai.bot.util.BgmUtil.formatInfoBoxToList
-import moe.kurenai.tdlight.model.MessageEntityType
-import moe.kurenai.tdlight.model.message.MessageEntity
+import moe.kurenai.bot.util.BgmUtil.toGrid
+import moe.kurenai.bot.util.HttpUtil
 import kotlin.time.Duration.Companion.days
 
 /**
@@ -51,21 +53,58 @@ object SubjectRepository {
         }.values
     }
 
-    fun getContent(sub: Subject, link: String): Pair<String, List<MessageEntity>> {
-        val title = " [${sub.type.category()}]　${sub.name}"
-        var infoBox = sub.infobox?.formatInfoBoxToList()
-        if (sub.type == SubjectType.ANIME) infoBox = infoBox?.filter { mainInfoProperties.contains(it.first) }
-        val content = infoBox?.joinToString("\n") { (k, v) ->
+    suspend fun getContent(sub: Subject, link: String): List<InlineQueryResult> {
+        val title = "[${sub.type.category()}]　${sub.name}"
+        val infoBox = sub.infobox?.formatInfoBoxToList() ?: emptyList()
+        val simpleInfoBot = if (sub.type == SubjectType.ANIME) infoBox.filter { mainInfoProperties.contains(it.first) } else infoBox
+        val content = simpleInfoBot.joinToString("\n") { (k, v) ->
             "$k: $v"
-        } ?: ""
+        }
 
-        val titleIndex = sub.type.category().length + 4
-        val entities = listOf(
-            MessageEntity(MessageEntityType.TEXT_LINK, 0, 1).apply { url = sub.images.getLarge() },
-            MessageEntity(MessageEntityType.TEXT_LINK, titleIndex, sub.name.length).apply { url = link },
+        val titleIndex = sub.type.category().length + 3
+        val entities = listOf(MessageEntity(MessageEntity.Type.TEXT_LINK, titleIndex, sub.name.length, url = link))
+        val caption = listOfNotNull(title, content).joinToString("\n\n")
+
+        val resultList = mutableListOf(
+            InlineQueryResultArticle(
+                "S${sub.id} - txt",
+                thumbUrl = sub.images.getLarge().toGrid(),
+                title = sub.name + "(${sub.nameCn})",
+                inputMessageContent = InputTextMessageContent(
+                    messageText = " $caption",
+                    entities = listOf(
+                        MessageEntity(MessageEntity.Type.TEXT_LINK, 0, 1, url = sub.images.getLarge()),
+                        MessageEntity(MessageEntity.Type.TEXT_LINK, titleIndex + 1, sub.name.length, url = link)
+                    )
+                )
+            ),
+            InlineQueryResultPhoto(
+                "S${sub.id} - img",
+                title = sub.name,
+                photoUrl = sub.images.getLarge(),
+                thumbUrl = sub.images.getLarge(),
+                caption = caption,
+                captionEntities = entities,
+            )
         )
 
-        return listOfNotNull(title, content).joinToString("\n\n") to entities
+        infoBox.filter { it.second.startsWith("http") }.flatMap {
+            kotlin.runCatching {
+                HttpUtil.getOgImageUrl(Url(it.second))
+            }.getOrDefault(emptyList())
+        }.forEachIndexed { i, url ->
+            resultList.add(
+                InlineQueryResultPhoto(
+                    "S${sub.id} - ${i + 1}",
+                    title = sub.name,
+                    photoUrl = url,
+                    thumbUrl = url,
+                    caption = caption,
+                    captionEntities = entities,
+                )
+            )
+        }
+        return resultList
     }
 
 }

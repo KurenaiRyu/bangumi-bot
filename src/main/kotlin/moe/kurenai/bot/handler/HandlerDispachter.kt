@@ -1,12 +1,15 @@
 package moe.kurenai.bot.handler
 
-import moe.kurenai.bot.BangumiBot.tdClient
+import com.elbekd.bot.types.Message
+import com.elbekd.bot.types.MessageEntity
+import com.elbekd.bot.types.Update
+import com.elbekd.bot.types.UpdateMessage
+import com.elbekd.bot.util.isCommand
+import moe.kurenai.bot.BangumiBot
+import moe.kurenai.bot.BangumiBot.telegram
+import moe.kurenai.bot.util.TelegramUtil.chatId
+import moe.kurenai.bot.util.TelegramUtil.text
 import moe.kurenai.bot.util.getLogger
-import moe.kurenai.tdlight.model.MessageEntityType
-import moe.kurenai.tdlight.model.chat.ChatType
-import moe.kurenai.tdlight.model.message.Message
-import moe.kurenai.tdlight.model.message.Update
-import moe.kurenai.tdlight.request.message.SendMessage
 import org.reflections.Reflections
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
@@ -28,23 +31,22 @@ object HandlerDispatcher {
         }
     }
 
-    suspend fun handle(update: Update) {
+    suspend fun handle(update: UpdateMessage) {
 
-        if (update.message?.chat?.type == ChatType.PRIVATE) {
-            privateHandler.remove(update.message?.from?.id)?.let {
+        if (update.message.chat.type.equals("private", true)) {
+            privateHandler.remove(update.message.from?.id)?.let {
                 it.accept(update)
                 return
             }
         }
 
-        if (update.message?.isCommand() == true) {
+        if (update.message.isCommand(BangumiBot.me.username)) {
             val command = update.message
-                ?.takeIf { it.isCommand() }
-                ?.entities?.firstOrNull { it.type == MessageEntityType.BOT_COMMAND }?.text?.replace("/", "")?.substringBefore("@")
+                .entities.firstOrNull { it.type == MessageEntity.Type.BOT_COMMAND }?.text(update.message)?.replace("/", "")?.substringBefore("@")
                 ?: return
 
             if (command == "help") {
-                handleHelp(update.message!!)
+                handleHelp(update.message)
             }
 
             val msg = handlers.firstOrNull { it.command == command }?.let {
@@ -56,7 +58,7 @@ object HandlerDispatcher {
                     e.message
                 }
             } ?: return
-            tdClient.send(SendMessage(update.message!!.chat.id.toString(), msg))
+            telegram.sendMessage(update.message.chatId(), msg)
         }
     }
 
@@ -77,7 +79,7 @@ object HandlerDispatcher {
             sb.append("/${handler.command} ${handler.name}\n")
             sb.append(handler.help)
         }
-        tdClient.send(SendMessage(message.chat.id.toString(), sb.toString()))
+        telegram.sendMessage(message.chatId(), sb.toString())
     }
 
 }

@@ -1,11 +1,11 @@
 package moe.kurenai.bot.command.inlines
 
-import moe.kurenai.tdlight.model.inline.InlineQuery
-import moe.kurenai.tdlight.model.message.Update
+import com.elbekd.bot.types.InlineQuery
+import com.elbekd.bot.types.UpdateInlineQuery
 
 class Search {
 
-    fun execute(update: Update, inlineQuery: InlineQuery, query: String) {
+    fun execute(update: UpdateInlineQuery, inlineQuery: InlineQuery, query: String) {
     }
 
 

@@ -1,10 +1,10 @@
 package moe.kurenai.bot.command
 
-import moe.kurenai.tdlight.model.message.Message
-import moe.kurenai.tdlight.model.message.Update
+import com.elbekd.bot.types.Message
+import com.elbekd.bot.types.UpdateMessage
 
 interface CommandHandler {
 
-    suspend fun execute(update: Update, message: Message, args: List<String>)
+    suspend fun execute(update: UpdateMessage, message: Message, args: List<String>)
 
 }

@@ -8,6 +8,13 @@ import com.fasterxml.jackson.databind.JsonNode
  */
 
 object BgmUtil {
+
+    fun List<Pair<String, String>>.formatInfoBox(): String {
+        return this.joinToString("\n") { (k, v) ->
+            "$k: $v"
+        }
+    }
+
     fun JsonNode.formatInfoBox(): String {
         return this.joinToString("\n") { node ->
             val (k, v) = formatInfoBox(node)
@@ -38,4 +45,6 @@ object BgmUtil {
         6 -> "三次元" //real
         else -> "？？"        //?
     }
+
+    fun String.toGrid(): String = this.replace("crt/l", "crt/g")
 }

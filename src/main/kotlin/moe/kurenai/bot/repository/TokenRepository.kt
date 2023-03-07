@@ -1,5 +1,7 @@
 package moe.kurenai.bot.repository
 
+import com.elbekd.bot.types.InlineQuery
+import com.elbekd.bot.types.Message
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -11,13 +13,13 @@ import moe.kurenai.bgm.exception.BgmException
 import moe.kurenai.bgm.model.auth.AccessToken
 import moe.kurenai.bot.BangumiBot
 import moe.kurenai.bot.util.json
-import moe.kurenai.tdlight.model.inline.InlineQuery
-import moe.kurenai.tdlight.model.message.Message
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
@@ -45,8 +47,17 @@ object TokenRepository {
     private val tokens: ConcurrentHashMap<Long, TokenEntity> = ConcurrentHashMap(loadToken().associateBy { it.userId })
 
     private fun loadToken(): List<TokenEntity> {
+        val tokenPath = Path.of(tokenFilePath)
         return kotlin.runCatching {
-            json.decodeFromString(ListSerializer(TokenEntity.serializer()), Path.of(tokenFilePath).readText())
+            if (tokenPath.exists().not()) {
+                tokenPath.writeText(
+                    json.encodeToString(ListSerializer(TokenEntity.serializer()), emptyList()),
+                    options = arrayOf(StandardOpenOption.CREATE, StandardOpenOption.WRITE)
+                )
+                listOf()
+            } else {
+                json.decodeFromString(ListSerializer(TokenEntity.serializer()), Path.of(tokenFilePath).readText())
+            }
         }.onFailure {
             log.warn("Load token error", it)
         }.recover {

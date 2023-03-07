@@ -1,22 +1,22 @@
 package moe.kurenai.bot.command.commands
 
+import com.elbekd.bot.model.toChatId
+import com.elbekd.bot.types.InputMediaPhoto
+import com.elbekd.bot.types.Message
+import com.elbekd.bot.types.UpdateMessage
+import com.elbekd.bot.util.SendingString
 import moe.kurenai.bgm.request.subject.GetCalendar
 import moe.kurenai.bot.BangumiBot.send
+import moe.kurenai.bot.BangumiBot.telegram
 import moe.kurenai.bot.command.Command
 import moe.kurenai.bot.command.CommandHandler
 import moe.kurenai.bot.repository.SubjectRepository
-import moe.kurenai.tdlight.model.media.InputFile
-import moe.kurenai.tdlight.model.message.Message
-import moe.kurenai.tdlight.model.message.Update
-import moe.kurenai.tdlight.request.message.InputMediaPhoto
-import moe.kurenai.tdlight.request.message.SendMediaGroup
-import moe.kurenai.tdlight.request.message.SendPhoto
 import java.time.LocalDate
 
 @Command(command = "air")
 class Air : CommandHandler {
 
-    override suspend fun execute(update: Update, message: Message, args: List<String>) {
+    override suspend fun execute(update: UpdateMessage, message: Message, args: List<String>) {
         val weekday = if (args.size == 1) args[0] else LocalDate.now().dayOfWeek.value
 
         val calendar = GetCalendar().send().find { it.weekday.id == weekday.toString() } ?: throw IllegalArgumentException("找不到该星期[$weekday]")
@@ -24,19 +24,17 @@ class Air : CommandHandler {
             .asSequence()
             .sortedBy { it.id }
             .map { sub ->
-                InputMediaPhoto(InputFile(sub.images?.large?.takeIf { it.isNotBlank() } ?: "https://bgm.tv/img/no_icon_subject.png")).apply {
-                    caption = "${sub.name}\n\n${sub.summary}"
-                }
+                (sub.images?.large?.takeIf { it.isNotBlank() } ?: "https://bgm.tv/img/no_icon_subject.png") to "${sub.name}\n\n${sub.summary}"
             }.chunked(10)
             .forEach { list ->
                 if (list.size == 1) {
-                    SendPhoto(message.chatId, list[0].media).apply {
-                        caption = list[0].caption
-                    }.send()
+                    val (link, content) = list[0]
+                    telegram.sendPhoto(message.chat.id.toChatId(), SendingString(link), caption = content)
                 } else {
-                    SendMediaGroup(message.chatId).apply {
-                        media = list
-                    }.send()
+                    val inputs = list.map { (link, content) ->
+                        InputMediaPhoto(link, caption = content)
+                    }
+                    telegram.sendMediaGroup(message.chat.id.toChatId(), inputs)
                 }
             }
     }
