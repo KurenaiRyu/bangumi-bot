@@ -6,7 +6,8 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 # We make four distinct layers so if there are application changes the library layers can be re-used
-COPY build/libs/ /deployments/
+COPY build/libs/lib /deployments/lib
+COPY build/libs/*.jar /deployments/
 COPY entrypoint.sh /deployments/
 
 EXPOSE 8080
