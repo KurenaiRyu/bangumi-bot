@@ -1,5 +1,6 @@
 package moe.kurenai.bot
 
+import com.elbekd.bot.types.ParseMode
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
@@ -9,6 +10,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import moe.kurenai.bgm.exception.BgmException
 import moe.kurenai.bgm.exception.NotFoundException
 import moe.kurenai.bgm.exception.UnauthorizedException
@@ -19,6 +21,7 @@ import moe.kurenai.bgm.util.DefaultMapper
 import moe.kurenai.bgm.util.DefaultMapper.MAPPER
 import java.io.File
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class TestJsonRead {
 
@@ -176,4 +179,8 @@ class TestJsonRead {
         }
     }
 
+    @org.junit.Test
+    fun testParseMode() {
+        assertEquals("\"MarkdownV2\"", Json.encodeToString(ParseMode.serializer(), ParseMode.MarkdownV2))
+    }
 }

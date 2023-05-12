@@ -1,6 +1,10 @@
 package moe.kurenai.bot.repository
 
-import com.elbekd.bot.types.*
+import com.elbekd.bot.types.InlineQueryResult
+import com.elbekd.bot.types.InlineQueryResultArticle
+import com.elbekd.bot.types.InlineQueryResultPhoto
+import com.elbekd.bot.types.InputTextMessageContent
+import com.elbekd.bot.types.MessageEntity
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.http.*
@@ -13,7 +17,7 @@ import moe.kurenai.bgm.model.subject.getLarge
 import moe.kurenai.bgm.request.subject.GetSubject
 import moe.kurenai.bot.BangumiBot
 import moe.kurenai.bot.util.BgmUtil.category
-import moe.kurenai.bot.util.BgmUtil.formatInfoBoxToList
+import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.toGrid
 import moe.kurenai.bot.util.HttpUtil
 import kotlin.time.Duration.Companion.days
@@ -55,7 +59,7 @@ object SubjectRepository {
 
     suspend fun getContent(sub: Subject, link: String): List<InlineQueryResult> {
         val title = "[${sub.type.category()}]　${sub.name}"
-        val infoBox = sub.infobox?.formatInfoBoxToList() ?: emptyList()
+        val infoBox = sub.infobox?.formatToList() ?: emptyList()
         val simpleInfoBot = if (sub.type == SubjectType.ANIME) infoBox.filter { mainInfoProperties.contains(it.first) } else infoBox
         val content = simpleInfoBot.joinToString("\n") { (k, v) ->
             "$k: $v"

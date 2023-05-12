@@ -42,6 +42,7 @@ object BiliBiliRepository {
         val doc = Jsoup.parse(dontRedirectClient.get(Url(uri)).bodyAsText())
         val redirectUrl = Url(doc.select("a").attr("href"))
         val segments = redirectUrl.pathSegments
+        if (segments.isEmpty()) error("Get short link error, origin: ${uri}, redirect: ${redirectUrl}, segments: $segments")
         val p = redirectUrl.parameters["p"]?.toInt() ?: 1
         val id = redirectUrl.pathSegments.last().takeIf { it.isNotBlank() } ?: segments[segments.lastIndex - 1]
         return id to p

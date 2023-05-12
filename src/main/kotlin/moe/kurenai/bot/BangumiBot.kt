@@ -33,7 +33,7 @@ object BangumiBot {
         BgmAuthServer.serverPort = serverPort
         BgmAuthServer.start()
         telegram.onAnyUpdate { update ->
-            log.info("Received: $update")
+            log.debug("Received: {}", update)
             CommandDispatcher.handle(update)
         }
         me = telegram.getMe()

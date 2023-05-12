@@ -24,7 +24,7 @@ data class VideoInfo(
         val ctime: Int,
         val desc: String,
         @SerialName("desc_v2")
-        val descV2: List<DescV2>,
+        val descV2: List<DescV2>?,
         val state: Int,
         val duration: Int,
         @SerialName("mission_id")
@@ -99,7 +99,7 @@ data class VideoInfo(
 
         @Serializable
         data class Owner(
-            val mid: Int,
+            val mid: Long,
             val name: String,
             val face: String
         )

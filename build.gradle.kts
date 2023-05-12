@@ -1,11 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-//    id("io.quarkus")
-    kotlin("jvm") version "1.7.22"
+    kotlin("jvm") version "1.8.20"
     application
-    id("org.graalvm.buildtools.native") version "0.9.19"
-    kotlin("plugin.serialization") version "1.7.22"
+    id("org.graalvm.buildtools.native") version "0.9.20"
+    kotlin("plugin.serialization") version "1.8.20"
 }
 
 group = "moe.kurenai.bot"
@@ -13,27 +12,30 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenLocal()
-    maven { url = uri("https://jitpack.io") }
+    maven { url = uri("https://maven.aliyun.com/repository/public/") }
+//    maven { url = uri("https://jitpack.io") }
     mavenCentral()
+    mavenLocal()
 }
 
 val vertxVersion = "4.2.3"
 val log4j = "2.19.0"
-val ktor = "2.2.2"
+val ktor = "2.2.4"
 dependencies {
     implementation("org.slf4j:slf4j-api:2.0.6")
     implementation("com.github.kurenairyu:bangumi-sdk:0.0.1")
-    implementation("moe.kurenai.tdlight", "td-light-sdk", "0.1.0-SNAPSHOT")
+//    implementation("com.github.KurenaiRyu", "kt-telegram-bot", "dev-SNAPSHOT")
+    implementation("moe.kurenai", "kt-telegram-bot", "2.2.0.1-SNAPSHOT")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("io.ktor:ktor-client-core:$ktor")
+//    implementation("io.ktor:ktor-server-netty:$ktor")
     implementation("io.ktor:ktor-server-cio:$ktor")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor")
 
-    //serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    //serializationh
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("net.mamoe.yamlkt:yamlkt-jvm:0.12.0")
 
     //cache
@@ -41,11 +43,16 @@ dependencies {
 
     implementation("org.jsoup:jsoup:1.15.3")
 
-    implementation("org.reflections", "reflections", "0.10.2")
+//    implementation("org.reflections", "reflections", "0.10.2")
 
 
     //logging
-    implementation("ch.qos.logback:logback-classic:1.3.0-alpha16")
+    val log4j = "2.20.0"
+//    implementation("org.apache.logging.log4j:log4j-core:$log4j")
+//    implementation("org.apache.logging.log4j:log4j-api:$log4j")
+//    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4j")
+//    implementation("com.lmax:disruptor:3.4.4")
+    implementation("ch.qos.logback:logback-classic:1.4.6")
 
     testImplementation(kotlin("test"))
 }

@@ -1,43 +1,59 @@
 package moe.kurenai.bot.command
 
-import com.elbekd.bot.types.*
+import com.elbekd.bot.types.InlineQuery
+import com.elbekd.bot.types.MessageEntity
+import com.elbekd.bot.types.Update
+import com.elbekd.bot.types.UpdateInlineQuery
+import com.elbekd.bot.types.UpdateMessage
+import moe.kurenai.bot.command.commands.Air
+import moe.kurenai.bot.command.commands.Collections
+import moe.kurenai.bot.command.commands.Help
+import moe.kurenai.bot.command.commands.Start
+import moe.kurenai.bot.command.commands.Status
+import moe.kurenai.bot.command.commands.Watching
 import moe.kurenai.bot.command.inlines.Search
 import moe.kurenai.bot.command.inlines.SearchByURI
 import moe.kurenai.bot.util.TelegramUtil
 import moe.kurenai.bot.util.getLogger
-import org.reflections.Reflections
 import java.net.URI
 
 object CommandDispatcher {
 
     private val log = getLogger()
 
-    val commands = HashMap<String, CommandHandler>()
-    val inlineCommands = HashMap<String, InlineCommandHandler>()
+    val commands = listOf(
+        Air(), Collections(), Help(), Start(), Status(), Watching()
+    ).associateBy { handler ->
+        handler.javaClass.simpleName.uppercase().also {
+            log.debug("Load command: $it")
+        }
+    }
+
+    //    val inlineCommands = HashMap<String, InlineCommandHandler>()
     val defaultInlineCommandHandler = Search()
     val uriInlineCommandHandler = SearchByURI
 
     init {
-        for (reflection in Reflections("moe.kurenai.bot.command.commands").getSubTypesOf(CommandHandler::class.java)) {
-            val annotation = reflection.getAnnotation(Command::class.java)
-            if (annotation != null) {
-                val instance = reflection.getConstructor().newInstance()
-                commands[annotation.command.uppercase()] = instance
-
-                for (alias in annotation.aliases) {
-                    commands[alias.uppercase()] = instance
-                }
-                log.debug("Load command: ${instance.javaClass.name}")
-            }
-        }
-        for (reflection in Reflections("moe.kurenai.bot.command.inlines").getSubTypesOf(InlineCommandHandler::class.java)) {
-            val annotation = reflection.getAnnotation(Command::class.java)
-            if (annotation != null) {
-                val instance = reflection.getConstructor().newInstance()
-                inlineCommands[annotation.command.uppercase()] = instance
-                log.debug("Load inline command: ${instance.javaClass.name}")
-            }
-        }
+//        for (reflection in Reflections("moe.kurenai.bot.command.commands").getSubTypesOf(CommandHandler::class.java)) {
+//            val annotation = reflection.getAnnotation(Command::class.java)
+//            if (annotation != null) {
+//                val instance = reflection.getConstructor().newInstance()
+//                commands[annotation.command.uppercase()] = instance
+//
+//                for (alias in annotation.aliases) {
+//                    commands[alias.uppercase()] = instance
+//                }
+//                log.debug("Load command: ${instance.javaClass.name}")
+//            }
+//        }
+//        for (reflection in Reflections("moe.kurenai.bot.command.inlines").getSubTypesOf(InlineCommandHandler::class.java)) {
+//            val annotation = reflection.getAnnotation(Command::class.java)
+//            if (annotation != null) {
+//                val instance = reflection.getConstructor().newInstance()
+//                inlineCommands[annotation.command.uppercase()] = instance
+//                log.debug("Load inline command: ${instance.javaClass.name}")
+//            }
+//        }
     }
 
     suspend fun handle(update: Update) {
@@ -89,13 +105,13 @@ object CommandDispatcher {
             }
 
             2 -> {
-                val handler = inlineCommands[args[0]]
-                if (handler != null) {
-                    log.info("Match command ${handler.javaClass.name}")
-                    handler.execute(update, inlineQuery, args[1])
-                } else {
-                    handleUriInline(inlineQuery, query)
-                }
+//                val handler = inlineCommands[args[0]]
+//                if (handler != null) {
+//                    log.info("Match command ${handler.javaClass.name}")
+//                    handler.execute(update, inlineQuery, args[1])
+//                } else {
+                handleUriInline(inlineQuery, query)
+//                }
             }
 
             else -> {

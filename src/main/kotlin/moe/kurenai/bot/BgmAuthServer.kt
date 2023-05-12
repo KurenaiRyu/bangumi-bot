@@ -2,8 +2,8 @@ package moe.kurenai.bot
 
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.server.application.*
+import io.ktor.server.cio.*
 import io.ktor.server.engine.*
-import io.ktor.server.netty.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -28,9 +28,15 @@ object BgmAuthServer {
         expireAfterWrite = 10.minutes
     }.build()
 
+    private var server: BaseApplicationEngine = embeddedServer(CIO, port = serverPort, module = Application::authModule)
+
     fun start() {
-        embeddedServer(Netty, port = serverPort, module = Application::authModule).start(false).also {
-            log.info("Web server listen to $serverPort")
+        kotlin.runCatching {
+            server.start(false).also {
+                log.info("Web server listen to $serverPort")
+            }
+        }.onFailure {
+            log.error("Start web server error", it)
         }
     }
 

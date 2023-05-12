@@ -1,6 +1,10 @@
 package moe.kurenai.bot.repository
 
-import com.elbekd.bot.types.*
+import com.elbekd.bot.types.InlineQueryResult
+import com.elbekd.bot.types.InlineQueryResultArticle
+import com.elbekd.bot.types.InlineQueryResultPhoto
+import com.elbekd.bot.types.InputTextMessageContent
+import com.elbekd.bot.types.MessageEntity
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.http.*
@@ -12,8 +16,8 @@ import moe.kurenai.bgm.model.subject.getLarge
 import moe.kurenai.bgm.model.subject.getSmall
 import moe.kurenai.bgm.request.person.GetPersonDetail
 import moe.kurenai.bot.BangumiBot
-import moe.kurenai.bot.util.BgmUtil.formatInfoBox
-import moe.kurenai.bot.util.BgmUtil.formatInfoBoxToList
+import moe.kurenai.bot.util.BgmUtil.format
+import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.toGrid
 import moe.kurenai.bot.util.HttpUtil
 import kotlin.time.Duration.Companion.days
@@ -53,13 +57,13 @@ object PersonRepository {
 
     suspend fun getContent(person: PersonDetail, link: String): List<InlineQueryResult> {
         val title = person.name
-        val infoBox = person.infobox?.formatInfoBoxToList() ?: emptyList()
+        val infoBox = person.infobox?.formatToList() ?: emptyList()
 
         val entities = listOf(
             MessageEntity(MessageEntity.Type.TEXT_LINK, 0, person.name.length, url = link),
         )
 
-        val message = listOfNotNull(title, infoBox.formatInfoBox()).joinToString("\n\n")
+        val message = listOfNotNull(title, infoBox.format()).joinToString("\n\n")
         val default = InlineQueryResultPhoto(
             "P${person.id} - img",
             photoUrl = person.images.getLarge(),

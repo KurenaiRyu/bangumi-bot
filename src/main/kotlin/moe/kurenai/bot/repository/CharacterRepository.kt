@@ -1,6 +1,10 @@
 package moe.kurenai.bot.repository
 
-import com.elbekd.bot.types.*
+import com.elbekd.bot.types.InlineQueryResult
+import com.elbekd.bot.types.InlineQueryResultArticle
+import com.elbekd.bot.types.InlineQueryResultPhoto
+import com.elbekd.bot.types.InputTextMessageContent
+import com.elbekd.bot.types.MessageEntity
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.http.*
@@ -13,8 +17,8 @@ import moe.kurenai.bgm.model.subject.getLarge
 import moe.kurenai.bgm.request.charater.GetCharacterDetail
 import moe.kurenai.bgm.request.charater.GetCharacterRelatedPersons
 import moe.kurenai.bot.BangumiBot
-import moe.kurenai.bot.util.BgmUtil.formatInfoBox
-import moe.kurenai.bot.util.BgmUtil.formatInfoBoxToList
+import moe.kurenai.bot.util.BgmUtil.format
+import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.toGrid
 import moe.kurenai.bot.util.HttpUtil
 import kotlin.time.Duration.Companion.days
@@ -67,8 +71,8 @@ object CharacterRepository {
 
     suspend fun getContent(character: CharacterDetail, link: String, persons: List<CharacterPerson>? = null): List<InlineQueryResult> {
         val title = character.name
-        val infoBox = character.infobox?.formatInfoBoxToList() ?: emptyList()
-        var content = infoBox.formatInfoBox()
+        val infoBox = character.infobox?.formatToList() ?: emptyList()
+        var content = infoBox.format()
         persons?.let {
             val personStr = persons.joinToString("\n") {
                 "${it.subjectName}: ${it.name}"
@@ -80,7 +84,7 @@ object CharacterRepository {
             MessageEntity(MessageEntity.Type.TEXT_LINK, 0, character.name.length, url = link),
         )
 
-        val message = listOfNotNull(title, infoBox.formatInfoBox()).joinToString("\n\n")
+        val message = listOfNotNull(title, infoBox.format()).joinToString("\n\n")
 
         val defaultResult = InlineQueryResultPhoto(
             "C${character.id} - img",

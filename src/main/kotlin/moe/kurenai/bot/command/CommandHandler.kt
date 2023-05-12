@@ -5,6 +5,6 @@ import com.elbekd.bot.types.UpdateMessage
 
 interface CommandHandler {
 
-    suspend fun execute(update: UpdateMessage, message: Message, args: List<String>)
+    abstract suspend fun execute(update: UpdateMessage, message: Message, args: List<String>)
 
 }

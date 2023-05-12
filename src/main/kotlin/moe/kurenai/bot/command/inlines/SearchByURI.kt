@@ -6,7 +6,12 @@ import com.elbekd.bot.types.InlineQueryResultVideo
 import com.elbekd.bot.types.ParseMode
 import io.ktor.http.*
 import moe.kurenai.bot.BangumiBot.telegram
-import moe.kurenai.bot.repository.*
+import moe.kurenai.bot.repository.BiliBiliRepository
+import moe.kurenai.bot.repository.CharacterRepository
+import moe.kurenai.bot.repository.PersonRepository
+import moe.kurenai.bot.repository.SakugabooruRepository
+import moe.kurenai.bot.repository.SubjectRepository
+import moe.kurenai.bot.repository.TokenRepository
 import moe.kurenai.bot.util.MimeTypes
 import moe.kurenai.bot.util.TelegramUtil
 import moe.kurenai.bot.util.TelegramUtil.fm2md
@@ -20,7 +25,9 @@ object SearchByURI {
 
     suspend fun execute(inlineQuery: InlineQuery, uri: URI) {
         when (uri.host) {
-            "www.sakugabooru.com" -> handleSakugabooru(inlineQuery, uri)
+            "www.sakugabooru.com",
+            "sakugabooru.com" -> handleSakugabooru(inlineQuery, uri)
+
             "b23.wtf" -> handleBiliBiliShortLink(inlineQuery, URI.create(uri.toString().replace("b23.wtf", "b23.tv")))
             "b23.tv" -> handleBiliBiliShortLink(inlineQuery, uri)
             "www.bilibili.com" -> handleBiliBili(inlineQuery, uri)

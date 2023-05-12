@@ -37,7 +37,8 @@ class Start : CommandHandler {
             } ?: kotlin.run {
                 doBind(userId, message)
             }
-        }.recoverCatching {
+        }.recover {
+            log.error(it.message, it)
             if (it is BgmException) {
                 if (it is UnauthorizedException) {
                     doBind(userId, message)
