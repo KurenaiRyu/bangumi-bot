@@ -2,12 +2,14 @@ package moe.kurenai.bot
 
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.server.application.*
-import io.ktor.server.cio.*
 import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import moe.kurenai.bgm.exception.BgmException
 import moe.kurenai.bot.BgmAuthServer.authCache
+import moe.kurenai.bot.TelegramBot.getUsername
 import moe.kurenai.bot.repository.TokenRepository
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -22,13 +24,14 @@ object BgmAuthServer {
 
     private val log = LoggerFactory.getLogger(BgmAuthServer::class.java)
 
-    internal var serverPort: Int = 8080
+    private val serverPort: Int = Config.CONFIG.bgm.server.port
 
     internal val authCache = caffeineBuilder<String, Long> {
         expireAfterWrite = 10.minutes
     }.build()
 
-    private var server: BaseApplicationEngine = embeddedServer(CIO, port = serverPort, module = Application::authModule)
+    private var server: BaseApplicationEngine =
+        embeddedServer(Netty, port = serverPort, module = Application::authModule)
 
     fun start() {
         kotlin.runCatching {
@@ -63,11 +66,14 @@ fun Application.authModule() {
                             val token = BangumiBot.bgmClient.getToken(code)
                             TokenRepository.put(userId, token)
                             log.info("Bind telegram id $userId to bangumi id ${token.userId}")
-                            call.respondRedirect("https://t.me/${BangumiBot.telegram.getMe().username}?start=success")
+                            call.respondRedirect("https://t.me/${getUsername()}?start=success")
                             authCache.invalidate(randomCode)
                         }.onFailure {
-                            log.error(it.message, it)
-                            call.respondText { "Error: ${it.message} \n请从新发送指令进行绑定！" }
+                            val message = if (it is BgmException) {
+                                "${it.error} ${it.errorDescription}".ifBlank { it.message }
+                            } else it.message
+                            log.error(message, it)
+                            call.respondText { "Error: ${message} \n请从新发送指令进行绑定！" }
                         }
                     } ?: kotlin.run {
                         call.respondText { "随机码失效，请从新发送指令进行绑定！" }

@@ -19,7 +19,7 @@ class BiliBiliTest {
     @Test
     fun testShortLink() = runBlocking {
         val url = "https://b23.tv/khh2gBJ"
-        HttpClient() {
+        HttpClient {
             followRedirects = false
         }.use { client ->
             val response = client.get(url)

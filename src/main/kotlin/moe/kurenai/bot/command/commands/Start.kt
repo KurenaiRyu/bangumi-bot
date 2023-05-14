@@ -1,39 +1,40 @@
 package moe.kurenai.bot.command.commands
 
-import com.elbekd.bot.types.Message
-import com.elbekd.bot.types.ParseMode
-import com.elbekd.bot.types.UpdateMessage
-import com.elbekd.bot.util.SendingString
+import it.tdlight.jni.TdApi.Message
+import it.tdlight.jni.TdApi.MessageSenderUser
 import moe.kurenai.bgm.exception.BgmException
 import moe.kurenai.bgm.exception.UnauthorizedException
 import moe.kurenai.bgm.request.user.GetMe
 import moe.kurenai.bot.BangumiBot.bgmClient
 import moe.kurenai.bot.BangumiBot.send
-import moe.kurenai.bot.BangumiBot.telegram
 import moe.kurenai.bot.BgmAuthServer
-import moe.kurenai.bot.command.Command
+import moe.kurenai.bot.TelegramBot.send
+import moe.kurenai.bot.TelegramBot.sendPhoto
 import moe.kurenai.bot.command.CommandHandler
-import moe.kurenai.bot.repository.token
-import moe.kurenai.bot.util.TelegramUtil.chatId
-import moe.kurenai.bot.util.TelegramUtil.fm2md
+import moe.kurenai.bot.repository.TokenRepository
+import moe.kurenai.bot.util.TelegramUtil.asText
+import moe.kurenai.bot.util.TelegramUtil.fmt
+import moe.kurenai.bot.util.TelegramUtil.markdown
+import moe.kurenai.bot.util.TelegramUtil.messageText
 import moe.kurenai.bot.util.getLogger
 
-@Command(command = "start")
 class Start : CommandHandler {
+    override val command: String = "start"
+    override val description: String = "绑定用户"
 
     companion object {
         private val log = getLogger()
     }
 
-    override suspend fun execute(update: UpdateMessage, message: Message, args: List<String>) {
-        val userId = message.from!!.id
+    override suspend fun execute(message: Message, sender: MessageSenderUser, args: List<String>) {
+        val userId = sender.userId
         kotlin.runCatching {
-            message.token()?.also { token ->
+            TokenRepository.findById(userId)?.also { token ->
                 val me = GetMe().apply { this.token = token.accessToken }.send()
-                telegram.sendPhoto(message.chatId(), SendingString(me.avatar.large),
-                    caption = "已绑定`${me.nickname.fm2md()}`\\(`${me.username.takeIf { it.isNotBlank() } ?: me.id}`\\)",
-                    parseMode = ParseMode.MarkdownV2
-                )
+                sendPhoto(
+                    message.chatId,
+                    me.avatar.large,
+                    "已绑定`${me.nickname.markdown()}`\\(`${me.username.takeIf { it.isNotBlank() } ?: me.id}`\\)".fmt())
             } ?: kotlin.run {
                 doBind(userId, message)
             }
@@ -43,10 +44,15 @@ class Start : CommandHandler {
                 if (it is UnauthorizedException) {
                     doBind(userId, message)
                 } else {
-                    telegram.sendMessage(message.chatId(), "请求bgm异常: [${it.code}] ${it.error} ${it.message ?: ""}")
+                    send {
+                        messageText(
+                            message.chatId,
+                            "请求bgm异常: [${it.code}] ${it.error} ${it.message ?: ""}".asText()
+                        )
+                    }
                 }
             } else {
-                telegram.sendMessage(message.chatId(), "Bot内部异常")
+                send { messageText(message.chatId, "Bot内部异常".asText()) }
             }
         }.onFailure {
             log.error("Get me $userId error: ${it.message}")
@@ -54,6 +60,11 @@ class Start : CommandHandler {
     }
 
     private suspend fun doBind(userId: Long, message: Message) {
-        telegram.sendMessage(message.chatId(), "请点击该[链接](${bgmClient.getOauthUrl(BgmAuthServer.genRandomCode(userId)).fm2md()})进行授权", parseMode = ParseMode.MarkdownV2)
+        send {
+            messageText(
+                message.chatId,
+                "请点击该[链接](${bgmClient.getOauthUrl(BgmAuthServer.genRandomCode(userId)).markdown()})进行授权".fmt()
+            )
+        }
     }
 }

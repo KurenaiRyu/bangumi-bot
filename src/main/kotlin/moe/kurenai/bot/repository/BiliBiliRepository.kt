@@ -23,7 +23,7 @@ object BiliBiliRepository {
 
     private val log = getLogger()
     private val client = HttpClient()
-    private val dontRedirectClient = HttpClient() {
+    private val dontRedirectClient = HttpClient {
         followRedirects = false
     }
 

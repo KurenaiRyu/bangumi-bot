@@ -1,40 +1,39 @@
 package moe.kurenai.bot.command.commands
 
-import com.elbekd.bot.model.toChatId
-import com.elbekd.bot.types.InputMediaPhoto
-import com.elbekd.bot.types.Message
-import com.elbekd.bot.types.UpdateMessage
-import com.elbekd.bot.util.SendingString
+import it.tdlight.jni.TdApi.Message
+import it.tdlight.jni.TdApi.MessageSenderUser
 import moe.kurenai.bgm.request.subject.GetCalendar
 import moe.kurenai.bot.BangumiBot.send
-import moe.kurenai.bot.BangumiBot.telegram
-import moe.kurenai.bot.command.Command
+import moe.kurenai.bot.TelegramBot.sendAlbumPhoto
+import moe.kurenai.bot.TelegramBot.sendPhoto
 import moe.kurenai.bot.command.CommandHandler
 import moe.kurenai.bot.repository.SubjectRepository
+import moe.kurenai.bot.util.TelegramUtil.asText
 import java.time.LocalDate
 
-@Command(command = "air")
 class Air : CommandHandler {
 
-    override suspend fun execute(update: UpdateMessage, message: Message, args: List<String>) {
+    override val command: String = "air"
+    override val description: String = "当日播放列表，/air N 则显示星期N的播放列表"
+
+    override suspend fun execute(message: Message, sender: MessageSenderUser, args: List<String>) {
         val weekday = if (args.size == 1) args[0] else LocalDate.now().dayOfWeek.value
 
-        val calendar = GetCalendar().send().find { it.weekday.id == weekday.toString() } ?: throw IllegalArgumentException("找不到该星期[$weekday]")
+        val calendar = GetCalendar().send().find { it.weekday.id == weekday.toString() }
+            ?: throw IllegalArgumentException("找不到该星期[$weekday]")
         SubjectRepository.findByIds(calendar.items.map { it.id })
             .asSequence()
             .sortedBy { it.id }
             .map { sub ->
-                (sub.images?.large?.takeIf { it.isNotBlank() } ?: "https://bgm.tv/img/no_icon_subject.png") to "${sub.name}\n\n${sub.summary}"
+                (sub.images?.large?.takeIf { it.isNotBlank() }
+                    ?: "https://bgm.tv/img/no_icon_subject.png") to "${sub.name}\n\n${sub.summary}"
             }.chunked(10)
             .forEach { list ->
                 if (list.size == 1) {
                     val (link, content) = list[0]
-                    telegram.sendPhoto(message.chat.id.toChatId(), SendingString(link), caption = content)
+                    sendPhoto(message.chatId, link, content.asText())
                 } else {
-                    val inputs = list.map { (link, content) ->
-                        InputMediaPhoto(link, caption = content)
-                    }
-                    telegram.sendMediaGroup(message.chat.id.toChatId(), inputs)
+                    sendAlbumPhoto(message.chatId, list.toMap())
                 }
             }
     }

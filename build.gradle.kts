@@ -1,38 +1,43 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.20"
+    kotlin("jvm") version "1.8.21"
     application
     id("org.graalvm.buildtools.native") version "0.9.20"
-    kotlin("plugin.serialization") version "1.8.20"
+    kotlin("plugin.serialization") version "1.8.21"
 }
 
 group = "moe.kurenai.bot"
 version = "1.0-SNAPSHOT"
 
 repositories {
-    mavenLocal()
-    maven { url = uri("https://maven.aliyun.com/repository/public/") }
+    maven("https://mvn.mchv.eu/repository/mchv/")
 //    maven { url = uri("https://jitpack.io") }
     mavenCentral()
-    mavenLocal()
+    mavenLocal {
+        content {
+            includeGroup("com.github.kurenairyu")
+        }
+    }
 }
 
-val vertxVersion = "4.2.3"
-val log4j = "2.19.0"
-val ktor = "2.2.4"
+object Versions {
+    const val vertxVersion = "4.2.3"
+    const val log4j = "2.20.0"
+    const val ktor = "2.3.0"
+    const val tdlight = "2.8.10.6"
+}
 dependencies {
     implementation("org.slf4j:slf4j-api:2.0.6")
     implementation("com.github.kurenairyu:bangumi-sdk:0.0.1")
-//    implementation("com.github.KurenaiRyu", "kt-telegram-bot", "dev-SNAPSHOT")
-    implementation("moe.kurenai", "kt-telegram-bot", "2.2.0.1-SNAPSHOT")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
-    implementation("io.ktor:ktor-client-core:$ktor")
-//    implementation("io.ktor:ktor-server-netty:$ktor")
-    implementation("io.ktor:ktor-server-cio:$ktor")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor")
+    implementation("io.ktor:ktor-client-core:${Versions.ktor}")
+    implementation("io.ktor:ktor-client-okhttp:${Versions.ktor}")
+    implementation("io.ktor:ktor-server-netty:${Versions.ktor}")
+//    implementation("io.ktor:ktor-server-cio:${Versions.ktor}")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:${Versions.ktor}")
 
     //serializationh
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
@@ -45,14 +50,24 @@ dependencies {
 
 //    implementation("org.reflections", "reflections", "0.10.2")
 
+    //tdlib
+    implementation(platform("it.tdlight:tdlight-java-bom:${Versions.tdlight}"))
+    implementation("it.tdlight:tdlight-java")
+    implementation("io.ktor:ktor-client-okhttp-jvm:2.3.0")
+    val hostOs = System.getProperty("os.name")
+    val isWin = hostOs.startsWith("Windows")
+    when {
+        hostOs == "Linux" -> implementation("it.tdlight:tdlight-natives-linux-amd64")
+        isWin -> implementation("it.tdlight:tdlight-natives-windows-amd64")
+        else -> throw GradleException("[$hostOs] is not support!")
+    }
 
     //logging
-    val log4j = "2.20.0"
-//    implementation("org.apache.logging.log4j:log4j-core:$log4j")
-//    implementation("org.apache.logging.log4j:log4j-api:$log4j")
-//    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4j")
-//    implementation("com.lmax:disruptor:3.4.4")
-    implementation("ch.qos.logback:logback-classic:1.4.6")
+    implementation("org.apache.logging.log4j:log4j-core:${Versions.log4j}")
+    implementation("org.apache.logging.log4j:log4j-api:${Versions.log4j}")
+    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:${Versions.log4j}")
+    implementation("com.lmax:disruptor:3.4.4")
+//    implementation("ch.qos.logback:logback-classic:1.4.6")
 
     testImplementation(kotlin("test"))
 }

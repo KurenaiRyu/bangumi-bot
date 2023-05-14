@@ -1,13 +1,10 @@
 package moe.kurenai.bot.repository
 
-import com.elbekd.bot.types.InlineQueryResult
-import com.elbekd.bot.types.InlineQueryResultArticle
-import com.elbekd.bot.types.InlineQueryResultPhoto
-import com.elbekd.bot.types.InputTextMessageContent
-import com.elbekd.bot.types.MessageEntity
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.http.*
+import it.tdlight.jni.TdApi
+import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -69,7 +66,11 @@ object CharacterRepository {
         }.values
     }
 
-    suspend fun getContent(character: CharacterDetail, link: String, persons: List<CharacterPerson>? = null): List<InlineQueryResult> {
+    suspend fun getContent(
+        character: CharacterDetail,
+        link: String,
+        persons: List<CharacterPerson>? = null
+    ): Array<InputInlineQueryResult> {
         val title = character.name
         val infoBox = character.infobox?.formatToList() ?: emptyList()
         var content = infoBox.format()
@@ -80,34 +81,34 @@ object CharacterRepository {
             content = "$content\n\n$personStr"
         }
 
-        val entities = listOf(
-            MessageEntity(MessageEntity.Type.TEXT_LINK, 0, character.name.length, url = link),
-        )
-
+        val entities = arrayOf(TextEntity(0, character.name.length, TdApi.TextEntityTypeTextUrl(link)))
         val message = listOfNotNull(title, infoBox.format()).joinToString("\n\n")
+        val formatText = FormattedText(message, entities)
 
-        val defaultResult = InlineQueryResultPhoto(
-            "C${character.id} - img",
-            photoUrl = character.images.getLarge(),
-            thumbUrl = character.images.getLarge(),
-            title = character.name,
-            caption = message,
-            captionEntities = entities,
-        )
+        val defaultResult = InputInlineQueryResultPhoto().apply {
+            id = "C${character.id} - img"
+            photoUrl = character.images.getLarge()
+            thumbnailUrl = character.images.getLarge()
+            this.title = character.name
+            this.inputMessageContent = TdApi.InputMessagePhoto().apply {
+                this.caption = formatText
+            }
+        }
 
         val resultList = mutableListOf(
-            InlineQueryResultArticle(
-                "C${character.id} - txt",
-                thumbUrl = character.images.getLarge().toGrid(),
-                title = character.name,
-                inputMessageContent = InputTextMessageContent(
-                    messageText = " $message",
-                    entities = listOf(
-                        MessageEntity(MessageEntity.Type.TEXT_LINK, 0, 1, url = character.images.getLarge()),
-                        MessageEntity(MessageEntity.Type.TEXT_LINK, 1, character.name.length, url = link)
+            InputInlineQueryResultArticle().apply {
+                id = "C${character.id} - txt"
+                thumbnailUrl = character.images.getLarge().toGrid()
+                this.title = character.name
+                this.inputMessageContent = TdApi.InputMessagePhoto().apply {
+                    this.caption = FormattedText(
+                        " $message", arrayOf(
+                            TextEntity(0, 1, TdApi.TextEntityTypeTextUrl(character.images.getLarge())),
+                            TextEntity(1, character.name.length, TdApi.TextEntityTypeTextUrl(link)),
+                        )
                     )
-                )
-            ),
+                }
+            },
             defaultResult,
         )
         infoBox.filter { it.second.startsWith("http") }.flatMap {
@@ -115,10 +116,18 @@ object CharacterRepository {
                 HttpUtil.getOgImageUrl(Url(it.second))
             }.getOrDefault(emptyList())
         }.forEachIndexed { i, url ->
-            resultList.add(defaultResult.copy(id = "C${character.id} - ${i + 1}", photoUrl = url, thumbUrl = url))
+            resultList.add(InputInlineQueryResultPhoto().apply {
+                id = "C${character.id} - ${i + 1}"
+                photoUrl = url
+                thumbnailUrl = url
+                this.title = character.name
+                this.inputMessageContent = TdApi.InputMessagePhoto().apply {
+                    this.caption = formatText
+                }
+            })
         }
 
-        return resultList
+        return resultList.toTypedArray()
     }
 
 }

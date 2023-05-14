@@ -1,13 +1,10 @@
 package moe.kurenai.bot.repository
 
-import com.elbekd.bot.types.InlineQueryResult
-import com.elbekd.bot.types.InlineQueryResultArticle
-import com.elbekd.bot.types.InlineQueryResultPhoto
-import com.elbekd.bot.types.InputTextMessageContent
-import com.elbekd.bot.types.MessageEntity
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.http.*
+import it.tdlight.jni.TdApi
+import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -55,37 +52,39 @@ object PersonRepository {
         }.values
     }
 
-    suspend fun getContent(person: PersonDetail, link: String): List<InlineQueryResult> {
+    suspend fun getContent(person: PersonDetail, link: String): Array<InputInlineQueryResult> {
         val title = person.name
-        val infoBox = person.infobox?.formatToList() ?: emptyList()
+        val infoBox = person.infobox.formatToList()
 
-        val entities = listOf(
-            MessageEntity(MessageEntity.Type.TEXT_LINK, 0, person.name.length, url = link),
-        )
-
-        val message = listOfNotNull(title, infoBox.format()).joinToString("\n\n")
-        val default = InlineQueryResultPhoto(
-            "P${person.id} - img",
-            photoUrl = person.images.getLarge(),
-            thumbUrl = person.images.getSmall(),
-            title = person.name,
-            caption = message,
-            captionEntities = entities,
-        )
+        val entities = arrayOf(TextEntity(0, person.name.length, TdApi.TextEntityTypeTextUrl(link)))
+        val caption = listOfNotNull(title, infoBox.format()).joinToString("\n\n")
+        val formattedText = FormattedText(caption, entities)
+        val default = InputInlineQueryResultPhoto().apply {
+            this.id = "P${person.id} - img"
+            photoUrl = person.images.getLarge()
+            thumbnailUrl = person.images.getSmall()
+            this.title = person.name
+            this.inputMessageContent = InputMessagePhoto().apply {
+                this.caption = formattedText
+            }
+        }
 
         val resultList = mutableListOf(
-            InlineQueryResultArticle(
-                "P${person.id} - text",
-                thumbUrl = person.images.getLarge().toGrid(),
-                title = person.name,
-                inputMessageContent = InputTextMessageContent(
-                    messageText = " $message",
-                    entities = listOf(
-                        MessageEntity(MessageEntity.Type.TEXT_LINK, 0, 1, url = person.images.getLarge()),
-                        MessageEntity(MessageEntity.Type.TEXT_LINK, 0, person.name.length, url = link)
+            InputInlineQueryResultArticle().apply {
+                val url = person.images.getLarge().toGrid()
+                this.id = "P${person.id} - text"
+                this.url = url
+                thumbnailUrl = url
+                this.title = person.name
+                this.inputMessageContent = InputMessageText().apply {
+                    text = FormattedText(
+                        " $caption", arrayOf(
+                            TextEntity(0, 1, TdApi.TextEntityTypeTextUrl(link)),
+                            TextEntity(0, person.name.length, TdApi.TextEntityTypeTextUrl(link))
+                        )
                     )
-                )
-            ),
+                }
+            },
             default
         )
         infoBox.filter { it.second.startsWith("http") }.flatMap {
@@ -93,9 +92,17 @@ object PersonRepository {
                 HttpUtil.getOgImageUrl(Url(it.second))
             }.getOrDefault(emptyList())
         }.forEachIndexed { i, url ->
-            resultList.add(default.copy(id = "P${person.id} - ${i + 1}", photoUrl = url, thumbUrl = url))
+            resultList.add(InputInlineQueryResultPhoto().apply {
+                this.id = "P${person.id} - ${i + 1}"
+                photoUrl = url
+                thumbnailUrl = url
+                this.title = person.name
+                this.inputMessageContent = InputMessagePhoto().apply {
+                    this.caption = formattedText
+                }
+            })
         }
-        return resultList
+        return resultList.toTypedArray()
     }
 
 }

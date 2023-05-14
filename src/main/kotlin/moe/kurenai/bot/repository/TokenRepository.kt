@@ -1,7 +1,5 @@
 package moe.kurenai.bot.repository
 
-import com.elbekd.bot.types.InlineQuery
-import com.elbekd.bot.types.Message
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -116,12 +114,4 @@ object TokenRepository {
 
     private fun AccessToken.computeExpires() = this.expiresIn + getNowSeconds()
 
-}
-
-suspend fun Message.token(): AccessToken? {
-    return TokenRepository.findById(this.from!!.id)
-}
-
-suspend fun InlineQuery.token(): AccessToken? {
-    return TokenRepository.findById(this.from.id)
 }

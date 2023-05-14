@@ -1,17 +1,14 @@
 package moe.kurenai.bot
 
-import com.elbekd.bot.Bot
-import com.elbekd.bot.types.User
 import moe.kurenai.bgm.BgmClient
 import moe.kurenai.bgm.request.Request
 import moe.kurenai.bot.Config.Companion.CONFIG
-import moe.kurenai.bot.command.CommandDispatcher
 import moe.kurenai.bot.util.getLogger
 import org.slf4j.Logger
 
 object BangumiBot {
 
-    private val serverPort = System.getProperty("PORT")?.toInt() ?: 8080
+    private val serverPort = CONFIG.bgm.server.port
 
     val bgmClient = BgmClient(
         CONFIG.bgm.appId,
@@ -20,24 +17,10 @@ object BangumiBot {
         isDebugEnabled = CONFIG.debug
     ).coroutine()
 
-    val telegram = Bot.createPolling(CONFIG.telegram.token) {
-        baseUrl = CONFIG.telegram.baseUrl
-        timeout = 60
-    }
-
-    lateinit var me: User
-
     private val log: Logger = getLogger()
 
-    suspend fun start() {
-        BgmAuthServer.serverPort = serverPort
+    fun start() {
         BgmAuthServer.start()
-        telegram.onAnyUpdate { update ->
-            log.debug("Received: {}", update)
-            CommandDispatcher.handle(update)
-        }
-        me = telegram.getMe()
-        telegram.start()
     }
 
     suspend fun <T> Request<T>.send(): T = kotlin.runCatching {

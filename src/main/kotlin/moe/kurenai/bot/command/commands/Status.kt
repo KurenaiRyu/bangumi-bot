@@ -1,30 +1,38 @@
 package moe.kurenai.bot.command.commands
 
-import com.elbekd.bot.types.Message
-import com.elbekd.bot.types.UpdateMessage
-import moe.kurenai.bot.BangumiBot.telegram
-import moe.kurenai.bot.command.Command
+import it.tdlight.jni.TdApi
+import it.tdlight.jni.TdApi.Message
+import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.command.CommandHandler
 import moe.kurenai.bot.repository.CharacterRepository
 import moe.kurenai.bot.repository.PersonRepository
 import moe.kurenai.bot.repository.SakugabooruRepository
 import moe.kurenai.bot.repository.SubjectRepository
-import moe.kurenai.bot.util.TelegramUtil.chatId
+import moe.kurenai.bot.util.TelegramUtil.asText
+import moe.kurenai.bot.util.TelegramUtil.messageText
 
 
-@Command("status")
 class Status : CommandHandler {
+    override val command: String = "status"
+    override val description: String = "机器人状态（并不一定准确）"
 
-    override suspend fun execute(update: UpdateMessage, message: Message, args: List<String>) {
+    override suspend fun execute(message: Message, sender: TdApi.MessageSenderUser, args: List<String>) {
         val runtime = Runtime.getRuntime()
-        val arr = arrayOf(runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory(), runtime.maxMemory(), runtime.freeMemory(), runtime.totalMemory())
+        val arr = arrayOf(
+            runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory(),
+            runtime.maxMemory(),
+            runtime.freeMemory(),
+            runtime.totalMemory()
+        )
             .map { it / 1024 / 1024 }
             .map { "${it}m" }
         val msg = """
             总可用内存: ${arr[0]}/${arr[1]}
             剩余可用分配内存: ${arr[2]}/${arr[3]}
             --------------------------------------
-            SubjectCache: ${SubjectRepository.cacheStats.snapshot().hitCount()} / ${SubjectRepository.cacheStats.snapshot().loadCount()} (${
+            SubjectCache: ${
+            SubjectRepository.cacheStats.snapshot().hitCount()
+        } / ${SubjectRepository.cacheStats.snapshot().loadCount()} (${
             SubjectRepository.cacheStats.snapshot().hitRate()
         })
             PersonCache: ${PersonRepository.cacheStats.snapshot().hitCount()} / ${PersonRepository.cacheStats.snapshot().loadCount()} (${
@@ -38,6 +46,6 @@ class Status : CommandHandler {
         } (${SakugabooruRepository.cacheStats.snapshot().hitRate()})
         """.trimIndent()
 
-        telegram.sendMessage(message.chatId(), msg)
+        send(messageText(message.chatId, msg.asText()))
     }
 }

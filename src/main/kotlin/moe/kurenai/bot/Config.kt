@@ -43,9 +43,12 @@ data class Redis(
 @Serializable
 data class Telegram(
     var baseUrl: String = "https://api.telegram.org",
+    var apiId: Int? = null,
+    var apiHash: String? = null,
     var token: String = "",
     var userMode: Boolean = false,
-    var updateBaseUrl: String = baseUrl
+    var updateBaseUrl: String = baseUrl,
+    var linkPreviewGroup: Long? = null
 )
 
 @Serializable
@@ -53,4 +56,10 @@ data class Bgm(
     var appId: String = "",
     var appSecret: String = "",
     var redirectUrl: String = "",
+    var server: Server = Server()
+)
+
+@Serializable
+data class Server(
+    val port: Int = 8080
 )

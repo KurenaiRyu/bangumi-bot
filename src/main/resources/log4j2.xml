@@ -29,7 +29,7 @@
     </Appenders>
     <Loggers>
         <!-- avoid duplicated logs with additivity=false -->
-        <Logger name="moe.kurenai" level="info" additivity="false" includeLocation="true">
+        <Logger name="moe.kurenai" level="trace" additivity="false" includeLocation="true">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="RandomAccessFile"/>
         </Logger>
@@ -37,13 +37,13 @@
             <AppenderRef ref="Console"/>
             <AppenderRef ref="RandomAccessFile"/>
         </Logger>
+        <Logger name="it.tdlight" level="warn" additivity="false" includeLocation="true">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RandomAccessFile"/>
+        </Logger>
         <Root level="info" includeLocation="true">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="RandomAccessFile"/>
         </Root>
-        <!--        <asyncRoot level="debug" includeLocation="false">-->
-        <!--            <AppenderRef ref="Console"/>-->
-        <!--            <AppenderRef ref="RandomAccessFile"/>-->
-        <!--        </asyncRoot>-->
     </Loggers>
 </Configuration>

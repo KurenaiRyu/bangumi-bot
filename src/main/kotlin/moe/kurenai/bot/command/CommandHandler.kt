@@ -1,10 +1,13 @@
 package moe.kurenai.bot.command
 
-import com.elbekd.bot.types.Message
-import com.elbekd.bot.types.UpdateMessage
+import it.tdlight.jni.TdApi.Message
+import it.tdlight.jni.TdApi.MessageSenderUser
 
 interface CommandHandler {
 
-    abstract suspend fun execute(update: UpdateMessage, message: Message, args: List<String>)
+    val command: String
+    val description: String
+
+    suspend fun execute(message: Message, sender: MessageSenderUser, args: List<String>)
 
 }

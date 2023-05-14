@@ -19,3 +19,13 @@ val json = Json {
     isLenient = true
     prettyPrint = true
 }
+
+//val localProperties by lazy {
+//    Properties().also { p ->
+//        Path.of("local.properties").inputStream().use(p::load)
+//    }
+//}
+//
+//fun getProp(key: String) = localProperties.getProperty(key) ?: System.getProperty(key) ?: System.getenv(key)
+
+fun String.limit(n: Int = 100) = if (this.length > n + 20) this.substring(0, n) + "..." else this

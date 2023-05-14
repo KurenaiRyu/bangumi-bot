@@ -1,21 +1,16 @@
 package moe.kurenai.bot.command.inlines
 
-import com.elbekd.bot.types.InlineQuery
-import com.elbekd.bot.types.InlineQueryResultPhoto
-import com.elbekd.bot.types.InlineQueryResultVideo
-import com.elbekd.bot.types.ParseMode
 import io.ktor.http.*
-import moe.kurenai.bot.BangumiBot.telegram
-import moe.kurenai.bot.repository.BiliBiliRepository
-import moe.kurenai.bot.repository.CharacterRepository
-import moe.kurenai.bot.repository.PersonRepository
-import moe.kurenai.bot.repository.SakugabooruRepository
-import moe.kurenai.bot.repository.SubjectRepository
-import moe.kurenai.bot.repository.TokenRepository
+import it.tdlight.jni.TdApi.*
+import moe.kurenai.bot.TelegramBot.send
+import moe.kurenai.bot.repository.*
 import moe.kurenai.bot.util.MimeTypes
-import moe.kurenai.bot.util.TelegramUtil
-import moe.kurenai.bot.util.TelegramUtil.fm2md
+import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
+import moe.kurenai.bot.util.TelegramUtil.answerInlineQueryEmpty
+import moe.kurenai.bot.util.TelegramUtil.fmt
+import moe.kurenai.bot.util.TelegramUtil.markdown
 import moe.kurenai.bot.util.getLogger
+import moe.kurenai.bot.util.limit
 import java.net.URI
 import kotlin.math.roundToInt
 
@@ -23,7 +18,7 @@ object SearchByURI {
 
     private val log = getLogger()
 
-    suspend fun execute(inlineQuery: InlineQuery, uri: URI) {
+    suspend fun execute(inlineQuery: UpdateNewInlineQuery, uri: URI) {
         when (uri.host) {
             "www.sakugabooru.com",
             "sakugabooru.com" -> handleSakugabooru(inlineQuery, uri)
@@ -42,25 +37,26 @@ object SearchByURI {
         }
     }
 
-    private suspend fun handleBgm(params: List<String>, inlineQuery: InlineQuery, uri: URI) {
+    private suspend fun handleBgm(params: List<String>, inlineQuery: UpdateNewInlineQuery, uri: URI) {
+        log.info("Handle Bangumi")
         val id = params[2].toInt()
-        val userId = inlineQuery.from.id
+        val userId = inlineQuery.senderUserId
         val token = TokenRepository.findById(userId)?.accessToken
         when (params[1]) {
             "subject" -> {
-                SubjectRepository.findById(id, token).let { sub ->
-                    telegram.answerInlineQuery(
+                send {
+                    answerInlineQuery(
                         inlineQuery.id,
-                        SubjectRepository.getContent(sub, uri.toString())
+                        SubjectRepository.getContent(SubjectRepository.findById(id, token), uri.toString())
                     )
                 }
             }
 
             "person" -> {
-                PersonRepository.findById(id, token).let { person ->
-                    telegram.answerInlineQuery(
+                send {
+                    answerInlineQuery(
                         inlineQuery.id,
-                        PersonRepository.getContent(person, uri.toString())
+                        PersonRepository.getContent(PersonRepository.findById(id, token), uri.toString())
                     )
                 }
             }
@@ -68,10 +64,12 @@ object SearchByURI {
             "character" -> {
                 val character = CharacterRepository.findById(id, token)
                 val persons = CharacterRepository.findPersons(id, token)
-                telegram.answerInlineQuery(
-                    inlineQuery.id,
-                    CharacterRepository.getContent(character, uri.toString(), persons)
-                )
+                send {
+                    answerInlineQuery(
+                        inlineQuery.id,
+                        CharacterRepository.getContent(character, uri.toString(), persons)
+                    )
+                }
             }
 
             else -> {
@@ -80,17 +78,14 @@ object SearchByURI {
         }
     }
 
-    private suspend fun handleSakugabooru(inlineQuery: InlineQuery, uri: URI) {
+    private suspend fun handleSakugabooru(inlineQuery: UpdateNewInlineQuery, uri: URI) {
         log.info("Handle Sakugabooru")
         val params = uri.path.split("/")
         if (params.size == 4) {
             if (params[1] == "post" && params[2] == "show") {
                 val id = params[3]
                 kotlin.runCatching {
-                    telegram.answerInlineQuery(
-                        inlineQuery.id,
-                        results = listOf(SakugabooruRepository.findOne(id, uri))
-                    )
+                    send { answerInlineQuery(inlineQuery.id, arrayOf(SakugabooruRepository.findOne(id, uri))) }
                 }.onFailure {
                     log.error(it.message, it)
                     fallback(inlineQuery)
@@ -99,7 +94,7 @@ object SearchByURI {
         }
     }
 
-    private suspend fun handleBiliBili(inlineQuery: InlineQuery, uri: URI) {
+    private suspend fun handleBiliBili(inlineQuery: UpdateNewInlineQuery, uri: URI) {
         log.info("Handle BiliBili")
         // https://www.bilibili.com/video/BV1Fx4y1w78G/?p=1
         val url = Url(uri)
@@ -109,53 +104,55 @@ object SearchByURI {
         handleBiliBili(inlineQuery, id, p)
     }
 
-    private suspend fun handleBiliBiliShortLink(inlineQuery: InlineQuery, uri: URI) {
+    private suspend fun handleBiliBiliShortLink(inlineQuery: UpdateNewInlineQuery, uri: URI) {
         log.info("Handle BiliBili short link")
         val (id, p) = BiliBiliRepository.getIdAndPByShortLink(uri)
         handleBiliBili(inlineQuery, id, p)
     }
 
-    private suspend fun handleBiliBili(inlineQuery: InlineQuery, id: String, p: Int) {
+    private suspend fun handleBiliBili(inlineQuery: UpdateNewInlineQuery, id: String, p: Int) {
         val videoInfo = BiliBiliRepository.getVideoInfo(id)
-        val desc = videoInfo.data.desc
+        val desc = videoInfo.data.desc.limit()
         val page = videoInfo.data.pages.find { it.page == p } ?: run {
             fallback(inlineQuery)
             return
         }
         val streamInfo = BiliBiliRepository.getPlayUrl(videoInfo.data.bvid, page.cid)
         val link = "https://www.bilibili.com/video/${videoInfo.data.bvid}?p=$p"
-        val up = "UP: [${videoInfo.data.owner.name.fm2md()}](https://space.bilibili.com/${videoInfo.data.owner.mid})"
-        val playCount = "${((videoInfo.data.stat.view / 10.0).roundToInt() / 100.0).toString().fm2md()}K 播放"
-        val partTitle = if (videoInfo.data.pages.size == 1 || page.part == "1") "" else "/ ${page.part.fm2md()}"
-        val rank = if (videoInfo.data.stat.nowRank == 0) "" else "/ ${videoInfo.data.stat.nowRank} 名 / 历史最高 ${videoInfo.data.stat.nowRank} 名"
-        val content = "[${videoInfo.data.title.fm2md()}]($link) $partTitle" +
+        val up = "UP: [${videoInfo.data.owner.name.markdown()}](https://space.bilibili.com/${videoInfo.data.owner.mid})"
+        val playCount = "${((videoInfo.data.stat.view / 10.0).roundToInt() / 100.0).toString().markdown()}K 播放"
+        val partTitle = if (videoInfo.data.pages.size == 1 || page.part == "1") "" else "/ ${page.part.markdown()}"
+        val rank =
+            if (videoInfo.data.stat.nowRank == 0) "" else "/ ${videoInfo.data.stat.nowRank} 名 / 历史最高 ${videoInfo.data.stat.nowRank} 名"
+        val content = ("[${videoInfo.data.title.markdown()}]($link) $partTitle" +
             "\n\n$up / $playCount $rank" +
-            "\n\n${desc.fm2md()}"
-        telegram.answerInlineQuery(
-            inlineQuery.id,
-            listOf(
-                InlineQueryResultVideo(
-                    id = "${videoInfo.data.bvid} - video",
-                    title = videoInfo.data.title,
-                    videoUrl = streamInfo.data.durl.first().url,
-                    thumbUrl = videoInfo.data.pic,
-                    mimeType = MimeTypes.Video.MP4,
-                    caption = content,
-                    parseMode = ParseMode.MarkdownV2
-                ),
-                InlineQueryResultPhoto(
-                    id = "${videoInfo.data.bvid} - pic",
-                    title = videoInfo.data.title,
-                    photoUrl = videoInfo.data.pic,
-                    thumbUrl = videoInfo.data.pic,
-                    caption = content,
-                    parseMode = ParseMode.MarkdownV2
-                )
-            )
-        )
+            "\n\n${desc.markdown()}").fmt()
+        send {
+            answerInlineQuery(inlineQuery.id, arrayOf(
+                InputInlineQueryResultVideo().apply {
+                    this.id = "${videoInfo.data.bvid} - video"
+                    title = videoInfo.data.title
+                    videoUrl = streamInfo.data.durl.first().url
+                    thumbnailUrl = videoInfo.data.pic
+                    mimeType = MimeTypes.Video.MP4
+                    inputMessageContent = InputMessageVideo().apply {
+                        this.caption = content
+                    }
+                },
+                InputInlineQueryResultPhoto().apply {
+                    this.id = "${videoInfo.data.bvid} - photo"
+                    title = videoInfo.data.title
+                    photoUrl = videoInfo.data.pic
+                    thumbnailUrl = videoInfo.data.pic
+                    inputMessageContent = InputMessagePhoto().apply {
+                        this.caption = content
+                    }
+                }
+            ))
+        }
     }
 
-    private suspend fun fallback(inlineQuery: InlineQuery): Boolean {
-        return TelegramUtil.answerInlineQueryEmpty(inlineQuery)
+    private suspend fun fallback(inlineQuery: UpdateNewInlineQuery): Boolean {
+        return send(answerInlineQueryEmpty(inlineQuery.id)) is Ok
     }
 }

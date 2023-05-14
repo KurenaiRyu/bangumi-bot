@@ -1,13 +1,9 @@
 package moe.kurenai.bot.repository
 
-import com.elbekd.bot.types.InlineQueryResult
-import com.elbekd.bot.types.InlineQueryResultArticle
-import com.elbekd.bot.types.InlineQueryResultPhoto
-import com.elbekd.bot.types.InputTextMessageContent
-import com.elbekd.bot.types.MessageEntity
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.http.*
+import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -57,39 +53,43 @@ object SubjectRepository {
         }.values
     }
 
-    suspend fun getContent(sub: Subject, link: String): List<InlineQueryResult> {
+    suspend fun getContent(sub: Subject, link: String): Array<InputInlineQueryResult> {
         val title = "[${sub.type.category()}]　${sub.name}"
         val infoBox = sub.infobox?.formatToList() ?: emptyList()
-        val simpleInfoBot = if (sub.type == SubjectType.ANIME) infoBox.filter { mainInfoProperties.contains(it.first) } else infoBox
+        val simpleInfoBot =
+            if (sub.type == SubjectType.ANIME) infoBox.filter { mainInfoProperties.contains(it.first) } else infoBox
         val content = simpleInfoBot.joinToString("\n") { (k, v) ->
             "$k: $v"
         }
 
         val titleIndex = sub.type.category().length + 3
-        val entities = listOf(MessageEntity(MessageEntity.Type.TEXT_LINK, titleIndex, sub.name.length, url = link))
+        val entities = arrayOf(TextEntity(titleIndex, sub.name.length, TextEntityTypeTextUrl(link)))
         val caption = listOfNotNull(title, content).joinToString("\n\n")
+        val formattedText = FormattedText(caption, entities)
 
         val resultList = mutableListOf(
-            InlineQueryResultArticle(
-                "S${sub.id} - txt",
-                thumbUrl = sub.images.getLarge().toGrid(),
-                title = sub.name + "(${sub.nameCn})",
-                inputMessageContent = InputTextMessageContent(
-                    messageText = " $caption",
-                    entities = listOf(
-                        MessageEntity(MessageEntity.Type.TEXT_LINK, 0, 1, url = sub.images.getLarge()),
-                        MessageEntity(MessageEntity.Type.TEXT_LINK, titleIndex + 1, sub.name.length, url = link)
+            InputInlineQueryResultArticle().apply {
+                this.id = "S${sub.id} - txt"
+                this.thumbnailUrl = sub.images.getLarge().toGrid()
+                this.title = sub.name + "(${sub.nameCn})"
+                inputMessageContent = InputMessageText().apply {
+                    this.text = FormattedText(
+                        " $caption", arrayOf(
+                            TextEntity(0, 1, TextEntityTypeTextUrl(sub.images.getLarge())),
+                            TextEntity(titleIndex + 1, sub.name.length, TextEntityTypeTextUrl(link))
+                        )
                     )
-                )
-            ),
-            InlineQueryResultPhoto(
-                "S${sub.id} - img",
-                title = sub.name,
-                photoUrl = sub.images.getLarge(),
-                thumbUrl = sub.images.getLarge(),
-                caption = caption,
-                captionEntities = entities,
-            )
+                }
+            },
+            InputInlineQueryResultPhoto().apply {
+                this.id = "S${sub.id} - img"
+                this.title = sub.name
+                this.photoUrl = sub.images.getLarge()
+                this.thumbnailUrl = sub.images.getLarge()
+                this.inputMessageContent = InputMessagePhoto().apply {
+                    this.caption = formattedText
+                }
+            }
         )
 
         infoBox.filter { it.second.startsWith("http") }.flatMap {
@@ -98,17 +98,18 @@ object SubjectRepository {
             }.getOrDefault(emptyList())
         }.forEachIndexed { i, url ->
             resultList.add(
-                InlineQueryResultPhoto(
-                    "S${sub.id} - ${i + 1}",
-                    title = sub.name,
-                    photoUrl = url,
-                    thumbUrl = url,
-                    caption = caption,
-                    captionEntities = entities,
-                )
+                InputInlineQueryResultPhoto().apply {
+                    this.id = "S${sub.id} - ${i + 1}"
+                    this.title = sub.name
+                    this.photoUrl = url
+                    this.thumbnailUrl = url
+                    this.inputMessageContent = InputMessagePhoto().apply {
+                        this.caption = formattedText
+                    }
+                }
             )
         }
-        return resultList
+        return resultList.toTypedArray()
     }
 
 }
