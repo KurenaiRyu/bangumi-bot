@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.kurenai.bot.TelegramBot.cacheSentMessage
+import moe.kurenai.bot.TelegramBot.getChat
 import moe.kurenai.bot.TelegramBot.getUsername
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.command.commands.*
@@ -102,17 +103,19 @@ object CommandDispatcher {
 
                 is UpdateDeleteMessages -> {
                     if (log.isTraceEnabled.not()) log.debug(
-                        "Deleted messages {} from chat {}",
+                        "Deleted messages {} from chat {}({})",
                         update.messageIds,
-                        update.chatId
+                        getChat(update.chatId).title,
+                        update.chatId,
                     )
                 }
 
                 is UpdateMessageSendSucceeded -> {
                     if (log.isTraceEnabled.not()) log.debug(
-                        "Sent message {} -> {} to chat {}",
+                        "Sent message {} -> {} to chat {}({})",
                         update.oldMessageId,
                         update.message.id,
+                        getChat(update.message.chatId).title,
                         update.message.chatId
                     )
                     cacheSentMessage(update)
@@ -120,9 +123,10 @@ object CommandDispatcher {
 
                 is UpdateMessageSendFailed -> {
                     log.error(
-                        "Sent message {} -> {} to chat {} fail: {} {}",
+                        "Sent message {} -> {} to chat {}({}) fail: {} {}",
                         update.oldMessageId,
                         update.message.id,
+                        getChat(update.message.chatId).title,
                         update.message.chatId,
                         update.errorCode,
                         update.errorMessage
