@@ -124,6 +124,10 @@ object TelegramBot {
 
     fun getMe(): User = client.me
 
+    suspend inline fun getChat(chatId: Long) = send {
+        GetChat(chatId)
+    }
+
     fun getUsername(): String = client.me.usernames.editableUsername
 
     suspend inline fun <R : Object, Fun : TdApi.Function<R>> send(
