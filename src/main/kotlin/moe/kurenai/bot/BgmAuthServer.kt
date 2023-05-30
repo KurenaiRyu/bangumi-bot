@@ -11,7 +11,10 @@ import moe.kurenai.bgm.exception.BgmException
 import moe.kurenai.bot.BgmAuthServer.authCache
 import moe.kurenai.bot.TelegramBot.getUsername
 import moe.kurenai.bot.repository.TokenRepository
+import moe.kurenai.bot.util.getProp
 import org.slf4j.LoggerFactory
+import java.io.File
+import java.security.KeyStore
 import java.util.*
 import kotlin.time.Duration.Companion.minutes
 
@@ -30,14 +33,28 @@ object BgmAuthServer {
         expireAfterWrite = 10.minutes
     }.build()
 
-    private var server: BaseApplicationEngine =
-        embeddedServer(Netty, port = serverPort, module = Application::authModule)
+    private lateinit var server: NettyApplicationEngine
 
     fun start() {
         kotlin.runCatching {
-            server.start(false).also {
-                log.info("Web server listen to $serverPort")
+            if (::server.isInitialized.not()) {
+                val environment = applicationEngineEnvironment {
+                    log = LoggerFactory.getLogger("ktor.application")
+                    val pw = getProp("key.store.passwd").toCharArray()
+                    val keyStoreFile = File("./config/keystore.jks")
+                    sslConnector(
+                        keyStore = KeyStore.getInstance(keyStoreFile, pw),
+                        keyAlias = "bgm.kurenai.moe",
+                        keyStorePassword = { pw },
+                        privateKeyPassword = { pw }) {
+                        port = serverPort
+                        keyStorePath = keyStoreFile
+                    }
+                    module(Application::authModule)
+                }
+                server = embeddedServer(Netty, environment)
             }
+            server.start(false)
         }.onFailure {
             log.error("Start web server error", it)
         }
@@ -49,6 +66,7 @@ object BgmAuthServer {
         authCache.put(randomCode, userId)
         return randomCode
     }
+
 }
 
 fun Application.authModule() {
