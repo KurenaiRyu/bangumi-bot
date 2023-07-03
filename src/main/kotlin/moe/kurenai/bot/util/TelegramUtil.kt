@@ -81,8 +81,12 @@ object TelegramUtil {
         this.inlineQueryId = id
         this.results = emptyArray()
         this.cacheTime = cacheTime
-        this.switchPmText = "搜索结果为空"
-        this.switchPmParameter = "help"
+        this.button = TdApi.InlineQueryResultsButton().apply {
+            this.text = "搜索结果为空"
+            this.type = TdApi.InlineQueryResultsButtonTypeStartBot().apply {
+                parameter = "help"
+            }
+        }
     }
 
     fun messageText(chatId: Long, msg: TdApi.FormattedText) = TdApi.SendMessage().apply {

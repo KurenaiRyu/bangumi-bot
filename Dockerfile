@@ -1,11 +1,9 @@
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre-focal
 
-RUN apk add --no-cache bash
-
+RUN apt update && apt install tzdata -y
+ENV TZ="Asia/Shanghai"
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
-RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
-# We make four distinct layers so if there are application changes the library layers can be re-used
 COPY build/libs/lib /deployments/lib
 COPY build/libs/*.jar /deployments/
 COPY entrypoint.sh /deployments/

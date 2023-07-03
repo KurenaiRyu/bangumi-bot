@@ -4,7 +4,7 @@ import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import moe.kurenai.bot.TelegramBot.cacheSentMessage
+import moe.kurenai.bot.TelegramBot
 import moe.kurenai.bot.TelegramBot.getChat
 import moe.kurenai.bot.TelegramBot.getUsername
 import moe.kurenai.bot.TelegramBot.send
@@ -14,6 +14,7 @@ import moe.kurenai.bot.util.TelegramUtil.answerInlineQueryEmpty
 import moe.kurenai.bot.util.TelegramUtil.text
 import moe.kurenai.bot.util.getLogger
 import java.net.URI
+import it.tdlight.client.Result as TdResult
 
 object CommandDispatcher {
 
@@ -118,7 +119,10 @@ object CommandDispatcher {
                         getChat(update.message.chatId).title,
                         update.message.chatId
                     )
-                    cacheSentMessage(update)
+                    TelegramBot.pendingMessage.getIfPresent(update.oldMessageId)?.let {
+                        TelegramBot.pendingMessage.invalidate(update.oldMessageId)
+                        it.resumeWith(Result.success(TdResult.of(update.message)))
+                    }
                 }
 
                 is UpdateMessageSendFailed -> {
@@ -131,6 +135,10 @@ object CommandDispatcher {
                         update.errorCode,
                         update.errorMessage
                     )
+                    TelegramBot.pendingMessage.getIfPresent(update.oldMessageId)?.let {
+                        TelegramBot.pendingMessage.invalidate(update.oldMessageId)
+                        it.resumeWith(Result.failure(IllegalStateException("[${update.errorCode}] ${update.errorMessage}")))
+                    }
                 }
 
                 is UpdateConnectionState -> {

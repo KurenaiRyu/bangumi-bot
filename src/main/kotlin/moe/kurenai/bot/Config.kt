@@ -61,5 +61,6 @@ data class Bgm(
 
 @Serializable
 data class Server(
-    val port: Int = 8080
+    val port: Int = 8080,
+    val keyStorePw: String = ""
 )

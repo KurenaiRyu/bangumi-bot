@@ -1,11 +1,7 @@
 package moe.kurenai.bot
 
 import com.sksamuel.aedile.core.caffeineBuilder
-import it.tdlight.client.APIToken
-import it.tdlight.client.AuthenticationData
-import it.tdlight.client.SimpleTelegramClient
-import it.tdlight.client.TDLibSettings
-import it.tdlight.common.Init
+import it.tdlight.client.*
 import it.tdlight.jni.TdApi
 import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.*
@@ -29,6 +25,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import it.tdlight.client.Result as TdResult
 
 /**
  * @author Kurenai
@@ -44,16 +41,17 @@ object TelegramUserBot {
     // Configure the client
     val settings: TDLibSettings
 
-    val client: SimpleTelegramClient
+    lateinit var client: SimpleTelegramClient
 
     val started = CountDownLatch(1)
 
     private val fetchRemoteFileSemaphore = Semaphore(5)
 
-    private val sentMessageCache = caffeineBuilder<Long, Message> {
+    val pendingMessage = caffeineBuilder<Long, CancellableContinuation<it.tdlight.client.Result<Object>>> {
         maximumSize = 200
         expireAfterWrite = 5.minutes
     }.build()
+
 
     private val remoteFileCache = caffeineBuilder<String, String> {
         maximumSize = 200
@@ -61,7 +59,6 @@ object TelegramUserBot {
     }.build()
 
     init {
-        Init.start()
         apiToken = APIToken(
             Config.CONFIG.telegram.apiId ?: 94575,
             Config.CONFIG.telegram.apiHash ?: "a3406de8d171bb422bb6ddf3bbd800e2"
@@ -75,7 +72,6 @@ object TelegramUserBot {
             isChatInfoDatabaseEnabled = true
             isMessageDatabaseEnabled = true
         }
-        client = SimpleTelegramClient(settings)
         CoroutineScope(Dispatchers.IO).launch {
             val path = Path.of("config/remote-file-cache.json")
             if (path.exists()) {
@@ -104,7 +100,7 @@ object TelegramUserBot {
     }
 
     fun start() {
-        client.start(AuthenticationData.qrCode())
+        client = SimpleTelegramClientFactory().builder(settings).build(AuthenticationSupplier.qrCode())
         client.addUpdateHandler(UpdateAuthorizationState::class.java) { update ->
             if (update.authorizationState.constructor == AuthorizationStateReady.CONSTRUCTOR) {
                 log.info("Telegram user bot started.")
@@ -118,8 +114,12 @@ object TelegramUserBot {
 
     fun handleUpdate(update: Update) = CoroutineScope(Dispatchers.Default).launch {
         when (update) {
+
             is UpdateMessageSendSucceeded -> {
-                sentMessageCache.put(update.oldMessageId, update.message)
+                pendingMessage.getIfPresent(update.oldMessageId)?.let {
+                    pendingMessage.invalidate(update.oldMessageId)
+                    it.resumeWith(Result.success(TdResult.of(update.message)))
+                }
             }
 
             else -> {
@@ -128,7 +128,17 @@ object TelegramUserBot {
         }
     }
 
-    suspend fun getSentMessage(oldMsgId: Long) = sentMessageCache.getIfPresent(oldMsgId)
+    suspend fun sendUrl(url: String) {
+        val chatId = Config.CONFIG.telegram.linkPreviewGroup ?: return
+        send {
+            SendMessage().apply {
+                this.chatId = chatId
+                this.inputMessageContent = InputMessageText().apply {
+                    this.text = url.asText()
+                }
+            }
+        }
+    }
 
     suspend fun fetchRemoteFile(url: String, type: RemoteFileType = RemoteFileType.PHOTO): String? =
         fetchRemoteFileSemaphore.withPermit {
@@ -137,18 +147,11 @@ object TelegramUserBot {
             if (remoteFileId != null) return remoteFileId
 
             val linkPreviewGroup = Config.CONFIG.telegram.linkPreviewGroup ?: return null
-            val message = send { messageText(linkPreviewGroup, url.asText()) }
+            val message = send(untilPersistent = true) {
+                messageText(linkPreviewGroup, url.asText())
+            }
             val content = message.content as? MessageText ?: return null
-            val webpage = content.webPage ?: let {
-                var tmpMsg: Message? = getSentMessage(message.id)
-                withTimeoutOrNull(5.seconds) {
-                    while (tmpMsg == null) {
-                        delay(1000)
-                        tmpMsg = getSentMessage(message.id)
-                    }
-                }
-                (tmpMsg?.content as? MessageText)?.webPage
-            } ?: return null
+            val webpage = content.webPage ?: return null
             val remoteFile = when (type) {
                 RemoteFileType.PHOTO -> webpage.photo?.sizes?.firstOrNull()?.photo?.remote
                 RemoteFileType.AUDIO -> webpage.audio?.audio?.remote
@@ -189,48 +192,31 @@ object TelegramUserBot {
 
     fun getMe(): User = client.me
 
-    fun getUsername(): String = client.me.usernames.editableUsername
+    fun getUsername(): String = getMe().usernames.editableUsername
 
+    @Suppress("UNCHECKED_CAST")
     suspend inline fun <R : Object> send(
         untilPersistent: Boolean = false,
         timeout: Duration = 5.seconds,
         crossinline block: suspend () -> TdApi.Function<R>
-    ): R =
-        suspendCancellableCoroutine { con ->
-            CoroutineScope(Dispatchers.IO).launch {
-                withTimeout(20.seconds) {
-                    client.send(block.invoke()) { result ->
-                        var handled = false
-                        if (untilPersistent && !result.isError) {
-                            val res = result.get()
-                            if (res is Message && (MessageSendingStatePending.CONSTRUCTOR == res.sendingState?.constructor || null == res.sendingState?.constructor)) {
-                                handled = true
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    log.debug("Try to fetch persistent message by {} from chat {}", res.id, res.chatId)
-                                    runCatching {
-                                        withTimeoutOrNull(timeout) {
-                                            var msg: Message? = getSentMessage(res.id)
-                                            while (isActive && msg == null) {
-                                                delay(1000)
-                                                msg = getSentMessage(res.id)
-                                            }
-                                            log.debug(
-                                                "Fetched persistent message {} by {} from chat {}",
-                                                msg?.id,
-                                                res.id,
-                                                res.chatId
-                                            )
-                                            it.tdlight.client.Result.of(msg)
-                                        } ?: result
-                                    }.let(con::resumeWith)
-                                }
-                            }
-                        }
-                        if (handled.not()) con.resumeWith(Result.success(result))
+    ): R = suspendCancellableCoroutine<it.tdlight.client.Result<R>> { con ->
+        CoroutineScope(Dispatchers.IO).launch {
+            client.send(block.invoke()) { result ->
+                if (untilPersistent && !result.isError) {
+                    val obj = result.get()
+                    if ((obj as? Message)?.sendingState?.constructor == MessageSendingStatePending.CONSTRUCTOR) {
+                        pendingMessage[obj.id] = con as CancellableContinuation<it.tdlight.client.Result<Object>>
+                    } else {
+                        con.resumeWith(Result.success(result))
                     }
+                } else {
+                    con.resumeWith(Result.success(result))
                 }
             }
-        }.get()
+            delay(timeout)
+            if (con.isActive) con.resumeWith(Result.failure(error("Telegram client timeout in $timeout s")))
+        }
+    }.get()
 
     enum class RemoteFileType {
         PHOTO,

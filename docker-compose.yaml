@@ -1,20 +1,21 @@
 version: '3.5'
 services:
-  bot:
-      build: .
-    image: kurenai9/bgm-bot:native-230323
-    container_name: bgm-bot
-    restart: always
-    ports:
-        - "22052:8080"
-    deploy:
-      resources:
-        limits:
-            memory: 100m
-    logging:
-      driver: "json-file"
-      options:
-          max-size: "10m"
-        max-file: "1"
-    volumes:
-      - ./config:/deployments/config
+    bot:
+        build: .
+        image: kurenai9/bgm-bot:native-230323
+        container_name: bgm-bot
+        restart: always
+        ports:
+            - "22052:8080"
+        deploy:
+            resources:
+                limits:
+                    memory: 100m
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "10m"
+                max-file: "1"
+        volumes:
+            - ./config:/deployments/config
+            - ./tdlib:/deployments/tdlib

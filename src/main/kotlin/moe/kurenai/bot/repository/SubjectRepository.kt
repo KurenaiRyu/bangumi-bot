@@ -54,6 +54,7 @@ object SubjectRepository {
     }
 
     suspend fun getContent(sub: Subject, link: String): Array<InputInlineQueryResult> {
+
         val title = "[${sub.type.category()}]　${sub.name}"
         val infoBox = sub.infobox?.formatToList() ?: emptyList()
         val simpleInfoBot =

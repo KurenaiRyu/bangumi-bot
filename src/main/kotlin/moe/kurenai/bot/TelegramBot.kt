@@ -1,11 +1,7 @@
 package moe.kurenai.bot
 
 import com.sksamuel.aedile.core.caffeineBuilder
-import it.tdlight.client.APIToken
-import it.tdlight.client.AuthenticationData
-import it.tdlight.client.SimpleTelegramClient
-import it.tdlight.client.TDLibSettings
-import it.tdlight.common.Init
+import it.tdlight.client.*
 import it.tdlight.jni.TdApi
 import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.*
@@ -17,6 +13,7 @@ import java.nio.file.Paths
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import it.tdlight.client.Result as TdResult
 
 /**
  * @author Kurenai
@@ -27,20 +24,19 @@ object TelegramBot {
 
     val log = getLogger()
 
-    val apiToken: APIToken
+    private val apiToken: APIToken
 
     // Configure the client
-    val settings: TDLibSettings
+    private val settings: TDLibSettings
 
-    val client: SimpleTelegramClient
+    lateinit var client: SimpleTelegramClient
 
-    private val sentMessageCache = caffeineBuilder<Long, Message> {
+    val pendingMessage = caffeineBuilder<Long, CancellableContinuation<TdResult<Object>>> {
         maximumSize = 200
         expireAfterWrite = 5.minutes
     }.build()
 
     init {
-        Init.start()
         apiToken = APIToken(
             Config.CONFIG.telegram.apiId ?: 94575,
             Config.CONFIG.telegram.apiHash ?: "a3406de8d171bb422bb6ddf3bbd800e2"
@@ -54,11 +50,11 @@ object TelegramBot {
             isChatInfoDatabaseEnabled = true
             isMessageDatabaseEnabled = true
         }
-        client = SimpleTelegramClient(settings)
     }
 
     fun start() {
-        client.start(AuthenticationData.bot(Config.CONFIG.telegram.token))
+        client = SimpleTelegramClientFactory().builder(settings)
+            .build(AuthenticationSupplier.bot(Config.CONFIG.telegram.token))
         client.addUpdateHandler(UpdateAuthorizationState::class.java) { update ->
             if (update.authorizationState.constructor == AuthorizationStateReady.CONSTRUCTOR) {
                 log.info("Telegram bot started.")
@@ -79,12 +75,6 @@ object TelegramBot {
             }
         }
     }
-
-    fun cacheSentMessage(update: UpdateMessageSendSucceeded) {
-        sentMessageCache.put(update.oldMessageId, update.message)
-    }
-
-    suspend fun getSentMessage(oldMsgId: Long) = sentMessageCache.getIfPresent(oldMsgId)
 
     suspend fun sendPhoto(chatId: Long, photoUrl: String, msg: FormattedText): Message {
         val remoteFileId = fetchRemoteFile(photoUrl) ?: error("Fetch photo url ($photoUrl) fail!")
@@ -137,44 +127,27 @@ object TelegramBot {
     ): R =
         send(untilPersistent, timeout) { func }
 
+    @Suppress("UNCHECKED_CAST")
     suspend inline fun <R : Object> send(
         untilPersistent: Boolean = false,
         timeout: Duration = 5.seconds,
         crossinline block: suspend () -> TdApi.Function<R>
-    ): R =
-        suspendCancellableCoroutine { con ->
-            CoroutineScope(Dispatchers.IO).launch {
-                withTimeout(20.seconds) {
-                    client.send(block.invoke()) { result ->
-                        var handled = false
-                        if (untilPersistent && !result.isError) {
-                            val res = result.get()
-                            if (res is Message && (MessageSendingStatePending.CONSTRUCTOR == res.sendingState?.constructor || null == res.sendingState?.constructor)) {
-                                handled = true
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    log.debug("Try to fetch persistent message by {} from chat {}", res.id, res.chatId)
-                                    runCatching {
-                                        withTimeoutOrNull(timeout) {
-                                            var msg: Message? = getSentMessage(res.id)
-                                            while (isActive && msg == null) {
-                                                delay(1000)
-                                                msg = getSentMessage(res.id)
-                                            }
-                                            log.debug(
-                                                "Fetched persistent message {} by {} from chat {}",
-                                                msg?.id,
-                                                res.id,
-                                                res.chatId
-                                            )
-                                            it.tdlight.client.Result.of(msg)
-                                        } ?: result
-                                    }.let(con::resumeWith)
-                                }
-                            }
-                        }
-                        if (handled.not()) con.resumeWith(Result.success(result))
+    ): R = suspendCancellableCoroutine<TdResult<R>> { con ->
+        CoroutineScope(Dispatchers.IO).launch {
+            client.send(block.invoke()) { result ->
+                if (untilPersistent && !result.isError) {
+                    val obj = result.get()
+                    if ((obj as? Message)?.sendingState?.constructor == MessageSendingStatePending.CONSTRUCTOR) {
+                        pendingMessage[obj.id] = con as CancellableContinuation<TdResult<Object>>
+                    } else {
+                        con.resumeWith(Result.success(result))
                     }
+                } else {
+                    con.resumeWith(Result.success(result))
                 }
             }
-        }.get()
+            delay(timeout)
+            if (con.isActive) con.resumeWith(Result.failure(error("Telegram client timeout in $timeout s")))
+        }
+    }.get()
 }

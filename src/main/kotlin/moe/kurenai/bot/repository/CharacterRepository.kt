@@ -3,7 +3,6 @@ package moe.kurenai.bot.repository
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.http.*
-import it.tdlight.jni.TdApi
 import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -81,7 +80,7 @@ object CharacterRepository {
             content = "$content\n\n$personStr"
         }
 
-        val entities = arrayOf(TextEntity(0, character.name.length, TdApi.TextEntityTypeTextUrl(link)))
+        val entities = arrayOf(TextEntity(0, character.name.length, TextEntityTypeTextUrl(link)))
         val message = listOfNotNull(title, infoBox.format()).joinToString("\n\n")
         val formatText = FormattedText(message, entities)
 
@@ -90,8 +89,8 @@ object CharacterRepository {
             photoUrl = character.images.getLarge()
             thumbnailUrl = character.images.getLarge()
             this.title = character.name
-            this.inputMessageContent = TdApi.InputMessagePhoto().apply {
-                this.caption = formatText
+            this.inputMessageContent = InputMessageText().apply {
+                this.text = formatText
             }
         }
 
@@ -100,11 +99,11 @@ object CharacterRepository {
                 id = "C${character.id} - txt"
                 thumbnailUrl = character.images.getLarge().toGrid()
                 this.title = character.name
-                this.inputMessageContent = TdApi.InputMessagePhoto().apply {
-                    this.caption = FormattedText(
+                this.inputMessageContent = InputMessageText().apply {
+                    this.text = FormattedText(
                         " $message", arrayOf(
-                            TextEntity(0, 1, TdApi.TextEntityTypeTextUrl(character.images.getLarge())),
-                            TextEntity(1, character.name.length, TdApi.TextEntityTypeTextUrl(link)),
+                            TextEntity(0, 1, TextEntityTypeTextUrl(character.images.getLarge())),
+                            TextEntity(1, character.name.length, TextEntityTypeTextUrl(link)),
                         )
                     )
                 }
@@ -121,7 +120,7 @@ object CharacterRepository {
                 photoUrl = url
                 thumbnailUrl = url
                 this.title = character.name
-                this.inputMessageContent = TdApi.InputMessagePhoto().apply {
+                this.inputMessageContent = InputMessagePhoto().apply {
                     this.caption = formatText
                 }
             })

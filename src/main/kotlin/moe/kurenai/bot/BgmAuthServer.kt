@@ -1,12 +1,17 @@
 package moe.kurenai.bot
 
 import com.sksamuel.aedile.core.caffeineBuilder
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.coroutines.runBlocking
 import moe.kurenai.bgm.exception.BgmException
 import moe.kurenai.bot.BgmAuthServer.authCache
 import moe.kurenai.bot.TelegramBot.getUsername
@@ -16,6 +21,8 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.security.KeyStore
 import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.timerTask
 import kotlin.time.Duration.Companion.minutes
 
 /**
@@ -33,7 +40,9 @@ object BgmAuthServer {
         expireAfterWrite = 10.minutes
     }.build()
 
-    private lateinit var server: NettyApplicationEngine
+    internal val timer = Timer("DDOS-Task", true)
+
+    private lateinit var server: ApplicationEngine
 
     fun start() {
         kotlin.runCatching {
@@ -53,11 +62,34 @@ object BgmAuthServer {
                     module(Application::authModule)
                 }
                 server = embeddedServer(Netty, environment)
+//                server = embeddedServer(Netty, environment)
             }
             server.start(false)
         }.onFailure {
             log.error("Start web server error", it)
         }
+
+        //TODO: Avoid hard code
+        timer.scheduleAtFixedRate(timerTask {
+            runBlocking {
+                val ipResult = HttpClient().get {
+                    url("https://api-ipv4.ip.sb/ip ")
+                    userAgent("Mozilla")
+                }
+                val json = """
+                {
+                  "content": "${ipResult.bodyAsText().trim()}"
+                }
+            """.trimIndent()
+                HttpClient().patch {
+                    url("https://api.cloudflare.com/client/v4/zones/3317d4133b44b844384f76f48f5d804e/dns_records/e69c33d3136591b0adae05d8bbd6ef83")
+                    setBody(json)
+                    contentType(ContentType.Application.Json)
+                    header("X-Auth-Email", "kurenai233@yahoo.com")
+                    header("X-Auth-Key", "41bf28cdc2ae64002bc38c0efaf0e489fc0c6")
+                }
+            }
+        }, 5000L, TimeUnit.HOURS.toMillis(1))
     }
 
     fun genRandomCode(userId: Long): String {

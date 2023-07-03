@@ -12,8 +12,8 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     maven("https://mvn.mchv.eu/repository/mchv/")
-//    maven { url = uri("https://jitpack.io") }
     mavenCentral()
+    google()
     mavenLocal {
         content {
             includeGroup("com.github.kurenairyu")
@@ -25,21 +25,23 @@ object Versions {
     const val vertxVersion = "4.2.3"
     const val log4j = "2.20.0"
     const val ktor = "2.3.0"
-    const val tdlight = "2.8.10.6"
+    const val tdlight = "3.0.11+td.1.8.14"
 }
 dependencies {
-    implementation("org.slf4j:slf4j-api:2.0.6")
     implementation("com.github.kurenairyu:bangumi-sdk:0.0.1")
+
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.21")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("io.ktor:ktor-client-core:${Versions.ktor}")
+    implementation("io.ktor:ktor-network-tls-certificates:${Versions.ktor}")
     implementation("io.ktor:ktor-client-okhttp:${Versions.ktor}")
     implementation("io.ktor:ktor-server-netty:${Versions.ktor}")
-//    implementation("io.ktor:ktor-server-cio:${Versions.ktor}")
+    implementation("io.ktor:ktor-server-cio:${Versions.ktor}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${Versions.ktor}")
 
-    //serializationh
+    //serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("net.mamoe.yamlkt:yamlkt-jvm:0.12.0")
 
@@ -48,29 +50,37 @@ dependencies {
 
     implementation("org.jsoup:jsoup:1.15.3")
 
-//    implementation("org.reflections", "reflections", "0.10.2")
-
     //tdlib
     implementation(platform("it.tdlight:tdlight-java-bom:${Versions.tdlight}"))
     implementation("it.tdlight:tdlight-java")
-    implementation("io.ktor:ktor-client-okhttp-jvm:2.3.0")
     val hostOs = System.getProperty("os.name")
     val isWin = hostOs.startsWith("Windows")
-    when {
-        hostOs == "Linux" -> implementation("it.tdlight:tdlight-natives-linux-amd64")
-        isWin -> implementation("it.tdlight:tdlight-natives-windows-amd64")
+    val classifier = when {
+        hostOs == "Linux" -> "linux_amd64"
+        isWin -> "windows_amd64"
         else -> throw GradleException("[$hostOs] is not support!")
     }
+    implementation(group = "it.tdlight", name = "tdlight-natives", classifier = classifier)
+    //qrcode
+    implementation("com.google.zxing:core:3.5.1")
 
     //logging
+    implementation("org.slf4j:slf4j-api:2.0.6")
     implementation("org.apache.logging.log4j:log4j-core:${Versions.log4j}")
     implementation("org.apache.logging.log4j:log4j-api:${Versions.log4j}")
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:${Versions.log4j}")
     implementation("com.lmax:disruptor:3.4.4")
-//    implementation("ch.qos.logback:logback-classic:1.4.6")
 
     testImplementation(kotlin("test"))
 }
+
+//kotlin {
+//    sourceSets.all {
+//        languageSettings {
+//            languageVersion = "2.0"
+//        }
+//    }
+//}
 
 tasks.test {
     useJUnit()
@@ -99,7 +109,7 @@ tasks.jar {
         attributes["Manifest-Version"] = "1.0"
         attributes["Multi-Release"] = "true"
         attributes["Main-Class"] = main
-        attributes["Class-Path"] = configurations.runtimeClasspath.get().files.map { "lib/${it.name}" }.joinToString(" ")
+        attributes["Class-Path"] = configurations.runtimeClasspath.get().files.joinToString(" ") { "lib/${it.name}" }
     }
     archiveFileName.set("${rootProject.name}.jar")
 }

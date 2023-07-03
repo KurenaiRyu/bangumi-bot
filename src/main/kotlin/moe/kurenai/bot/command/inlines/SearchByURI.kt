@@ -3,6 +3,7 @@ package moe.kurenai.bot.command.inlines
 import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
 import moe.kurenai.bot.TelegramBot.send
+import moe.kurenai.bot.TelegramUserBot
 import moe.kurenai.bot.repository.*
 import moe.kurenai.bot.util.MimeTypes
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
@@ -128,6 +129,7 @@ object SearchByURI {
             "\n\n$up / $playCount $rank" +
             "\n\n${desc.markdown()}").fmt()
         send {
+            TelegramUserBot.sendUrl(videoInfo.data.pic)
             answerInlineQuery(inlineQuery.id, arrayOf(
                 InputInlineQueryResultVideo().apply {
                     this.id = "${videoInfo.data.bvid} - video"
