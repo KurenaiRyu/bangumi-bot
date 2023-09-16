@@ -107,8 +107,8 @@ object CharacterRepository {
                 }
                 thumbnailUrl = character.images.getSmall()
                 this.title = character.name
-                this.inputMessageContent = InputMessageText().apply {
-                    this.text = formattedText
+                this.inputMessageContent = InputMessagePhoto().apply {
+                    this.caption = formattedText
                 }
             },
         )

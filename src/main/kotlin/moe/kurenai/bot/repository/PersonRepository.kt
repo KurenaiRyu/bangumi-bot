@@ -3,7 +3,6 @@ package moe.kurenai.bot.repository
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.http.*
-import it.tdlight.jni.TdApi
 import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,12 +56,14 @@ object PersonRepository {
         val title = person.name
         val infoBox = person.infobox.formatToList()
 
-        val entities = arrayOf(TextEntity(0, person.name.length, TdApi.TextEntityTypeTextUrl(link)))
+        val entities = arrayOf(TextEntity(0, person.name.length, TextEntityTypeTextUrl(link)))
         val caption = listOfNotNull(title, infoBox.format()).joinToString("\n\n")
         val formattedText = FormattedText(caption, entities)
         val default = InputInlineQueryResultPhoto().apply {
             this.id = "P${person.id} - img"
-            photoUrl = person.images.getLarge()
+            photoUrl = person.images.getLarge().also {
+                TelegramUserBot.fetchRemoteFile(it)
+            }
             thumbnailUrl = person.images.getSmall()
             this.title = person.name
             this.inputMessageContent = InputMessagePhoto().apply {
@@ -80,8 +81,8 @@ object PersonRepository {
                 this.inputMessageContent = InputMessageText().apply {
                     text = FormattedText(
                         " $caption", arrayOf(
-                            TextEntity(0, 1, TdApi.TextEntityTypeTextUrl(link)),
-                            TextEntity(0, person.name.length, TdApi.TextEntityTypeTextUrl(link))
+                            TextEntity(0, 1, TextEntityTypeTextUrl(person.images.getLarge())),
+                            TextEntity(1, person.name.length, TextEntityTypeTextUrl(link))
                         )
                     )
                 }

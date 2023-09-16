@@ -219,14 +219,12 @@ object TelegramUserBot {
 
     private suspend fun fetchUrlRemoteFile(url: String, type: RemoteFileType, timeout: Duration): RemoteFile? {
         var result: RemoteFile? = null
-        runCatching {
-            withTimeout(timeout) {
-                result = fetchUrlRemoteFile(url, type)
-                while (result == null) {
-                    delay(200)
-                    result = fetchUrlRemoteFile(url, type)
-                }
-            }
+        result = fetchUrlRemoteFile(url, type)
+        if (result != null) return result
+        val end = System.currentTimeMillis() + timeout.inWholeMilliseconds
+        while (result == null && System.currentTimeMillis() < end) {
+            delay(200)
+            result = fetchUrlRemoteFile(url, type)
         }
         return result
     }
