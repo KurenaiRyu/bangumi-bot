@@ -1,17 +1,23 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.21"
     application
+    kotlin("jvm") version "1.9.10"
+    kotlin("plugin.serialization") version "1.9.10"
+    kotlin("plugin.lombok") version "1.9.10"
+    id("io.freefair.lombok") version "5.3.0"
     id("org.graalvm.buildtools.native") version "0.9.20"
-    kotlin("plugin.serialization") version "1.8.21"
 }
 
 group = "moe.kurenai.bot"
 version = "1.0-SNAPSHOT"
 
 repositories {
-    maven("https://mvn.mchv.eu/repository/mchv/")
+    maven("https://mvn.mchv.eu/repository/mchv/") {
+        content {
+            includeGroup("it.tdlight")
+        }
+    }
     mavenCentral()
     google()
     mavenLocal {
@@ -25,12 +31,13 @@ object Versions {
     const val vertxVersion = "4.2.3"
     const val log4j = "2.20.0"
     const val ktor = "2.3.0"
-    const val tdlight = "3.0.11+td.1.8.14"
+    const val tdlight = "3.1.4+td.1.8.17"
 }
 dependencies {
     implementation("com.github.kurenairyu:bangumi-sdk:0.0.1")
 
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.21")
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.10"))
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
@@ -56,7 +63,7 @@ dependencies {
     val hostOs = System.getProperty("os.name")
     val isWin = hostOs.startsWith("Windows")
     val classifier = when {
-        hostOs == "Linux" -> "linux_amd64"
+        hostOs == "Linux" -> "linux_amd64_gnu_ssl1"
         isWin -> "windows_amd64"
         else -> throw GradleException("[$hostOs] is not support!")
     }
