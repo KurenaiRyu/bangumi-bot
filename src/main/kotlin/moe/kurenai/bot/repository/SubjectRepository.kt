@@ -12,6 +12,7 @@ import moe.kurenai.bgm.model.subject.Subject
 import moe.kurenai.bgm.model.subject.getLarge
 import moe.kurenai.bgm.request.subject.GetSubject
 import moe.kurenai.bot.BangumiBot
+import moe.kurenai.bot.TelegramUserBot
 import moe.kurenai.bot.util.BgmUtil.category
 import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.toGrid
@@ -85,7 +86,9 @@ object SubjectRepository {
             InputInlineQueryResultPhoto().apply {
                 this.id = "S${sub.id} - img"
                 this.title = sub.name
-                this.photoUrl = sub.images.getLarge()
+                this.photoUrl = sub.images.getLarge().also {
+                    TelegramUserBot.fetchRemoteFile(it)
+                }
                 this.thumbnailUrl = sub.images.getLarge()
                 this.inputMessageContent = InputMessagePhoto().apply {
                     this.caption = formattedText
@@ -98,6 +101,7 @@ object SubjectRepository {
                 HttpUtil.getOgImageUrl(Url(it.second))
             }.getOrDefault(emptyList())
         }.forEachIndexed { i, url ->
+            TelegramUserBot.fetchRemoteFile(url)
             resultList.add(
                 InputInlineQueryResultPhoto().apply {
                     this.id = "S${sub.id} - ${i + 1}"

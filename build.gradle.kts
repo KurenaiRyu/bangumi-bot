@@ -34,7 +34,7 @@ object Versions {
     const val tdlight = "3.1.4+td.1.8.17"
 }
 dependencies {
-    implementation("com.github.kurenairyu:bangumi-sdk:0.0.1")
+    implementation(project(":sdk"))
 
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.10"))
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin")

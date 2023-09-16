@@ -68,8 +68,18 @@ object BgmAuthServer {
         }.onFailure {
             log.error("Start web server error", it)
         }
+    }
 
-        //TODO: Avoid hard code
+    fun genRandomCode(userId: Long): String {
+        val randomCode = UUID.randomUUID().toString().replace("-", "")
+        log.info("Generate random code: $randomCode")
+        authCache.put(randomCode, userId)
+        return randomCode
+    }
+
+    //TODO: Avoid hard code
+    @Deprecated("There is no public ip now")
+    private fun runDdosTask() {
         timer.scheduleAtFixedRate(timerTask {
             runBlocking {
                 val ipResult = HttpClient().get {
@@ -90,13 +100,6 @@ object BgmAuthServer {
                 }
             }
         }, 5000L, TimeUnit.HOURS.toMillis(1))
-    }
-
-    fun genRandomCode(userId: Long): String {
-        val randomCode = UUID.randomUUID().toString().replace("-", "")
-        log.info("Generate random code: $randomCode")
-        authCache.put(randomCode, userId)
-        return randomCode
     }
 
 }

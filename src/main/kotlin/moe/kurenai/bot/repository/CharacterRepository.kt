@@ -10,9 +10,11 @@ import kotlinx.coroutines.async
 import moe.kurenai.bgm.model.character.CharacterDetail
 import moe.kurenai.bgm.model.character.CharacterPerson
 import moe.kurenai.bgm.model.subject.getLarge
+import moe.kurenai.bgm.model.subject.getSmall
 import moe.kurenai.bgm.request.charater.GetCharacterDetail
 import moe.kurenai.bgm.request.charater.GetCharacterRelatedPersons
 import moe.kurenai.bot.BangumiBot
+import moe.kurenai.bot.TelegramUserBot
 import moe.kurenai.bot.util.BgmUtil.format
 import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.toGrid
@@ -82,17 +84,7 @@ object CharacterRepository {
 
         val entities = arrayOf(TextEntity(0, character.name.length, TextEntityTypeTextUrl(link)))
         val message = listOfNotNull(title, infoBox.format()).joinToString("\n\n")
-        val formatText = FormattedText(message, entities)
-
-        val defaultResult = InputInlineQueryResultPhoto().apply {
-            id = "C${character.id} - img"
-            photoUrl = character.images.getLarge()
-            thumbnailUrl = character.images.getLarge()
-            this.title = character.name
-            this.inputMessageContent = InputMessageText().apply {
-                this.text = formatText
-            }
-        }
+        val formattedText = FormattedText(message, entities)
 
         val resultList = mutableListOf(
             InputInlineQueryResultArticle().apply {
@@ -108,20 +100,31 @@ object CharacterRepository {
                     )
                 }
             },
-            defaultResult,
+            InputInlineQueryResultPhoto().apply {
+                id = "C${character.id} - img"
+                photoUrl = character.images.getLarge().also {
+                    TelegramUserBot.fetchRemoteFile(it)
+                }
+                thumbnailUrl = character.images.getSmall()
+                this.title = character.name
+                this.inputMessageContent = InputMessageText().apply {
+                    this.text = formattedText
+                }
+            },
         )
         infoBox.filter { it.second.startsWith("http") }.flatMap {
             kotlin.runCatching {
                 HttpUtil.getOgImageUrl(Url(it.second))
             }.getOrDefault(emptyList())
         }.forEachIndexed { i, url ->
+            TelegramUserBot.fetchRemoteFile(url)
             resultList.add(InputInlineQueryResultPhoto().apply {
                 id = "C${character.id} - ${i + 1}"
                 photoUrl = url
                 thumbnailUrl = url
                 this.title = character.name
                 this.inputMessageContent = InputMessagePhoto().apply {
-                    this.caption = formatText
+                    this.caption = formattedText
                 }
             })
         }

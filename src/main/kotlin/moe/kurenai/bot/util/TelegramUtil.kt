@@ -96,4 +96,28 @@ object TelegramUtil {
         }
     }
 
+    fun TdApi.Message.userSender(): TdApi.MessageSenderUser? = this.senderId as? TdApi.MessageSenderUser
+
+    fun TdApi.MessageContent.file() = when (this) {
+        is TdApi.MessageAnimation -> this.animation.animation
+        is TdApi.MessageAudio -> this.audio.audio
+        is TdApi.MessageDocument -> this.document.document
+        is TdApi.MessagePhoto -> this.photo.sizes.maxBy { it.photo.size }.photo
+        is TdApi.MessageSticker -> this.sticker.sticker
+        is TdApi.MessageVideo -> this.video.video
+        else -> null
+    }
+
+    fun TdApi.MessageContent.textOrCaption() = when (this) {
+        is TdApi.MessageAnimation -> this.caption
+        is TdApi.MessageAudio -> this.caption
+        is TdApi.MessageDocument -> this.caption
+        is TdApi.MessagePhoto -> this.caption
+        is TdApi.MessageVideo -> this.caption
+        is TdApi.MessageText -> this.text
+        else -> null
+    }
+
+    fun TdApi.User.username() = this.usernames.activeUsernames.firstOrNull() ?: this.id.toString()
+
 }

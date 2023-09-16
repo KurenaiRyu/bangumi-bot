@@ -132,22 +132,23 @@ object TelegramBot {
         untilPersistent: Boolean = false,
         timeout: Duration = 5.seconds,
         crossinline block: suspend () -> TdApi.Function<R>
-    ): R = suspendCancellableCoroutine<TdResult<R>> { con ->
-        CoroutineScope(Dispatchers.IO).launch {
-            client.send(block.invoke()) { result ->
-                if (untilPersistent && !result.isError) {
-                    val obj = result.get()
-                    if ((obj as? Message)?.sendingState?.constructor == MessageSendingStatePending.CONSTRUCTOR) {
-                        pendingMessage[obj.id] = con as CancellableContinuation<TdResult<Object>>
+    ): R {
+        val request = block.invoke()
+        return withTimeout(timeout) {
+            suspendCancellableCoroutine { con ->
+                client.send(request) { result ->
+                    if (untilPersistent && !result.isError) {
+                        val obj = result.get()
+                        if ((obj as? Message)?.sendingState?.constructor == MessageSendingStatePending.CONSTRUCTOR) {
+                            pendingMessage[obj.id] = con as CancellableContinuation<TdResult<Object>>
+                        } else {
+                            con.resumeWith(Result.success(result.get()))
+                        }
                     } else {
-                        con.resumeWith(Result.success(result))
+                        con.resumeWith(runCatching { result.get() })
                     }
-                } else {
-                    con.resumeWith(Result.success(result))
                 }
             }
-            delay(timeout)
-            if (con.isActive) con.resumeWith(Result.failure(error("Telegram client timeout in $timeout s")))
         }
-    }.get()
+    }
 }

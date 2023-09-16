@@ -11,6 +11,8 @@ import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import moe.kurenai.bot.util.TelegramUtil.asText
 import moe.kurenai.bot.util.TelegramUtil.messageText
+import moe.kurenai.bot.util.TelegramUtil.textOrCaption
+import moe.kurenai.bot.util.TelegramUtil.userSender
 import moe.kurenai.bot.util.getLogger
 import moe.kurenai.bot.util.json
 import java.nio.file.Path
@@ -114,6 +116,9 @@ object TelegramUserBot {
 
     fun handleUpdate(update: Update) = CoroutineScope(Dispatchers.Default).launch {
         when (update) {
+            is UpdateNewMessage -> {
+//                handleMineralwater(update)
+            }
 
             is UpdateMessageSendSucceeded -> {
                 pendingMessage.getIfPresent(update.oldMessageId)?.let {
@@ -128,7 +133,30 @@ object TelegramUserBot {
         }
     }
 
+    @Deprecated("Necessary any more")
+    private suspend fun handleMineralwater(update: UpdateNewMessage) {
+        update.message.userSender()?.let { sender ->
+            if (sender.userId != 537662249L) return
+            update.message.content.textOrCaption()?.let { text ->
+                if (text.text.trim().startsWith("https://twitter.com").not()) return
+                send {
+                    messageText(
+                        update.message.chatId,
+                        text.text.replace("https://twitter.com", "https://fxtwitter.com").asText()
+                    ).apply {
+                        this.replyTo = MessageReplyToMessage().apply {
+                            messageId = update.message.id
+                            chatId = update.message.chatId
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     suspend fun sendUrl(url: String) {
+        val key = "${RemoteFileType.PHOTO}:$url"
+        if (remoteFileCache.contains(key)) return
         val chatId = Config.CONFIG.telegram.linkPreviewGroup ?: return
         send {
             SendMessage().apply {
@@ -140,55 +168,84 @@ object TelegramUserBot {
         }
     }
 
+    /**
+     * Fetch remote file
+     *
+     * @param url
+     * @param type
+     * @return remote file id
+     */
     suspend fun fetchRemoteFile(url: String, type: RemoteFileType = RemoteFileType.PHOTO): String? =
         fetchRemoteFileSemaphore.withPermit {
             val key = "$type:$url"
             val remoteFileId = remoteFileCache.getIfPresent(key)
             if (remoteFileId != null) return remoteFileId
 
-            val linkPreviewGroup = Config.CONFIG.telegram.linkPreviewGroup ?: return null
-            val message = send(untilPersistent = true) {
-                messageText(linkPreviewGroup, url.asText())
-            }
-            val content = message.content as? MessageText ?: return null
-            val webpage = content.webPage ?: return null
-            val remoteFile = when (type) {
-                RemoteFileType.PHOTO -> webpage.photo?.sizes?.firstOrNull()?.photo?.remote
-                RemoteFileType.AUDIO -> webpage.audio?.audio?.remote
-                RemoteFileType.VIDEO -> webpage.video?.video?.remote
-                RemoteFileType.ANIMATION -> webpage.animation?.animation?.remote
-                RemoteFileType.DOCUMENT -> webpage.document?.document?.remote
-            } ?: return null
-            return (send {
-                SendMessage().apply {
-                    this.chatId = Config.CONFIG.telegram.linkPreviewGroup!!
-                    this.inputMessageContent = when (type) {
-                        RemoteFileType.PHOTO -> InputMessagePhoto().apply {
-                            this.photo = InputFileRemote(remoteFile.id)
-                        }
+            val remoteFile = fetchUrlRemoteFile(url, type, 2.seconds) ?: return null
 
-                        RemoteFileType.AUDIO -> InputMessageAudio().apply {
-                            this.audio = InputFileRemote(remoteFile.id)
-                        }
+            remoteFileCache.put(key, remoteFile.id)
+            log.debug("Put remote file cache {}: {}", key, remoteFile.id)
+            remoteFile.id
+//            return (send {
+//                SendMessage().apply {
+//                    this.chatId = Config.CONFIG.telegram.linkPreviewGroup!!
+//                    this.inputMessageContent = when (type) {
+//                        RemoteFileType.PHOTO -> InputMessagePhoto().apply {
+//                            this.photo = InputFileRemote(remoteFile.id)
+//                        }
+//
+//                        RemoteFileType.AUDIO -> InputMessageAudio().apply {
+//                            this.audio = InputFileRemote(remoteFile.id)
+//                        }
+//
+//                        RemoteFileType.VIDEO -> InputMessageVideo().apply {
+//                            this.video = InputFileRemote(remoteFile.id)
+//                        }
+//
+//                        RemoteFileType.ANIMATION -> InputMessageAnimation().apply {
+//                            this.animation = InputFileRemote(remoteFile.id)
+//                        }
+//
+//                        RemoteFileType.DOCUMENT -> InputMessageDocument().apply {
+//                            this.document = InputFileRemote(remoteFile.id)
+//                        }
+//                    }
+//                }
+//            }.content as? MessagePhoto)?.photo?.sizes?.firstOrNull()?.photo?.remote?.id?.also {
+//                remoteFileCache.put(key, it)
+//                log.debug("Put remote file cache {}: {}", key, it)
+//            }
+        }
 
-                        RemoteFileType.VIDEO -> InputMessageVideo().apply {
-                            this.video = InputFileRemote(remoteFile.id)
-                        }
-
-                        RemoteFileType.ANIMATION -> InputMessageAnimation().apply {
-                            this.animation = InputFileRemote(remoteFile.id)
-                        }
-
-                        RemoteFileType.DOCUMENT -> InputMessageDocument().apply {
-                            this.document = InputFileRemote(remoteFile.id)
-                        }
-                    }
+    private suspend fun fetchUrlRemoteFile(url: String, type: RemoteFileType, timeout: Duration): RemoteFile? {
+        var result: RemoteFile? = null
+        runCatching {
+            withTimeout(timeout) {
+                result = fetchUrlRemoteFile(url, type)
+                while (result == null) {
+                    delay(200)
+                    result = fetchUrlRemoteFile(url, type)
                 }
-            }.content as? MessagePhoto)?.photo?.sizes?.firstOrNull()?.photo?.remote?.id?.also {
-                log.debug("Put remote file cache {}: {}", key, it)
-                remoteFileCache.put(key, it)
             }
         }
+        return result
+    }
+
+    private suspend fun fetchUrlRemoteFile(url: String, type: RemoteFileType): RemoteFile? {
+        val linkPreviewGroup = Config.CONFIG.telegram.linkPreviewGroup ?: return null
+        val message = send(untilPersistent = true) {
+            messageText(linkPreviewGroup, url.asText())
+        }
+        val content = message.content as? MessageText ?: return null
+        val webpage = content.webPage ?: return null
+        return when (type) {
+            RemoteFileType.PHOTO -> webpage.photo?.sizes?.firstOrNull()?.photo?.remote
+            RemoteFileType.AUDIO -> webpage.audio?.audio?.remote
+            RemoteFileType.VIDEO -> webpage.video?.video?.remote
+            RemoteFileType.ANIMATION -> webpage.animation?.animation?.remote
+            RemoteFileType.DOCUMENT -> webpage.document?.document?.remote
+        }
+    }
 
     fun getMe(): User = client.me
 
