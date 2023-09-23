@@ -23,6 +23,7 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
+import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
@@ -175,61 +176,44 @@ object TelegramUserBot {
      * @param type
      * @return remote file id
      */
-    suspend fun fetchRemoteFile(url: String, type: RemoteFileType = RemoteFileType.PHOTO): String? =
+    suspend fun fetchRemoteFileId(url: String, type: RemoteFileType = RemoteFileType.PHOTO): String? =
         fetchRemoteFileSemaphore.withPermit {
             val key = "$type:$url"
             val remoteFileId = remoteFileCache.getIfPresent(key)
             if (remoteFileId != null) return remoteFileId
 
-            val remoteFile = fetchUrlRemoteFile(url, type, 2.seconds) ?: return null
+            val remoteFile = fetchRemoteFile(url, type, 5.seconds) ?: return null
 
             remoteFileCache.put(key, remoteFile.id)
             log.debug("Put remote file cache {}: {}", key, remoteFile.id)
             remoteFile.id
-//            return (send {
-//                SendMessage().apply {
-//                    this.chatId = Config.CONFIG.telegram.linkPreviewGroup!!
-//                    this.inputMessageContent = when (type) {
-//                        RemoteFileType.PHOTO -> InputMessagePhoto().apply {
-//                            this.photo = InputFileRemote(remoteFile.id)
-//                        }
-//
-//                        RemoteFileType.AUDIO -> InputMessageAudio().apply {
-//                            this.audio = InputFileRemote(remoteFile.id)
-//                        }
-//
-//                        RemoteFileType.VIDEO -> InputMessageVideo().apply {
-//                            this.video = InputFileRemote(remoteFile.id)
-//                        }
-//
-//                        RemoteFileType.ANIMATION -> InputMessageAnimation().apply {
-//                            this.animation = InputFileRemote(remoteFile.id)
-//                        }
-//
-//                        RemoteFileType.DOCUMENT -> InputMessageDocument().apply {
-//                            this.document = InputFileRemote(remoteFile.id)
-//                        }
-//                    }
-//                }
-//            }.content as? MessagePhoto)?.photo?.sizes?.firstOrNull()?.photo?.remote?.id?.also {
-//                remoteFileCache.put(key, it)
-//                log.debug("Put remote file cache {}: {}", key, it)
-//            }
         }
 
-    private suspend fun fetchUrlRemoteFile(url: String, type: RemoteFileType, timeout: Duration): RemoteFile? {
+    private suspend fun fetchRemoteFile(url: String, type: RemoteFileType, timeout: Duration): RemoteFile? {
         var result: RemoteFile? = null
-        result = fetchUrlRemoteFile(url, type)
-        if (result != null) return result
+        result = fetchFile(url, type)?.remote
+        if (result != null && result.isUploadingCompleted) return result
         val end = System.currentTimeMillis() + timeout.inWholeMilliseconds
-        while (result == null && System.currentTimeMillis() < end) {
+        var completed = false
+        while ((result == null || !completed) && System.currentTimeMillis() < end) {
             delay(200)
-            result = fetchUrlRemoteFile(url, type)
+            result = fetchFile(url, type)?.let {
+                log.debug(
+                    "upload file [{}] {}/{}({}%): {}",
+                    it.id, it.remote.uploadedSize,
+                    it.local.downloadedSize,
+                    if (it.local.downloadedSize == 0L) "NaN"
+                    else (it.remote.uploadedSize / it.local.downloadedSize * 100.0).roundToInt(),
+                    it.local.path,
+                )
+                completed = it.remote.isUploadingCompleted
+                it.remote
+            }
         }
         return result
     }
 
-    private suspend fun fetchUrlRemoteFile(url: String, type: RemoteFileType): RemoteFile? {
+    private suspend fun fetchFile(url: String, type: RemoteFileType): File? {
         val linkPreviewGroup = Config.CONFIG.telegram.linkPreviewGroup ?: return null
         val message = send(untilPersistent = true) {
             messageText(linkPreviewGroup, url.asText())
@@ -237,11 +221,11 @@ object TelegramUserBot {
         val content = message.content as? MessageText ?: return null
         val webpage = content.webPage ?: return null
         return when (type) {
-            RemoteFileType.PHOTO -> webpage.photo?.sizes?.firstOrNull()?.photo?.remote
-            RemoteFileType.AUDIO -> webpage.audio?.audio?.remote
-            RemoteFileType.VIDEO -> webpage.video?.video?.remote
-            RemoteFileType.ANIMATION -> webpage.animation?.animation?.remote
-            RemoteFileType.DOCUMENT -> webpage.document?.document?.remote
+            RemoteFileType.PHOTO -> webpage.photo?.sizes?.firstOrNull()?.photo
+            RemoteFileType.AUDIO -> webpage.audio?.audio
+            RemoteFileType.VIDEO -> webpage.video?.video
+            RemoteFileType.ANIMATION -> webpage.animation?.animation
+            RemoteFileType.DOCUMENT -> webpage.document?.document
         }
     }
 

@@ -11,7 +11,7 @@ import moe.kurenai.bot.util.TelegramUtil.answerInlineQueryEmpty
 import moe.kurenai.bot.util.TelegramUtil.fmt
 import moe.kurenai.bot.util.TelegramUtil.markdown
 import moe.kurenai.bot.util.getLogger
-import moe.kurenai.bot.util.limit
+import moe.kurenai.bot.util.trimString
 import java.net.URI
 import kotlin.math.roundToInt
 
@@ -113,7 +113,7 @@ object SearchByURI {
 
     private suspend fun handleBiliBili(inlineQuery: UpdateNewInlineQuery, id: String, p: Int) {
         val videoInfo = BiliBiliRepository.getVideoInfo(id)
-        val desc = videoInfo.data.desc.limit()
+        val desc = videoInfo.data.desc.trimString()
         val page = videoInfo.data.pages.find { it.page == p } ?: run {
             fallback(inlineQuery)
             return
@@ -129,7 +129,7 @@ object SearchByURI {
             "\n\n$up / $playCount $rank" +
             "\n\n${desc.markdown()}").fmt()
         send {
-            TelegramUserBot.fetchRemoteFile(videoInfo.data.pic) ?: run {
+            TelegramUserBot.fetchRemoteFileId(videoInfo.data.pic) ?: run {
                 log.warn("Fetch video image fail.")
             }
             answerInlineQuery(inlineQuery.id, arrayOf(

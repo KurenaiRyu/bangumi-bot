@@ -29,7 +29,7 @@
     </Appenders>
     <Loggers>
         <!-- avoid duplicated logs with additivity=false -->
-        <Logger name="moe.kurenai.bot.command" level="trace" additivity="false" includeLocation="true">
+        <Logger name="moe.kurenai.bot.command" level="debug" additivity="false" includeLocation="true">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="RandomAccessFile"/>
         </Logger>

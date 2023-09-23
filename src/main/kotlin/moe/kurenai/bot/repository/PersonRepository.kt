@@ -62,7 +62,7 @@ object PersonRepository {
         val default = InputInlineQueryResultPhoto().apply {
             this.id = "P${person.id} - img"
             photoUrl = person.images.getLarge().also {
-                TelegramUserBot.fetchRemoteFile(it)
+                TelegramUserBot.fetchRemoteFileId(it)
             }
             thumbnailUrl = person.images.getSmall()
             this.title = person.name
@@ -94,7 +94,7 @@ object PersonRepository {
                 HttpUtil.getOgImageUrl(Url(it.second))
             }.getOrDefault(emptyList())
         }.forEachIndexed { i, url ->
-            TelegramUserBot.fetchRemoteFile(url)
+            TelegramUserBot.fetchRemoteFileId(url)
             resultList.add(InputInlineQueryResultPhoto().apply {
                 this.id = "P${person.id} - ${i + 1}"
                 photoUrl = url

@@ -87,7 +87,7 @@ object SubjectRepository {
                 this.id = "S${sub.id} - img"
                 this.title = sub.name
                 this.photoUrl = sub.images.getLarge().also {
-                    TelegramUserBot.fetchRemoteFile(it)
+                    TelegramUserBot.fetchRemoteFileId(it)
                 }
                 this.thumbnailUrl = sub.images.getLarge()
                 this.inputMessageContent = InputMessagePhoto().apply {
@@ -101,7 +101,7 @@ object SubjectRepository {
                 HttpUtil.getOgImageUrl(Url(it.second))
             }.getOrDefault(emptyList())
         }.forEachIndexed { i, url ->
-            TelegramUserBot.fetchRemoteFile(url)
+            TelegramUserBot.fetchRemoteFileId(url)
             resultList.add(
                 InputInlineQueryResultPhoto().apply {
                     this.id = "S${sub.id} - ${i + 1}"
