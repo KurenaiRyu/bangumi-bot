@@ -103,7 +103,7 @@ object CharacterRepository {
             InputInlineQueryResultPhoto().apply {
                 id = "C${character.id} - img"
                 photoUrl = character.images.getLarge().also {
-                    TelegramUserBot.fetchRemoteFileId(it)
+                    TelegramUserBot.fetchRemoteFileIdByUrl(it)
                 }
                 thumbnailUrl = character.images.getSmall()
                 this.title = character.name
@@ -117,7 +117,7 @@ object CharacterRepository {
                 HttpUtil.getOgImageUrl(Url(it.second))
             }.getOrDefault(emptyList())
         }.forEachIndexed { i, url ->
-            TelegramUserBot.fetchRemoteFileId(url)
+            TelegramUserBot.fetchRemoteFileIdByUrl(url)
             resultList.add(InputInlineQueryResultPhoto().apply {
                 id = "C${character.id} - ${i + 1}"
                 photoUrl = url

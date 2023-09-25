@@ -23,7 +23,6 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
-import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
@@ -176,48 +175,53 @@ object TelegramUserBot {
      * @param type
      * @return remote file id
      */
-    suspend fun fetchRemoteFileId(url: String, type: RemoteFileType = RemoteFileType.PHOTO): String? =
+    suspend fun fetchRemoteFileIdByUrl(url: String, type: RemoteFileType = RemoteFileType.PHOTO): String? =
         fetchRemoteFileSemaphore.withPermit {
             val key = "$type:$url"
             val remoteFileId = remoteFileCache.getIfPresent(key)
             if (remoteFileId != null) return remoteFileId
 
-            val remoteFile = fetchRemoteFile(url, type, 5.seconds) ?: return null
+            val remoteFile = fetchRemoteFileByUrl(url, type) ?: return null
 
             remoteFileCache.put(key, remoteFile.id)
             log.debug("Put remote file cache {}: {}", key, remoteFile.id)
             remoteFile.id
         }
 
-    private suspend fun fetchRemoteFile(url: String, type: RemoteFileType, timeout: Duration): RemoteFile? {
-        var result: RemoteFile? = null
-        result = fetchFile(url, type)?.remote
-        if (result != null && result.isUploadingCompleted) return result
-        val end = System.currentTimeMillis() + timeout.inWholeMilliseconds
-        var completed = false
-        while ((result == null || !completed) && System.currentTimeMillis() < end) {
-            delay(200)
-            result = fetchFile(url, type)?.let {
-                log.debug(
-                    "upload file [{}] {}/{}({}%): {}",
-                    it.id, it.remote.uploadedSize,
-                    it.local.downloadedSize,
-                    if (it.local.downloadedSize == 0L) "NaN"
-                    else (it.remote.uploadedSize / it.local.downloadedSize * 100.0).roundToInt(),
-                    it.local.path,
-                )
-                completed = it.remote.isUploadingCompleted
-                it.remote
-            }
-        }
-        return result
-    }
-
-    private suspend fun fetchFile(url: String, type: RemoteFileType): File? {
+    private suspend fun fetchRemoteFileByUrl(
+        url: String,
+        type: RemoteFileType,
+        timeout: Duration = 5.seconds
+    ): RemoteFile? {
+        var file: File?
         val linkPreviewGroup = Config.CONFIG.telegram.linkPreviewGroup ?: return null
         val message = send(untilPersistent = true) {
             messageText(linkPreviewGroup, url.asText())
         }
+        file = getFile(message, type)
+        if (file?.remote?.isUploadingCompleted == true) return file.remote
+        val end = System.currentTimeMillis() + timeout.inWholeMilliseconds
+        var completed = false
+        while ((file == null || !completed) && System.currentTimeMillis() < end) {
+            delay(200)
+            file = if (file == null) {
+                send(untilPersistent = true) {
+                    GetMessage(linkPreviewGroup, message.id)
+                }?.let {
+                    getFile(it, type)
+                }
+            } else {
+                send(untilPersistent = true) { GetFile(file!!.id) }
+            }?.also {
+                log.debug("upload file [{}] {}", it.id, it.remote.uploadedSize)
+                completed = it.remote?.isUploadingCompleted ?: false
+            }
+
+        }
+        return file?.remote
+    }
+
+    private fun getFile(message: Message, type: RemoteFileType): File? {
         val content = message.content as? MessageText ?: return null
         val webpage = content.webPage ?: return null
         return when (type) {

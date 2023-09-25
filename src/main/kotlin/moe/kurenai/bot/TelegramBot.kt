@@ -5,7 +5,7 @@ import it.tdlight.client.*
 import it.tdlight.jni.TdApi
 import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.*
-import moe.kurenai.bot.TelegramUserBot.fetchRemoteFileId
+import moe.kurenai.bot.TelegramUserBot.fetchRemoteFileIdByUrl
 import moe.kurenai.bot.command.CommandDispatcher
 import moe.kurenai.bot.util.TelegramUtil.asText
 import moe.kurenai.bot.util.getLogger
@@ -77,7 +77,7 @@ object TelegramBot {
     }
 
     suspend fun sendPhoto(chatId: Long, photoUrl: String, msg: FormattedText): Message {
-        val remoteFileId = fetchRemoteFileId(photoUrl) ?: error("Fetch photo url ($photoUrl) fail!")
+        val remoteFileId = fetchRemoteFileIdByUrl(photoUrl) ?: error("Fetch photo url ($photoUrl) fail!")
 
         return send {
             SendMessage().apply {
@@ -92,7 +92,7 @@ object TelegramBot {
 
     suspend fun sendAlbumPhoto(chatId: Long, pairs: Map<String, String>): Messages {
         val contents = pairs.entries.mapNotNull { (url, msg) ->
-            val remoteFileId = fetchRemoteFileId(url) ?: run {
+            val remoteFileId = fetchRemoteFileIdByUrl(url) ?: run {
                 log.warn("Fetch photo url ({}) fail!", url)
                 return@mapNotNull null
             }

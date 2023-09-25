@@ -129,7 +129,7 @@ object SearchByURI {
             "\n\n$up / $playCount $rank" +
             "\n\n${desc.markdown()}").fmt()
         send {
-            TelegramUserBot.fetchRemoteFileId(videoInfo.data.pic) ?: run {
+            TelegramUserBot.fetchRemoteFileIdByUrl(videoInfo.data.pic) ?: run {
                 log.warn("Fetch video image fail.")
             }
             answerInlineQuery(inlineQuery.id, arrayOf(
