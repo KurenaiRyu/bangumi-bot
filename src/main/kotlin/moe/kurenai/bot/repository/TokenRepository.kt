@@ -1,10 +1,10 @@
 package moe.kurenai.bot.repository
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import moe.kurenai.bgm.exception.BgmException
@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * @author Kurenai
@@ -30,10 +31,7 @@ object TokenRepository {
     private val log = LoggerFactory.getLogger(TokenRepository::class.java)
     private const val tokenFilePath = "config/token.json"
     private val lock = Mutex()
-
-    init {
-        loadToken()
-    }
+    private val fileLock = Mutex()
 
     @Serializable
     data class TokenEntity(
@@ -42,7 +40,7 @@ object TokenRepository {
         val expires: Long
     )
 
-    private val tokens: ConcurrentHashMap<Long, TokenEntity> = ConcurrentHashMap(loadToken().associateBy { it.userId })
+    internal val tokens: ConcurrentHashMap<Long, TokenEntity> = ConcurrentHashMap(loadToken().associateBy { it.userId })
 
     private fun loadToken(): List<TokenEntity> {
         val tokenPath = Path.of(tokenFilePath)
@@ -66,46 +64,42 @@ object TokenRepository {
     suspend fun findById(userId: Long): AccessToken? {
         return tokens[userId]?.let { entity ->
             lock.withLock {
-                if (entity.expires > LocalDateTime.now().atOffset(ZoneOffset.ofHours(8)).toEpochSecond()) {
-                    entity.accessToken
-                } else {
-                    kotlin.runCatching {
-                        BangumiBot.bgmClient.refreshToken(entity.accessToken.refreshToken)
-                    }.onFailure {
-                        if (it.cause is BgmException) {
-                            tokens.remove(userId)
+                withTimeout(30.seconds) {
+                    if (entity.expires > LocalDateTime.now().atOffset(ZoneOffset.ofHours(8)).toEpochSecond()) {
+                        entity.accessToken
+                    } else {
+                        kotlin.runCatching {
+                            BangumiBot.bgmClient.refreshToken(entity.accessToken.refreshToken)
+                        }.onFailure {
+                            if (it.cause is BgmException) {
+                                tokens.remove(userId)
+                            }
+                        }.onSuccess {
+                            tokens[userId] = entity.copy(accessToken = it, expires = it.expiresIn + getNowSeconds())
+                        }.getOrNull().also {
+                            save()
                         }
-                    }.onSuccess {
-                        tokens[userId] = entity.copy(accessToken = it, expires = it.expiresIn + getNowSeconds())
-                    }.getOrNull().also {
-                        save()
                     }
                 }
             }
         }
     }
 
-    private fun save() {
-        CoroutineScope(Dispatchers.IO).launch {
-            lock.withLock {
-                Path.of(tokenFilePath).writeText(json.encodeToString(ListSerializer(TokenEntity.serializer()), tokens.values.toList()))
-            }
+    private suspend fun save() {
+        withContext(Dispatchers.IO) {
+            Path.of(tokenFilePath)
+                .writeText(json.encodeToString(ListSerializer(TokenEntity.serializer()), tokens.values.toList()))
         }
     }
 
-    suspend fun put(userId: Long, accessToken: AccessToken) {
-        lock.withLock {
-            val old = tokens[userId]
-            tokens[userId] = if (old == null) {
-                TokenEntity(userId, accessToken, accessToken.computeExpires())
-            } else {
-                old.copy(accessToken = accessToken, expires = accessToken.expiresIn + getNowSeconds())
-            }
-        }
+    suspend fun put(userId: Long, accessToken: AccessToken) = lock.withLock {
+        val old = tokens[userId]
+        tokens[userId] = old?.copy(accessToken = accessToken, expires = accessToken.expiresIn + getNowSeconds())
+            ?: TokenEntity(userId, accessToken, accessToken.computeExpires())
         save()
     }
 
-    fun putIfAbsent(userId: Long, accessToken: AccessToken) {
+    suspend fun putIfAbsent(userId: Long, accessToken: AccessToken) = lock.withLock {
         tokens.putIfAbsent(userId, TokenEntity(userId, accessToken, accessToken.computeExpires()))
         save()
     }

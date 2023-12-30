@@ -3,7 +3,7 @@ package moe.kurenai.bot.command.commands
 import it.tdlight.jni.TdApi.Message
 import it.tdlight.jni.TdApi.MessageSenderUser
 import moe.kurenai.bgm.exception.BgmException
-import moe.kurenai.bgm.exception.UnauthorizedException
+import moe.kurenai.bgm.model.error.UnauthorizedError
 import moe.kurenai.bgm.request.user.GetMe
 import moe.kurenai.bot.BangumiBot.bgmClient
 import moe.kurenai.bot.BangumiBot.send
@@ -41,13 +41,14 @@ class Start : CommandHandler {
         }.recover {
             log.error(it.message, it)
             if (it is BgmException) {
-                if (it is UnauthorizedException) {
+                val error = it.error
+                if (error is UnauthorizedError) {
                     doBind(userId, message)
                 } else {
                     send {
                         messageText(
                             message.chatId,
-                            "请求bgm异常: [${it.code}] ${it.error} ${it.message ?: ""}".asText()
+                            "请求bgm异常: [${error.code}] ${error.error} ${it.message ?: ""}".asText()
                         )
                     }
                 }

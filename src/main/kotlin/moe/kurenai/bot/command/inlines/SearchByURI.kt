@@ -190,7 +190,7 @@ object SearchByURI {
                 InputInlineQueryResultVideo().apply {
                     this.id = "${videoInfo.data.bvid} - video"
                     title = videoInfo.data.title
-                    videoUrl = streamInfo.data.durl.first().url
+                    videoUrl = streamInfo.data.durl!!.first().url
                     thumbnailUrl = videoInfo.data.pic
                     mimeType = MimeTypes.Video.MP4
                     inputMessageContent = InputMessageVideo().apply {
@@ -205,7 +205,7 @@ object SearchByURI {
                     inputMessageContent = InputMessagePhoto().apply {
                         this.caption = content
                     }
-                }
+                },
             ))
         }
     }

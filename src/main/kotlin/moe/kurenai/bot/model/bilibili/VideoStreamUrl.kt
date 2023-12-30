@@ -31,13 +31,14 @@ data class VideoStreamUrl(
         val seekParam: String,
         @SerialName("seek_type")
         val seekType: String,
-        val durl: List<Durl>,
+        val durl: List<Durl>? = null,
         @SerialName("support_formats")
         val supportFormats: List<SupportFormat>,
         @SerialName("last_play_time")
         val lastPlayTime: Int,
         @SerialName("last_play_cid")
         val lastPlayCid: Int,
+        val dash: Dash? = null
     ) {
         @Serializable
         data class Durl(
@@ -60,7 +61,67 @@ data class VideoStreamUrl(
             @SerialName("display_desc")
             val displayDesc: String,
             val superscript: String,
-            val codecs: String? = null
+            val codecs: List<String>? = null
         )
+
+        @Serializable
+        data class Dash(
+            val audio: List<Audio>,
+            val duration: Int,
+            val minBufferTime: Double,
+            val video: List<Video>
+        ) {
+            @Serializable
+            data class Audio(
+                val backupUrl: List<String>,
+                val bandwidth: Int,
+                val baseUrl: String,
+                val codecid: Int,
+                val codecs: String,
+                val frameRate: String,
+                val height: Int,
+                val id: Int,
+                val mimeType: String,
+                val sar: String,
+                @SerialName("segment_base")
+                val segmentBase: SegmentBase,
+                val startWithSap: Int,
+                val width: Int
+            ) {
+
+                @Serializable
+                data class SegmentBase(
+                    @SerialName("index_range")
+                    val indexRange: String,
+                    val initialization: String
+                )
+            }
+
+            @Serializable
+            data class Video(
+                val backupUrl: List<String>,
+                val bandwidth: Int,
+                val baseUrl: String,
+                val codecid: Int,
+                val codecs: String,
+                val frameRate: String,
+                val height: Int,
+                val id: Int,
+                val mimeType: String,
+                val sar: String,
+                @SerialName("segment_base")
+                val segmentBase: SegmentBase,
+                val startWithSap: Int,
+                val width: Int
+            ) {
+
+                @Serializable
+                data class SegmentBase(
+                    @SerialName("index_range")
+                    val indexRange: String,
+                    val initialization: String
+                )
+            }
+        }
     }
 }

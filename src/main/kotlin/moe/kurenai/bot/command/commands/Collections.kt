@@ -100,10 +100,11 @@ class Collections : CommandHandler {
         }.recover {
             log.error(it.message, it)
             if (it is BgmException) {
+                val error = it.error
                 send {
                     messageText(
                         message.chatId,
-                        "请求Bgm异常: [${it.code}] ${it.error} ${it.message ?: ""}".asText()
+                        "请求Bgm异常: [${error.code}] ${error.error} ${it.message ?: ""}".asText()
                     )
                 }
             } else {

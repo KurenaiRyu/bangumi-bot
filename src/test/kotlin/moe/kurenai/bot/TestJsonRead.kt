@@ -10,9 +10,10 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import moe.kurenai.bgm.exception.BgmException
-import moe.kurenai.bgm.exception.NotFoundException
-import moe.kurenai.bgm.exception.UnauthorizedException
-import moe.kurenai.bgm.exception.ValidationError
+import moe.kurenai.bgm.model.error.BgmError
+import moe.kurenai.bgm.model.error.NotFoundError
+import moe.kurenai.bgm.model.error.UnauthorizedError
+import moe.kurenai.bgm.model.error.ValidationError
 import moe.kurenai.bgm.request.auth.AccessTokenGrantType
 import moe.kurenai.bgm.request.auth.AccessTokenRequest
 import moe.kurenai.bgm.util.DefaultMapper
@@ -159,19 +160,19 @@ class TestJsonRead {
             }
 
             HttpStatusCode.Unauthorized -> {
-                throw MAPPER.readValue(body, UnauthorizedException::class.java)
+                throw BgmException(MAPPER.readValue(body, UnauthorizedError::class.java))
             }
 
             HttpStatusCode.NotFound -> {
-                throw MAPPER.readValue(body, NotFoundException::class.java)
+                throw BgmException(MAPPER.readValue(body, NotFoundError::class.java))
             }
 
             HttpStatusCode.UnprocessableEntity -> {
-                throw MAPPER.readValue(body, ValidationError::class.java)
+                throw BgmException(MAPPER.readValue(body, ValidationError::class.java))
             }
 
             else -> {
-                throw BgmException("Unknown response type")
+                throw BgmException(BgmError("Unknown response type"))
             }
         }
     }

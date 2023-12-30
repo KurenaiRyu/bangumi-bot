@@ -123,10 +123,11 @@ fun Application.authModule() {
                             authCache.invalidate(randomCode)
                         }.onFailure {
                             val message = if (it is BgmException) {
-                                "${it.error} ${it.errorDescription}".ifBlank { it.message }
+                                val error = it.error
+                                "${error.error} ${error.errorDescription}".ifBlank { it.message }
                             } else it.message
                             log.error(message, it)
-                            call.respondText { "Error: ${message} \n请从新发送指令进行绑定！" }
+                            call.respondText { "Error: $message \n请从新发送指令进行绑定！" }
                         }
                     } ?: kotlin.run {
                         call.respondText { "随机码失效，请从新发送指令进行绑定！" }
