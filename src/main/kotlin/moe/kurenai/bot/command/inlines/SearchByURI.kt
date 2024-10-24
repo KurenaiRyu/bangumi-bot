@@ -27,6 +27,7 @@ object SearchByURI {
             "b23.wtf" -> handleBiliBiliShortLink(inlineQuery, URI.create(uri.toString().replace("b23.wtf", "b23.tv")))
             "b23.tv" -> handleBiliBiliShortLink(inlineQuery, uri)
             "www.bilibili.com" -> handleBiliBili(inlineQuery, uri)
+            "t.bilibili.com" -> handleBiliDynamic(inlineQuery, uri)
             else -> {
                 val params = uri.path.split("/")
                 if (params.size != 3) {
@@ -36,6 +37,54 @@ object SearchByURI {
                 }
             }
         }
+    }
+
+    private suspend fun handleBiliDynamic(inlineQuery: UpdateNewInlineQuery, uri: URI) {
+        val id = uri.path.substringAfterLast("/").takeIf { it.isNotBlank() }?: run {
+            fallback(inlineQuery)
+            return
+        }
+        val info = BiliBiliRepository.getDynamicDetail(id)
+        val moduleDynamic = info.data.item.modules.moduleDynamic
+
+        val content = moduleDynamic.major?.opus?.summary?.text?: moduleDynamic.desc?.text?: ""
+        val summary = "${info.data.item.modules.moduleAuthor.name} - ${info.data.item.modules.moduleAuthor.pubTime}:\n\n$content\n\n${uri.path}"
+
+        var caption = summary.markdown().fmt()
+
+        info.data.item.orig?.let { orig ->
+            val quoteContent = orig.modules.moduleDynamic.major?.opus?.summary?.text?: moduleDynamic.desc?.text?: ""
+            val quoteSummary = "${orig.modules.moduleAuthor.name} - ${orig.modules.moduleAuthor.pubTime}:\n\n$quoteContent\n\n${orig.basic.jumpUrl?:""}"
+            val start = caption.text.length
+            caption.entities +=  TextEntity().apply {
+                this.offset = start
+                this.length = quoteSummary.length
+                this.type = TextEntityTypeBold()
+            }
+            caption.text += quoteSummary
+        }
+
+        val fmText = FormattedText().apply {
+            text = summary
+        }
+
+        val items: Array<InputInlineQueryResult> = moduleDynamic.major.opus.pics.mapIndexed { index, pic ->
+            val picId = pic.url.substringAfterLast("/")
+            InputInlineQueryResultPhoto().apply {
+                this.id = "dynamic - $id - $picId"
+                title = "${info.data.item.modules.moduleAuthor.name} ${info.data.item.modules.moduleAuthor.pubTime}[$index]"
+                thumbnailUrl = pic.url
+                photoUrl = pic.url
+                photoWidth = pic.width
+                photoHeight = pic.height
+                inputMessageContent = InputMessagePhoto().apply {
+                    this.caption = fmText
+                }
+            }
+        }.toTypedArray()
+
+        answerInlineQuery(inlineQuery.id, items)
+
     }
 
     private suspend fun handleBgm(params: List<String>, inlineQuery: UpdateNewInlineQuery, uri: URI) {
@@ -97,11 +146,16 @@ object SearchByURI {
 
     private suspend fun handleBiliBili(inlineQuery: UpdateNewInlineQuery, uri: URI) {
         log.info("Handle BiliBili")
+        if (uri.path.contains("www.bilibili.com/opus")) {
+            handleBiliDynamic(inlineQuery, uri)
+            return
+        }
+
         // https://www.bilibili.com/video/BV1Fx4y1w78G/?p=1
         val url = Url(uri)
         val segments = Url(uri).pathSegments
         val id = segments.last().takeIf { it.isNotBlank() } ?: segments[segments.lastIndex - 1]
-        val p = url.parameters["p"]?.toInt() ?: 1
+        val p = url.parameters["p"]?.toLong() ?: 1L
         handleBiliBili(inlineQuery, id, p)
     }
 
@@ -111,7 +165,7 @@ object SearchByURI {
         handleBiliBili(inlineQuery, id, p)
     }
 
-    private suspend fun handleBiliBili(inlineQuery: UpdateNewInlineQuery, id: String, p: Int) {
+    private suspend fun handleBiliBili(inlineQuery: UpdateNewInlineQuery, id: String, p: Long) {
         val videoInfo = BiliBiliRepository.getVideoInfo(id)
         val desc = videoInfo.data.desc.trimString()
         val page = videoInfo.data.pages.find { it.page == p } ?: run {

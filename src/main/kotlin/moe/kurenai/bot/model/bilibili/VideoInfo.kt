@@ -119,9 +119,7 @@ data class VideoInfo(
             val hisRank: Int,
             val like: Int,
             val dislike: Int,
-            val evaluation: String,
-            @SerialName("argue_msg")
-            val argueMsg: String
+            val evaluation: String
         )
 
         @Serializable
@@ -133,8 +131,8 @@ data class VideoInfo(
 
         @Serializable
         data class Page(
-            val cid: Int,
-            val page: Int,
+            val cid: Long,
+            val page: Long,
             val from: String,
             val part: String,
             val duration: Int,

@@ -31,7 +31,7 @@ object Versions {
     const val vertxVersion = "4.2.3"
     const val log4j = "2.20.0"
     const val ktor = "2.3.0"
-    const val tdlight = "3.1.4+td.1.8.17"
+    const val tdlight = "3.4.0+td.1.8.26"
 }
 dependencies {
     implementation(project(":sdk"))

@@ -91,7 +91,7 @@ object TelegramBot {
     }
 
     suspend fun sendAlbumPhoto(chatId: Long, pairs: Map<String, String>): Messages {
-        val contents = pairs.entries.mapNotNull { (url, msg) ->
+        val contents = pairs.mapNotNull { (url, msg) ->
             val remoteFileId = fetchRemoteFileIdByUrl(url) ?: run {
                 log.warn("Fetch photo url ({}) fail!", url)
                 return@mapNotNull null
