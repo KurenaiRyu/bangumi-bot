@@ -21,7 +21,7 @@ object CommandDispatcher {
     private val log = getLogger()
 
     val commands: Map<String, CommandHandler> = listOf(
-        Air(), Collections(), Start(), Status(), Watching()
+        Air(), Collections(), Start(), Status(), Watching(), BiliDynamic()
     ).associateBy { handler ->
         handler.command.lowercase().also {
             log.debug("Load command: $it")

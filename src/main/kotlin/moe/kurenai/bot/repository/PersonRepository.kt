@@ -12,7 +12,6 @@ import moe.kurenai.bgm.model.subject.getLarge
 import moe.kurenai.bgm.model.subject.getSmall
 import moe.kurenai.bgm.request.person.GetPersonDetail
 import moe.kurenai.bot.BangumiBot
-import moe.kurenai.bot.TelegramUserBot
 import moe.kurenai.bot.util.BgmUtil.format
 import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.toGrid
@@ -62,7 +61,7 @@ object PersonRepository {
         val default = InputInlineQueryResultPhoto().apply {
             this.id = "P${person.id} - img"
             photoUrl = person.images.getLarge().also {
-                TelegramUserBot.fetchRemoteFileIdByUrl(it)
+//                TelegramUserBot.fetchRemoteFileIdByUrl(it)
             }
             thumbnailUrl = person.images.getSmall()
             this.title = person.name
@@ -94,7 +93,7 @@ object PersonRepository {
                 HttpUtil.getOgImageUrl(Url(it.second))
             }.getOrDefault(emptyList())
         }.forEachIndexed { i, url ->
-            TelegramUserBot.fetchRemoteFileIdByUrl(url)
+//            TelegramUserBot.fetchRemoteFileIdByUrl(url)
             resultList.add(InputInlineQueryResultPhoto().apply {
                 this.id = "P${person.id} - ${i + 1}"
                 photoUrl = url

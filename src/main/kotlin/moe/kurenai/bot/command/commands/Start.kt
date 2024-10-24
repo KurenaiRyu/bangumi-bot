@@ -10,6 +10,7 @@ import moe.kurenai.bot.BangumiBot.send
 import moe.kurenai.bot.BgmAuthServer
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.TelegramBot.sendPhoto
+import moe.kurenai.bot.command.CommandDispatcher
 import moe.kurenai.bot.command.CommandHandler
 import moe.kurenai.bot.repository.TokenRepository
 import moe.kurenai.bot.util.TelegramUtil.asText
@@ -27,6 +28,16 @@ class Start : CommandHandler {
     }
 
     override suspend fun execute(message: Message, sender: MessageSenderUser, args: List<String>) {
+        if (args.isNotEmpty()) {
+            val param = args.first()
+            CommandDispatcher.commands.values.firstOrNull { c ->
+                param.startsWith(c.command)
+            }?.let { c ->
+                c.execute(message, sender, listOf(param.removePrefix(c.command)))
+                return
+            }
+        }
+
         val userId = sender.userId
         kotlin.runCatching {
             TokenRepository.findById(userId)?.also { token ->

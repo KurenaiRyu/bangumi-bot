@@ -31,6 +31,8 @@ data class DynamicInfo(
             data class Orig(
                 val basic: Basic,
                 val modules: Modules,
+                @SerialName("id_str")
+                val idStr: String,
             )
 
             @Serializable
@@ -44,7 +46,7 @@ data class DynamicInfo(
                 @SerialName("like_icon")
                 val likeIcon: LikeIcon,
                 @SerialName("rid_str")
-                val ridStr: String
+                val ridStr: String,
             ) {
                 @Serializable
                 data class LikeIcon(

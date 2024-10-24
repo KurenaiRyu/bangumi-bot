@@ -34,3 +34,5 @@ fun getProp(key: String) = localProperties.getProperty(key) ?: System.getPropert
 fun String.trimString(size: Int = 100) = if (this.length > size + 20) this.substring(0, size) + "..." else this
 
 fun Boolean.toInt() = if (this) 1 else 0
+
+fun String.urlBase64() = Base64.getUrlEncoder().encodeToString(this.toByteArray())

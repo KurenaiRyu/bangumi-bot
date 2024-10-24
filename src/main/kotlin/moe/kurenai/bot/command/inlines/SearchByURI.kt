@@ -3,7 +3,6 @@ package moe.kurenai.bot.command.inlines
 import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
 import moe.kurenai.bot.TelegramBot.send
-import moe.kurenai.bot.TelegramUserBot
 import moe.kurenai.bot.repository.*
 import moe.kurenai.bot.util.MimeTypes
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
@@ -48,26 +47,28 @@ object SearchByURI {
         val moduleDynamic = info.data.item.modules.moduleDynamic
 
         val content = moduleDynamic.major?.opus?.summary?.text?: moduleDynamic.desc?.text?: ""
-        val summary = "${info.data.item.modules.moduleAuthor.name} - ${info.data.item.modules.moduleAuthor.pubTime}:\n\n$content\n\n${uri.path}"
+        val summary =
+            "${info.data.item.modules.moduleAuthor.name} - ${info.data.item.modules.moduleAuthor.pubTime}:\n\n$content\n\nhttps://t.bilibili.com/${id}"
 
         val caption = summary.markdown().fmt()
 
         info.data.item.orig?.let { orig ->
-            val quoteContent = orig.modules.moduleDynamic.major?.opus?.summary?.text?: moduleDynamic.desc?.text?: ""
-            val quoteSummary = "${orig.modules.moduleAuthor.name} - ${orig.modules.moduleAuthor.pubTime}:\n\n$quoteContent\n\n${orig.basic.jumpUrl?:""}"
+            val quoteContent = orig.modules.moduleDynamic.major?.opus?.summary?.text ?: ""
+            val quoteSummary =
+                "${orig.modules.moduleAuthor.name} - ${orig.modules.moduleAuthor.pubTime}:\n\n$quoteContent\n\nhttps://t.bilibili.com/${orig.idStr}"
             val start = caption.text.length
             caption.entities +=  TextEntity().apply {
                 this.offset = start
                 this.length = quoteSummary.length
-                this.type = TextEntityTypeBold()
+                this.type = TextEntityTypeBlockQuote()
             }
             caption.text += quoteSummary
         }
 
-        val items: Array<InputInlineQueryResult> = moduleDynamic.major?.opus?.pics?.mapIndexed { index, pic ->
+        val items = moduleDynamic.major?.opus?.pics?.mapIndexed { index, pic ->
             val picId = pic.url.substringAfterLast("/")
             InputInlineQueryResultPhoto().apply {
-                this.id = "dynamic - $id - $picId"
+                this.id = "${id}$picId"
                 title = "${info.data.item.modules.moduleAuthor.name} ${info.data.item.modules.moduleAuthor.pubTime}[$index]"
                 thumbnailUrl = pic.url
                 photoUrl = pic.url
@@ -77,16 +78,27 @@ object SearchByURI {
                     this.caption = caption
                 }
             }
-        }?.toTypedArray() ?: arrayOf(InputInlineQueryResultPhoto().apply {
+        }?.toTypedArray()?.takeIf { it.isNotEmpty() }
+            ?: arrayOf(InputInlineQueryResultArticle().apply {
             this.id = "dynamic$id"
             this.title = "${info.data.item.modules.moduleAuthor.name} ${info.data.item.modules.moduleAuthor.pubTime}"
-            this.inputMessageContent = InputMessagePhoto().apply {
-                this.caption = caption
+                this.inputMessageContent = InputMessageText().apply {
+                    this.text = caption
             }
-            this.photoUrl = info.data.item.modules.moduleAuthor.face
         })
 
-        answerInlineQuery(inlineQuery.id, items)
+        send {
+            answerInlineQuery(inlineQuery.id, items).apply {
+                if (moduleDynamic.major?.opus?.pics?.isNotEmpty() == true) {
+                    this.button = InlineQueryResultsButton().apply {
+                        this.text = "合并图片为一条消息"
+                        this.type = InlineQueryResultsButtonTypeStartBot().apply {
+                            parameter = "dynamic$id"
+                        }
+                    }
+                }
+            }
+        }
 
     }
 
@@ -186,9 +198,9 @@ object SearchByURI {
             "\n\n$up / $playCount $rank" +
             "\n\n${desc.markdown()}").fmt()
         send {
-            TelegramUserBot.fetchRemoteFileIdByUrl(videoInfo.data.pic) ?: run {
-                log.warn("Fetch video image fail.")
-            }
+//            TelegramUserBot.fetchRemoteFileIdByUrl(videoInfo.data.pic) ?: run {
+//                log.warn("Fetch video image fail.")
+//            }
             answerInlineQuery(inlineQuery.id, arrayOf(
                 InputInlineQueryResultVideo().apply {
                     this.id = "${videoInfo.data.bvid} - video"

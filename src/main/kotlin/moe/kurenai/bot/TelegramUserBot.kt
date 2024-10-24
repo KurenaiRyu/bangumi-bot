@@ -8,13 +8,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.sync.withPermit
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import moe.kurenai.bot.util.TelegramUtil.asText
-import moe.kurenai.bot.util.TelegramUtil.messageText
-import moe.kurenai.bot.util.TelegramUtil.textOrCaption
-import moe.kurenai.bot.util.TelegramUtil.userSender
 import moe.kurenai.bot.util.getLogger
 import moe.kurenai.bot.util.json
 import java.nio.file.Path
@@ -165,27 +161,6 @@ object TelegramUserBot {
         }
     }
 
-    @Deprecated("Necessary any more")
-    private suspend fun handleMineralwater(update: UpdateNewMessage) {
-        update.message.userSender()?.let { sender ->
-            if (sender.userId != 537662249L) return
-            update.message.content.textOrCaption()?.let { text ->
-                if (text.text.trim().startsWith("https://twitter.com").not()) return
-                send {
-                    messageText(
-                        update.message.chatId,
-                        text.text.replace("https://twitter.com", "https://fxtwitter.com").asText()
-                    ).apply {
-                        this.replyTo = InputMessageReplyToMessage().apply {
-                            messageId = update.message.id
-                            chatId = update.message.chatId
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     suspend fun sendUrl(url: String) {
         val key = "${RemoteFileType.PHOTO}:$url"
         if (remoteFileCache.contains(key)) return
@@ -200,73 +175,73 @@ object TelegramUserBot {
         }
     }
 
-    /**
-     * Fetch remote file
-     *
-     * @param url
-     * @param type
-     * @return remote file id
-     */
-    suspend fun fetchRemoteFileIdByUrl(url: String, type: RemoteFileType = RemoteFileType.PHOTO): String? =
-        fetchRemoteFileSemaphore.withPermit {
-            val key = "$type:$url"
-            val remoteFileId = remoteFileCache.getIfPresent(key)
-            if (remoteFileId != null) return remoteFileId
-
-            val remoteFile = fetchRemoteFileByUrl(url, type) ?: return null
-
-            remoteFileCache.put(key, remoteFile.id)
-            log.debug("Put remote file cache {}: {}", key, remoteFile.id)
-            remoteFile.id
-        }
-
-    private suspend fun fetchRemoteFileByUrl(
-        url: String,
-        type: RemoteFileType,
-        timeout: Duration = 10.seconds
-    ): RemoteFile? {
-        val linkPreviewGroup = Config.CONFIG.telegram.linkPreviewGroup ?: return null
-        val message = send(untilPersistent = true) {
-            messageText(linkPreviewGroup, url.asText())
-        }
-        var f = getFile(message.content, type)
-
-        log.debug("Get file: {}", f)
-
-        if (f == null) {
-            val contentDefer =
-                addListener(timeout) { event: UpdateMessageContent ->
-                    if (event.chatId == message.chatId && event.messageId == message.id) {
-                        log.debug("Update message content: {}", event)
-                        val file = getFile(event.newContent, type)
-                        if (file == null) ListenerResult.unComplete()
-                        else ListenerResult.complete(file)
-                    } else ListenerResult.unComplete()
-                }
-            f = runCatching {
-                contentDefer.await()
-            }.getOrNull()
-        } else if (f.remote?.isUploadingCompleted == true) return f.remote
-
-        val file = f ?: return null
-
-        log.debug("Get file: {}", file)
-
-        if (file.remote?.isUploadingCompleted == true) return file.remote
-
-        val fileId = file.id
-        val deferred: Deferred<File?> = addListener(timeout) { event: UpdateFile ->
-            if (event.file.id == fileId && event.file.remote.isUploadingCompleted) {
-                ListenerResult.complete(event.file)
-            } else {
-                ListenerResult.unComplete<File>()
-            }
-        }
-
-        return runCatching {
-            deferred.await()?.remote
-        }.getOrNull()
-    }
+//    /**
+//     * Fetch remote file
+//     *
+//     * @param url
+//     * @param type
+//     * @return remote file id
+//     */
+//    suspend fun fetchRemoteFileIdByUrl(url: String, type: RemoteFileType = RemoteFileType.PHOTO): String? =
+//        fetchRemoteFileSemaphore.withPermit {
+//            val key = "$type:$url"
+//            val remoteFileId = remoteFileCache.getIfPresent(key)
+//            if (remoteFileId != null) return remoteFileId
+//
+//            val remoteFile = fetchRemoteFileByUrl(url, type) ?: return null
+//
+//            remoteFileCache.put(key, remoteFile.id)
+//            log.debug("Put remote file cache {}: {}", key, remoteFile.id)
+//            remoteFile.id
+//        }
+//
+//    private suspend fun fetchRemoteFileByUrl(
+//        url: String,
+//        type: RemoteFileType,
+//        timeout: Duration = 10.seconds
+//    ): RemoteFile? {
+//        val linkPreviewGroup = Config.CONFIG.telegram.linkPreviewGroup ?: return null
+//        val message = send(untilPersistent = true) {
+//            messageText(linkPreviewGroup, url.asText())
+//        }
+//        var f = getFile(message.content, type)
+//
+//        log.debug("Get file: {}", f)
+//
+//        if (f == null) {
+//            val contentDefer =
+//                addListener(timeout) { event: UpdateMessageContent ->
+//                    if (event.chatId == message.chatId && event.messageId == message.id) {
+//                        log.debug("Update message content: {}", event)
+//                        val file = getFile(event.newContent, type)
+//                        if (file == null) ListenerResult.unComplete()
+//                        else ListenerResult.complete(file)
+//                    } else ListenerResult.unComplete()
+//                }
+//            f = runCatching {
+//                contentDefer.await()
+//            }.getOrNull()
+//        } else if (f.remote?.isUploadingCompleted == true) return f.remote
+//
+//        val file = f ?: return null
+//
+//        log.debug("Get file: {}", file)
+//
+//        if (file.remote?.isUploadingCompleted == true) return file.remote
+//
+//        val fileId = file.id
+//        val deferred: Deferred<File?> = addListener(timeout) { event: UpdateFile ->
+//            if (event.file.id == fileId && event.file.remote.isUploadingCompleted) {
+//                ListenerResult.complete(event.file)
+//            } else {
+//                ListenerResult.unComplete<File>()
+//            }
+//        }
+//
+//        return runCatching {
+//            deferred.await()?.remote
+//        }.getOrNull()
+//    }
 
     private inline fun <R : Object?, reified Event : Update> addListener(
         timeout: Duration? = 5L.seconds,
@@ -288,39 +263,6 @@ object TelegramUserBot {
             }
         }
     }
-
-//    private suspend fun fetchRemoteFileByUrl(
-//        url: String,
-//        type: RemoteFileType,
-//        timeout: Duration = 5.seconds
-//    ): RemoteFile? {
-//        var file: File?
-//        val linkPreviewGroup = Config.CONFIG.telegram.linkPreviewGroup ?: return null
-//        val message = send(untilPersistent = true) {
-//            messageText(linkPreviewGroup, url.asText())
-//        }
-//        file = getFile(message, type)
-//        if (file?.remote?.isUploadingCompleted == true) return file.remote
-//        val end = System.currentTimeMillis() + timeout.inWholeMilliseconds
-//        var completed = false
-//        while ((file == null || !completed) && System.currentTimeMillis() < end) {
-//            delay(200)
-//            file = if (file == null) {
-//                send(untilPersistent = true) {
-//                    GetMessage(linkPreviewGroup, message.id)
-//                }?.let {
-//                    getFile(it, type)
-//                }
-//            } else {
-//                send(untilPersistent = true) { GetFile(file!!.id) }
-//            }?.also {
-//                log.debug("upload file [{}] {}", it.id, it.remote.uploadedSize)
-//                completed = it.remote?.isUploadingCompleted ?: false
-//            }
-//
-//        }
-//        return file?.remote
-//    }
 
     private fun getFile(messageContent: MessageContent, type: RemoteFileType): File? {
         val content = messageContent as? MessageText ?: return null

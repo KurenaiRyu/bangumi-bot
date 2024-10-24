@@ -70,7 +70,11 @@ object TelegramUtil {
         }.toTypedArray()
     }
 
-    fun answerInlineQuery(id: Long, inlineQueryResults: Array<TdApi.InputInlineQueryResult>, cacheTime: Int = 60) =
+    fun <T : TdApi.InputInlineQueryResult> answerInlineQuery(
+        id: Long,
+        inlineQueryResults: Array<T>,
+        cacheTime: Int = 60
+    ) =
         TdApi.AnswerInlineQuery().apply {
             this.inlineQueryId = id
             this.results = inlineQueryResults

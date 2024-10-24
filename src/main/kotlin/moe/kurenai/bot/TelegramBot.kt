@@ -5,9 +5,7 @@ import it.tdlight.client.*
 import it.tdlight.jni.TdApi
 import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.*
-import moe.kurenai.bot.TelegramUserBot.fetchRemoteFileIdByUrl
 import moe.kurenai.bot.command.CommandDispatcher
-import moe.kurenai.bot.util.TelegramUtil.asText
 import moe.kurenai.bot.util.getLogger
 import java.nio.file.Paths
 import kotlin.time.Duration
@@ -77,31 +75,35 @@ object TelegramBot {
     }
 
     suspend fun sendPhoto(chatId: Long, photoUrl: String, msg: FormattedText): Message {
-        val remoteFileId = fetchRemoteFileIdByUrl(photoUrl) ?: error("Fetch photo url ($photoUrl) fail!")
+//        val remoteFileId = fetchRemoteFileIdByUrl(photoUrl) ?: error("Fetch photo url ($photoUrl) fail!")
 
         return send {
             SendMessage().apply {
                 this.chatId = chatId
                 inputMessageContent = InputMessagePhoto().apply {
                     this.caption = msg
-                    this.photo = InputFileRemote(remoteFileId)
+                    this.photo = InputFileRemote(photoUrl)
                 }
             }
         }
     }
 
-    suspend fun sendAlbumPhoto(chatId: Long, pairs: Map<String, String>): Messages {
-        val contents = pairs.mapNotNull { (url, msg) ->
-            val remoteFileId = fetchRemoteFileIdByUrl(url) ?: run {
-                log.warn("Fetch photo url ({}) fail!", url)
-                return@mapNotNull null
-            }
+    suspend fun sendAlbumPhoto(chatId: Long, pairs: List<Pair<String, FormattedText?>>): Messages {
+        if (pairs.size == 1) {
+            val (url, msg) = pairs[0]
+            sendPhoto(chatId, url, msg!!)
+        }
+
+        val contents = pairs.map { (url, msg) ->
+//            val remoteFileId = fetchRemoteFileIdByUrl(url) ?: run {
+//                log.warn("Fetch photo url ({}) fail!", url)
+//                return@mapNotNull null
+//            }
             InputMessagePhoto().apply {
-                this.caption = msg.asText()
-                this.photo = InputFileRemote(remoteFileId)
+                this.caption = msg
+                this.photo = InputFileRemote(url)
             }
         }.toTypedArray()
-
 
 
         return send {

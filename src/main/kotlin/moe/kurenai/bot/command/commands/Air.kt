@@ -26,14 +26,14 @@ class Air : CommandHandler {
             .sortedBy { it.id }
             .map { sub ->
                 (sub.images?.large?.takeIf { it.isNotBlank() }
-                    ?: "https://bgm.tv/img/no_icon_subject.png") to "${sub.name}\n\n${sub.summary}"
+                    ?: "https://bgm.tv/img/no_icon_subject.png") to "${sub.name}\n\n${sub.summary}".asText()
             }.chunked(10)
             .forEach { list ->
                 if (list.size == 1) {
                     val (link, content) = list[0]
-                    sendPhoto(message.chatId, link, content.asText())
+                    sendPhoto(message.chatId, link, content)
                 } else {
-                    sendAlbumPhoto(message.chatId, list.toMap())
+                    sendAlbumPhoto(message.chatId, list)
                 }
             }
     }
