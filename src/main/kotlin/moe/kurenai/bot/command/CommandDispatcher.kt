@@ -132,12 +132,12 @@ object CommandDispatcher {
                         update.message.id,
                         getChat(update.message.chatId).title,
                         update.message.chatId,
-                        update.errorCode,
-                        update.errorMessage
+                        update.error.code,
+                        update.error.message
                     )
                     TelegramBot.pendingMessage.getIfPresent(update.oldMessageId)?.let {
                         TelegramBot.pendingMessage.invalidate(update.oldMessageId)
-                        it.resumeWith(Result.failure(IllegalStateException("[${update.errorCode}] ${update.errorMessage}")))
+                        it.resumeWith(Result.failure(IllegalStateException("[${update.error.code}] ${update.error.message}")))
                     }
                 }
 

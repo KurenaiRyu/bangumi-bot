@@ -50,7 +50,7 @@ object SearchByURI {
         val content = moduleDynamic.major?.opus?.summary?.text?: moduleDynamic.desc?.text?: ""
         val summary = "${info.data.item.modules.moduleAuthor.name} - ${info.data.item.modules.moduleAuthor.pubTime}:\n\n$content\n\n${uri.path}"
 
-        var caption = summary.markdown().fmt()
+        val caption = summary.markdown().fmt()
 
         info.data.item.orig?.let { orig ->
             val quoteContent = orig.modules.moduleDynamic.major?.opus?.summary?.text?: moduleDynamic.desc?.text?: ""
@@ -64,11 +64,7 @@ object SearchByURI {
             caption.text += quoteSummary
         }
 
-        val fmText = FormattedText().apply {
-            text = summary
-        }
-
-        val items: Array<InputInlineQueryResult> = moduleDynamic.major.opus.pics.mapIndexed { index, pic ->
+        val items: Array<InputInlineQueryResult> = moduleDynamic.major?.opus?.pics?.mapIndexed { index, pic ->
             val picId = pic.url.substringAfterLast("/")
             InputInlineQueryResultPhoto().apply {
                 this.id = "dynamic - $id - $picId"
@@ -78,10 +74,17 @@ object SearchByURI {
                 photoWidth = pic.width
                 photoHeight = pic.height
                 inputMessageContent = InputMessagePhoto().apply {
-                    this.caption = fmText
+                    this.caption = caption
                 }
             }
-        }.toTypedArray()
+        }?.toTypedArray() ?: arrayOf(InputInlineQueryResultPhoto().apply {
+            this.id = "dynamic$id"
+            this.title = "${info.data.item.modules.moduleAuthor.name} ${info.data.item.modules.moduleAuthor.pubTime}"
+            this.inputMessageContent = InputMessagePhoto().apply {
+                this.caption = caption
+            }
+            this.photoUrl = info.data.item.modules.moduleAuthor.face
+        })
 
         answerInlineQuery(inlineQuery.id, items)
 

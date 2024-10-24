@@ -2,9 +2,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     application
-    kotlin("jvm") version "1.9.10"
-    kotlin("plugin.serialization") version "1.9.10"
-    kotlin("plugin.lombok") version "1.9.10"
+    kotlin("jvm") version "1.9.24"
+    kotlin("plugin.serialization") version "1.9.24"
+    kotlin("plugin.lombok") version "1.9.24"
     id("io.freefair.lombok") version "5.3.0"
 //    id("org.graalvm.buildtools.native") version "0.9.20"
 }
@@ -30,7 +30,7 @@ repositories {
 object Versions {
     const val vertxVersion = "4.2.3"
     const val log4j = "2.20.0"
-    const val ktor = "2.3.5"
+    const val ktor = "2.3.12"
     const val tdlight = "3.4.0+td.1.8.26"
 }
 dependencies {

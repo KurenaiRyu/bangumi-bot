@@ -13,7 +13,7 @@ data class VideoInfo(
     @Serializable
     data class Data(
         val bvid: String,
-        val aid: Int,
+        val aid: Long,
         val videos: Int,
         val tid: Int,
         val tname: String,
@@ -28,12 +28,12 @@ data class VideoInfo(
         val state: Int,
         val duration: Int,
         @SerialName("mission_id")
-        val missionId: Int? = null,
+        val missionId: Long? = null,
         val rights: Rights,
         val owner: Owner,
         val stat: Stat,
         val `dynamic`: String,
-        val cid: Int,
+        val cid: Long,
         val dimension: Dimension,
         @SerialName("teenage_mode")
         val teenageMode: Int,
@@ -106,7 +106,7 @@ data class VideoInfo(
 
         @Serializable
         data class Stat(
-            val aid: Int,
+            val aid: Long,
             val view: Int,
             val danmaku: Int,
             val reply: Int,
@@ -175,7 +175,7 @@ data class VideoInfo(
             ) {
                 @Serializable
                 data class Author(
-                    val mid: Int,
+                    val mid: Long,
                     val name: String,
                     val sex: String,
                     val face: String,
@@ -196,7 +196,7 @@ data class VideoInfo(
 
         @Serializable
         data class Staff(
-            val mid: Int,
+            val mid: Long,
             val title: String,
             val name: String,
             val face: String,
@@ -277,7 +277,7 @@ data class VideoInfo(
         ) {
             @Serializable
             data class Honor(
-                val aid: Int,
+                val aid: Long,
                 val type: Int,
                 val desc: String,
                 @SerialName("weekly_recommend_num")
