@@ -73,7 +73,6 @@ data class DynamicInfo(
             ) {
                 @Serializable
                 data class ModuleAuthor(
-                    val avatar: Avatar,
                     val face: String,
                     @SerialName("face_nft")
                     val faceNft: Boolean,
@@ -94,136 +93,7 @@ data class DynamicInfo(
                     @SerialName("pub_ts")
                     val pubTs: Int,
                     val type: String,
-//                    val vip: Vip
                 ) {
-                    @Serializable
-                    data class Avatar(
-                        @SerialName("container_size")
-                        val containerSize: ContainerSize,
-                        @SerialName("fallback_layers")
-                        val fallbackLayers: FallbackLayers,
-                        val mid: String
-                    ) {
-                        @Serializable
-                        data class ContainerSize(
-                            val height: Double,
-                            val width: Double
-                        )
-
-                        @Serializable
-                        data class FallbackLayers(
-                            @SerialName("is_critical_group")
-                            val isCriticalGroup: Boolean,
-                            val layers: List<Layer>
-                        ) {
-                            @Serializable
-                            data class Layer(
-                                @SerialName("general_spec")
-                                val generalSpec: GeneralSpec,
-                                @SerialName("layer_config")
-                                val layerConfig: LayerConfig,
-                                val resource: Resource,
-                                val visible: Boolean
-                            ) {
-                                @Serializable
-                                data class GeneralSpec(
-                                    @SerialName("pos_spec")
-                                    val posSpec: PosSpec,
-                                    @SerialName("render_spec")
-                                    val renderSpec: RenderSpec,
-                                    @SerialName("size_spec")
-                                    val sizeSpec: SizeSpec
-                                ) {
-                                    @Serializable
-                                    data class PosSpec(
-                                        @SerialName("axis_x")
-                                        val axisX: Double,
-                                        @SerialName("axis_y")
-                                        val axisY: Double,
-                                        @SerialName("coordinate_pos")
-                                        val coordinatePos: Int
-                                    )
-
-                                    @Serializable
-                                    data class RenderSpec(
-                                        val opacity: Int
-                                    )
-
-                                    @Serializable
-                                    data class SizeSpec(
-                                        val height: Int,
-                                        val width: Int
-                                    )
-                                }
-
-                                @Serializable
-                                data class LayerConfig(
-                                    @SerialName("is_critical")
-                                    val isCritical: Boolean,
-                                    val tags: Tags
-                                ) {
-                                    @Serializable
-                                    data class Tags(
-                                        @SerialName("AVATAR_LAYER")
-                                        val aVATARLAYER: AVATARLAYER?,
-                                        @SerialName("GENERAL_CFG")
-                                        val gENERALCFG: GENERALCFG
-                                    ) {
-                                        @Serializable
-                                        class AVATARLAYER
-
-                                        @Serializable
-                                        data class GENERALCFG(
-                                            @SerialName("config_type")
-                                            val configType: Int,
-                                            @SerialName("general_config")
-                                            val generalConfig: GeneralConfig
-                                        ) {
-                                            @Serializable
-                                            data class GeneralConfig(
-                                                @SerialName("web_css_style")
-                                                val webCssStyle: WebCssStyle
-                                            ) {
-                                                @Serializable
-                                                data class WebCssStyle(
-                                                    val borderRadius: String
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-
-                                @Serializable
-                                data class Resource(
-                                    @SerialName("res_image")
-                                    val resImage: ResImage,
-                                    @SerialName("res_type")
-                                    val resType: Int
-                                ) {
-                                    @Serializable
-                                    data class ResImage(
-                                        @SerialName("image_src")
-                                        val imageSrc: ImageSrc
-                                    ) {
-                                        @Serializable
-                                        data class ImageSrc(
-                                            val placeholder: Int,
-                                            val remote: Remote,
-                                            @SerialName("src_type")
-                                            val srcType: Int
-                                        ) {
-                                            @Serializable
-                                            data class Remote(
-                                                @SerialName("bfs_style")
-                                                val bfsStyle: String,
-                                                val url: String
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
 
                     @Serializable
                     data class OfficialVerify(
@@ -245,48 +115,6 @@ data class DynamicInfo(
                         val pid: Int
                     )
 
-                    @Serializable
-                    data class Vip(
-                        @SerialName("avatar_subscript")
-                        val avatarSubscript: Int,
-                        @SerialName("avatar_subscript_url")
-                        val avatarSubscriptUrl: String,
-                        @SerialName("due_date")
-                        val dueDate: Int,
-                        val label: Label,
-                        @SerialName("nickname_color")
-                        val nicknameColor: String,
-                        val status: Int,
-                        @SerialName("theme_type")
-                        val themeType: Int,
-                        val type: Int
-                    ) {
-                        @Serializable
-                        data class Label(
-                            @SerialName("bg_color")
-                            val bgColor: String,
-                            @SerialName("bg_style")
-                            val bgStyle: Int,
-                            @SerialName("border_color")
-                            val borderColor: String,
-                            @SerialName("img_label_uri_hans")
-                            val imgLabelUriHans: String,
-                            @SerialName("img_label_uri_hans_static")
-                            val imgLabelUriHansStatic: String,
-                            @SerialName("img_label_uri_hant")
-                            val imgLabelUriHant: String,
-                            @SerialName("img_label_uri_hant_static")
-                            val imgLabelUriHantStatic: String,
-                            @SerialName("label_theme")
-                            val labelTheme: String,
-                            val path: String,
-                            val text: String,
-                            @SerialName("text_color")
-                            val textColor: String,
-                            @SerialName("use_img_label")
-                            val useImgLabel: Boolean
-                        )
-                    }
                 }
 
                 @Serializable

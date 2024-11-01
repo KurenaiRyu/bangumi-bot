@@ -84,7 +84,7 @@ object BiliBiliRepository {
             parameter("timezone_offset", "-480")
             parameter("platform", "web")
             parameter("id", id)
-            parameter("features", "itemOpusStyle,opusBigCover,onlyfansVote,endFooterHidden,decorationCard,onlyfansAssetsV2,ugcDelete,onlyfansQaCard,editable,opusPrivateVisible")
+            parameter("features", "itemOpusStyle")
             header(HttpHeaders.UserAgent, USER_AGENT)
         }.bodyAsText().also {
             log.debug("bili dynamic: $it")
