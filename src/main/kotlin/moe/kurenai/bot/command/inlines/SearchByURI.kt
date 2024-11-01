@@ -161,7 +161,7 @@ object SearchByURI {
 
     private suspend fun handleBiliBili(inlineQuery: UpdateNewInlineQuery, uri: URI) {
         log.info("Handle BiliBili")
-        if (uri.path.contains("www.bilibili.com/opus")) {
+        if (uri.path.contains("opus")) {
             handleBiliDynamic(inlineQuery, uri)
             return
         }
@@ -202,6 +202,15 @@ object SearchByURI {
 //                log.warn("Fetch video image fail.")
 //            }
             answerInlineQuery(inlineQuery.id, arrayOf(
+                InputInlineQueryResultPhoto().apply {
+                    this.id = "${videoInfo.data.bvid} - photo"
+                    title = videoInfo.data.title
+                    photoUrl = videoInfo.data.pic
+                    thumbnailUrl = videoInfo.data.pic
+                    inputMessageContent = InputMessagePhoto().apply {
+                        this.caption = content
+                    }
+                },
                 InputInlineQueryResultVideo().apply {
                     this.id = "${videoInfo.data.bvid} - video"
                     title = videoInfo.data.title
@@ -209,15 +218,6 @@ object SearchByURI {
                     thumbnailUrl = videoInfo.data.pic
                     mimeType = MimeTypes.Video.MP4
                     inputMessageContent = InputMessageVideo().apply {
-                        this.caption = content
-                    }
-                },
-                InputInlineQueryResultPhoto().apply {
-                    this.id = "${videoInfo.data.bvid} - photo"
-                    title = videoInfo.data.title
-                    photoUrl = videoInfo.data.pic
-                    thumbnailUrl = videoInfo.data.pic
-                    inputMessageContent = InputMessagePhoto().apply {
                         this.caption = content
                     }
                 },
