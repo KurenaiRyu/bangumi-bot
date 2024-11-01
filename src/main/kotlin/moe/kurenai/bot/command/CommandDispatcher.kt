@@ -14,6 +14,7 @@ import moe.kurenai.bot.util.TelegramUtil.answerInlineQueryEmpty
 import moe.kurenai.bot.util.TelegramUtil.text
 import moe.kurenai.bot.util.getLogger
 import java.net.URI
+import java.time.Instant
 import it.tdlight.client.Result as TdResult
 
 object CommandDispatcher {
@@ -32,6 +33,7 @@ object CommandDispatcher {
 
     fun handle(update: Update) = CoroutineScope(Dispatchers.Default).launch {
         log.trace("Incoming update: {}", update.toString().trim())
+
         runCatching {
             when (update) {
                 is UpdateNewInlineQuery -> {
@@ -60,6 +62,12 @@ object CommandDispatcher {
                             update.message.chatId
                         )
                     }
+
+                    // check if expired
+                    if (Instant.ofEpochMilli(update.message.date.toLong())
+                            .isBefore(Instant.now().minusSeconds(5 * 60))
+                    ) return@launch
+
                     val content = update.message.content
                     val sender = update.message.senderId
                     if (content !is MessageText || sender !is MessageSenderUser) return@launch
