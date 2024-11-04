@@ -64,7 +64,7 @@ object CommandDispatcher {
                     }
 
                     // check if expired
-                    if (Instant.ofEpochMilli(update.message.date.toLong())
+                    if (Instant.ofEpochSecond(update.message.date.toLong())
                             .isBefore(Instant.now().minusSeconds(5 * 60))
                     ) return@launch
 
