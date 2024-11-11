@@ -6,7 +6,6 @@ plugins {
     kotlin("plugin.serialization") version "1.9.24"
     kotlin("plugin.lombok") version "1.9.24"
     id("io.freefair.lombok") version "5.3.0"
-//    id("org.graalvm.buildtools.native") version "0.9.20"
 }
 
 group = "moe.kurenai.bot"
@@ -68,6 +67,7 @@ dependencies {
         else -> throw GradleException("[$hostOs] is not support!")
     }
     implementation(group = "it.tdlight", name = "tdlight-natives", classifier = classifier)
+    implementation(group = "it.tdlight", name = "tdlight-natives", classifier = "linux_amd64_gnu_ssl1")
     //qrcode
     implementation("com.google.zxing:core:3.5.1")
 
@@ -81,14 +81,6 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
-//kotlin {
-//    sourceSets.all {
-//        languageSettings {
-//            languageVersion = "2.0"
-//        }
-//    }
-//}
-
 tasks.test {
     useJUnit()
 }
@@ -99,18 +91,13 @@ application {
     mainClass.set(main)
 }
 
-tasks.register<Delete>("clearLib") {
-    delete("$buildDir/libs/lib")
-}
-
-tasks.register<Copy>("copyLib") {
+tasks.register<Sync>("syncLib") {
     from(configurations.compileClasspath)
-    into("$buildDir/libs/lib")
+    into("${layout.buildDirectory.get()}/libs/lib")
 }
 
 tasks.jar {
-    dependsOn("clearLib")
-    dependsOn("copyLib")
+    dependsOn("syncLib")
     exclude("**/*.jar")
     manifest {
         attributes["Manifest-Version"] = "1.0"
@@ -129,64 +116,3 @@ tasks.withType<KotlinCompile> {
         javaParameters = true
     }
 }
-
-//graalvmNative {
-//    binaries {
-//        all {
-//            resources.autodetect()
-//        }
-//        named("main") {
-//            javaLauncher.set(javaToolchains.launcherFor {
-//                languageVersion.set(JavaLanguageVersion.of(17))
-//                vendor.set(JvmVendorSpec.matching("GraalVM Community"))
-//            })
-//            debug.set(true)
-//            verbose.set(true)
-//            richOutput.set(true)
-//
-//            buildArgs.add(
-//                "--initialize-at-build-time=" +
-//                    "io.ktor," +
-//                    "kotlin," +
-//                    "kotlinx," +
-//                    "com.fasterxml.jackson," +
-//                    "org.yaml.snakeyaml," +
-//                    "net.mamoe.yamlkt," +
-//                    "ch.qos.logback," +
-//                    "org.slf4j," +
-//                    "com.github.benmanes.caffeine"
-//            )
-//
-//            buildArgs.add(
-//                "--initialize-at-run-time=" +
-//                    "io.netty.buffer.AbstractByteBufAllocator," +
-//                    "io.netty.channel.epoll.Epoll," +
-//                    "io.netty.channel.epoll.EpollEventLoop," +
-//                    "io.netty.channel.epoll.EpollEventArray," +
-//                    "io.netty.channel.epoll.Native," +
-//                    "io.netty.channel.DefaultFileRegion," +
-//                    "io.netty.channel.unix.Errors"
-//            )
-////            buildArgs.add("--initialize-at-run-time=io.netty.buffer.AbstractByteBufAllocator")
-////            buildArgs.add("--initialize-at-run-time=io.netty.channel.DefaultFileRegion")
-////            buildArgs.add("--initialize-at-run-time=io.netty.channel.epoll.Native")
-////            buildArgs.add("--initialize-at-run-time=io.netty.channel.epoll.Epoll")
-////            buildArgs.add("--initialize-at-run-time=io.netty.channel.epoll.EpollEventLoop")
-////            buildArgs.add("--initialize-at-run-time=io.netty.channel.epoll.EpollEventArray")
-////            buildArgs.add("--initialize-at-run-time=io.netty.channel.kqueue.KQueue")
-////            buildArgs.add("--initialize-at-run-time=io.netty.channel.kqueue.KQueueEventLoop")
-////            buildArgs.add("--initialize-at-run-time=io.netty.channel.kqueue.KQueueEventArray")
-////            buildArgs.add("--initialize-at-run-time=io.netty.channel.kqueue.Native")
-////            buildArgs.add("--initialize-at-run-time=io.netty.channel.unix.Limits")
-////            buildArgs.add("--initialize-at-run-time=io.netty.channel.unix.Errors")
-////            buildArgs.add("--initialize-at-run-time=io.netty.channel.unix.IovArray")
-//
-////            buildArgs.add("--trace-class-initialization=com.fasterxml.jackson.core.util.VersionUtil")
-//
-//            buildArgs.add("--enable-url-protocols=http")
-//            buildArgs.add("-H:+InstallExitHandlers")
-//            buildArgs.add("-H:+ReportExceptionStackTraces")
-//            buildArgs.add("-H:-CheckToolchain")
-//        }
-//    }
-//}
