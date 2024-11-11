@@ -9,6 +9,7 @@ data class Config(
     var redis: Redis = Redis(),
     var telegram: Telegram = Telegram(),
     var bgm: Bgm = Bgm(),
+    var bilibili: Bilibili = Bilibili(),
     var debug: Boolean = false
 ) {
 
@@ -32,6 +33,11 @@ data class Config(
     }
 
 }
+
+@Serializable
+data class Bilibili(
+    var cookie: String? = null
+)
 
 @Serializable
 data class Redis(

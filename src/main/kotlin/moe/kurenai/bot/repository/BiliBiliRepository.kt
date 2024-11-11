@@ -5,6 +5,10 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import moe.kurenai.bot.Config.Companion.CONFIG
 import moe.kurenai.bot.model.bilibili.DynamicInfo
 import moe.kurenai.bot.model.bilibili.VideoInfo
 import moe.kurenai.bot.model.bilibili.VideoStreamUrl
@@ -41,9 +45,12 @@ object BiliBiliRepository {
         expireAfterWrite = 100.minutes
     }.build()
 
-    suspend fun getIdAndPByShortLink(uri: URI): Pair<String, Long> {
+    suspend fun getRedirectUrl(uri: URI): Url {
         val doc = Jsoup.parse(dontRedirectClient.get(Url(uri)).bodyAsText())
-        val redirectUrl = Url(doc.select("a").attr("href"))
+        return Url(doc.select("a").attr("href"))
+    }
+
+    suspend fun getIdAndPByShortLink(uri: URI, redirectUrl: Url): Pair<String, Long> {
         val segments = redirectUrl.pathSegments
         if (segments.isEmpty()) error("Get short link error, origin: ${uri}, redirect: ${redirectUrl}, segments: $segments")
         val p = redirectUrl.parameters["p"]?.toLong() ?: 1
@@ -82,14 +89,19 @@ object BiliBiliRepository {
     suspend fun getDynamicDetail(id: String): DynamicInfo {
         val body = client.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail") {
             parameter("timezone_offset", "-480")
-            parameter("platform", "web")
             parameter("id", id)
             parameter("features", "itemOpusStyle")
             header(HttpHeaders.UserAgent, USER_AGENT)
+            header(HttpHeaders.Cookie, CONFIG.bilibili.cookie)
         }.bodyAsText().also {
             log.debug("bili dynamic: $it")
         }
-        return json.decodeFromString(DynamicInfo.serializer(), body)
+        val jsonObject = json.parseToJsonElement(body).jsonObject
+        return if (jsonObject["code"]?.jsonPrimitive?.intOrNull == 0) {
+            json.decodeFromJsonElement(DynamicInfo.serializer(), jsonObject)
+        } else {
+            error("Return code ${jsonObject["code"]?.jsonPrimitive?.intOrNull}")
+        }
     }
 
 }

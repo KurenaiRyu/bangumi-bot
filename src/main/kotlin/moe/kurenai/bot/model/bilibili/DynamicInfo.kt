@@ -43,22 +43,9 @@ data class DynamicInfo(
                 val commentType: Int,
                 @SerialName("jump_url")
                 val jumpUrl: String? = null,
-                @SerialName("like_icon")
-                val likeIcon: LikeIcon,
                 @SerialName("rid_str")
                 val ridStr: String,
-            ) {
-                @Serializable
-                data class LikeIcon(
-                    @SerialName("action_url")
-                    val actionUrl: String,
-                    @SerialName("end_url")
-                    val endUrl: String,
-                    val id: Int,
-                    @SerialName("start_url")
-                    val startUrl: String
-                )
-            }
+            )
 
             @Serializable
             data class Modules(
@@ -66,10 +53,6 @@ data class DynamicInfo(
                 val moduleAuthor: ModuleAuthor,
                 @SerialName("module_dynamic")
                 val moduleDynamic: ModuleDynamic,
-                @SerialName("module_more")
-                val moduleMore: ModuleMore? = null,
-                @SerialName("module_stat")
-                val moduleStat: ModuleStat? = null
             ) {
                 @Serializable
                 data class ModuleAuthor(
@@ -163,44 +146,6 @@ data class DynamicInfo(
                             }
                         }
                     }
-                }
-
-                @Serializable
-                data class ModuleMore(
-                    @SerialName("three_point_items")
-                    val threePointItems: List<ThreePointItem>
-                ) {
-                    @Serializable
-                    data class ThreePointItem(
-                        val label: String,
-                        val type: String
-                    )
-                }
-
-                @Serializable
-                data class ModuleStat(
-                    val comment: Comment,
-                    val forward: Forward,
-                    val like: Like
-                ) {
-                    @Serializable
-                    data class Comment(
-                        val count: Int,
-                        val forbidden: Boolean
-                    )
-
-                    @Serializable
-                    data class Forward(
-                        val count: Int,
-                        val forbidden: Boolean
-                    )
-
-                    @Serializable
-                    data class Like(
-                        val count: Int,
-                        val forbidden: Boolean,
-                        val status: Boolean
-                    )
                 }
             }
         }

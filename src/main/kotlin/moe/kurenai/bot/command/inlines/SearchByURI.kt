@@ -176,7 +176,14 @@ object SearchByURI {
 
     private suspend fun handleBiliBiliShortLink(inlineQuery: UpdateNewInlineQuery, uri: URI) {
         log.info("Handle BiliBili short link")
-        val (id, p) = BiliBiliRepository.getIdAndPByShortLink(uri)
+        val redirectUrl = BiliBiliRepository.getRedirectUrl(uri)
+
+        if (redirectUrl.host.contains("opus") || redirectUrl.host == "t.bilibili.com") {
+            handleBiliDynamic(inlineQuery, redirectUrl.toURI())
+            return
+        }
+
+        val (id, p) = BiliBiliRepository.getIdAndPByShortLink(uri, redirectUrl)
         handleBiliBili(inlineQuery, id, p)
     }
 
