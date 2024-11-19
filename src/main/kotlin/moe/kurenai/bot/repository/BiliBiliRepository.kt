@@ -47,7 +47,9 @@ object BiliBiliRepository {
 
     suspend fun getRedirectUrl(uri: URI): Url {
         val doc = Jsoup.parse(dontRedirectClient.get(Url(uri)).bodyAsText())
-        return Url(doc.select("a").attr("href"))
+        val redirectUrl = doc.select("a").attr("href")
+        log.info("Get redirect url: $redirectUrl")
+        return Url(redirectUrl)
     }
 
     suspend fun getIdAndPByShortLink(uri: URI, redirectUrl: Url): Pair<String, Long> {

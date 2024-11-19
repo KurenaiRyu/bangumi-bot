@@ -39,6 +39,7 @@ object SearchByURI {
     }
 
     private suspend fun handleBiliDynamic(inlineQuery: UpdateNewInlineQuery, uri: URI) {
+        log.info("Handle bilibili dynamic: $uri")
         val id = uri.path.substringAfterLast("/").takeIf { it.isNotBlank() }?: run {
             fallback(inlineQuery)
             return
@@ -178,7 +179,7 @@ object SearchByURI {
         log.info("Handle BiliBili short link")
         val redirectUrl = BiliBiliRepository.getRedirectUrl(uri)
 
-        if (redirectUrl.host.contains("opus") || redirectUrl.host == "t.bilibili.com") {
+        if (redirectUrl.pathSegments.contains("opus") || redirectUrl.host == "t.bilibili.com") {
             handleBiliDynamic(inlineQuery, redirectUrl.toURI())
             return
         }
@@ -188,6 +189,8 @@ object SearchByURI {
     }
 
     private suspend fun handleBiliBili(inlineQuery: UpdateNewInlineQuery, id: String, p: Long) {
+        log.info("Handle bilibili: $id, $p")
+
         val videoInfo = BiliBiliRepository.getVideoInfo(id)
         val desc = videoInfo.data.desc.trimString()
         val page = videoInfo.data.pages.find { it.page == p } ?: run {
