@@ -8,8 +8,6 @@ import org.slf4j.Logger
 
 object BangumiBot {
 
-    private val serverPort = CONFIG.bgm.server.port
-
     val bgmClient = BgmClient(
         CONFIG.bgm.appId,
         CONFIG.bgm.appSecret,

@@ -16,7 +16,6 @@ import moe.kurenai.bgm.exception.BgmException
 import moe.kurenai.bot.BgmAuthServer.authCache
 import moe.kurenai.bot.TelegramBot.getUsername
 import moe.kurenai.bot.repository.TokenRepository
-import moe.kurenai.bot.util.getProp
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.security.KeyStore
@@ -35,6 +34,7 @@ object BgmAuthServer {
     private val log = LoggerFactory.getLogger(BgmAuthServer::class.java)
 
     private val serverPort: Int = Config.CONFIG.bgm.server.port
+    private val keyStorePw: String = Config.CONFIG.bgm.server.keyStorePw
 
     internal val authCache = caffeineBuilder<String, Long> {
         expireAfterWrite = 10.minutes
@@ -49,20 +49,30 @@ object BgmAuthServer {
             if (::server.isInitialized.not()) {
                 val environment = applicationEngineEnvironment {
                     log = LoggerFactory.getLogger("ktor.application")
-                    val pw = getProp("key.store.passwd").toCharArray()
+
+                    val pw = keyStorePw.toCharArray()
                     val keyStoreFile = File("./config/keystore.jks")
-                    sslConnector(
-                        keyStore = KeyStore.getInstance(keyStoreFile, pw),
-                        keyAlias = "bgm.kurenai.moe",
-                        keyStorePassword = { pw },
-                        privateKeyPassword = { pw }) {
-                        port = serverPort
-                        keyStorePath = keyStoreFile
+                    if (pw.isNotEmpty() && keyStoreFile.exists()) {
+                        sslConnector(
+                            keyStore = KeyStore.getInstance(keyStoreFile, pw),
+                            keyAlias = "bgm.kurenai.moe",
+                            keyStorePassword = { pw },
+                            privateKeyPassword = { pw }) {
+                            keyStorePath = keyStoreFile
+                            if (serverPort > 0) {
+                                port = serverPort
+                            }
+                        }
+                    } else {
+                        connector {
+                            if (serverPort > 0) {
+                                port = serverPort
+                            }
+                        }
                     }
                     module(Application::authModule)
                 }
                 server = embeddedServer(Netty, environment)
-//                server = embeddedServer(Netty, environment)
             }
             server.start(false)
         }.onFailure {
