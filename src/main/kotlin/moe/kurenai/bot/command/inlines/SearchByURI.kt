@@ -89,7 +89,7 @@ object SearchByURI {
 
         send {
             answerInlineQuery(inlineQuery.id, items).apply {
-                if (moduleDynamic.major?.opus?.pics?.isNotEmpty() == true) {
+                if ((moduleDynamic.major?.opus?.pics?.size ?: 0) > 1) {
                     this.button = InlineQueryResultsButton().apply {
                         this.text = "合并图片为一条消息"
                         this.type = InlineQueryResultsButtonTypeStartBot().apply {
