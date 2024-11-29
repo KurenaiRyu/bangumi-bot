@@ -61,7 +61,7 @@ data class VideoInfo(
             val rawText: String,
             val type: Int,
             @SerialName("biz_id")
-            val bizId: Int
+            val bizId: Long
         )
 
         @Serializable
