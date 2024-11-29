@@ -67,9 +67,8 @@ object SearchByURI {
         }
 
         val items = moduleDynamic.major?.opus?.pics?.mapIndexed { index, pic ->
-            val picId = pic.url.substringAfterLast("/")
             InputInlineQueryResultPhoto().apply {
-                this.id = "${id}$picId"
+                this.id = index.toString()
                 title = "${info.data.item.modules.moduleAuthor.name} ${info.data.item.modules.moduleAuthor.pubTime}[$index]"
                 thumbnailUrl = pic.url + "@240w_!web-dynamic.webp"
                 photoUrl = pic.url + "@1920w_!web-dynamic.webp"
