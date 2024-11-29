@@ -136,21 +136,25 @@ object TelegramBot {
         crossinline block: suspend () -> TdApi.Function<R>
     ): R {
         val request = block.invoke()
-        return withTimeout(timeout) {
-            suspendCancellableCoroutine { con ->
-                client.send(request) { result ->
-                    if (untilPersistent && !result.isError) {
-                        val obj = result.get()
-                        if ((obj as? Message)?.sendingState?.constructor == MessageSendingStatePending.CONSTRUCTOR) {
-                            pendingMessage[obj.id] = con as CancellableContinuation<TdResult<Object>>
+        return kotlin.runCatching {
+            withTimeout(timeout) {
+                suspendCancellableCoroutine { con ->
+                    client.send(request) { result ->
+                        if (untilPersistent && !result.isError) {
+                            val obj = result.get()
+                            if ((obj as? Message)?.sendingState?.constructor == MessageSendingStatePending.CONSTRUCTOR) {
+                                pendingMessage[obj.id] = con as CancellableContinuation<TdResult<Object>>
+                            } else {
+                                con.resumeWith(Result.success(result.get()))
+                            }
                         } else {
-                            con.resumeWith(Result.success(result.get()))
+                            con.resumeWith(runCatching { result.get() })
                         }
-                    } else {
-                        con.resumeWith(runCatching { result.get() })
                     }
                 }
             }
-        }
+        }.onFailure {
+            if (it !is TimeoutCancellationException) log.error("Send request failed: {}", request)
+        }.getOrThrow()
     }
 }
