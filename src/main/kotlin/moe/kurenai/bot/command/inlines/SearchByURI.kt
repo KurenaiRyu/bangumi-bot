@@ -71,8 +71,8 @@ object SearchByURI {
             InputInlineQueryResultPhoto().apply {
                 this.id = "${id}$picId"
                 title = "${info.data.item.modules.moduleAuthor.name} ${info.data.item.modules.moduleAuthor.pubTime}[$index]"
-                thumbnailUrl = pic.url
-                photoUrl = pic.url
+                thumbnailUrl = pic.url + "@240w_!web-dynamic.webp"
+                photoUrl = pic.url + "@1920w_!web-dynamic.webp"
                 photoWidth = pic.width
                 photoHeight = pic.height
                 inputMessageContent = InputMessagePhoto().apply {
