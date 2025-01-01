@@ -219,7 +219,7 @@ object SearchByURI {
 //            }
             answerInlineQuery(inlineQuery.id, arrayOf(
                 InputInlineQueryResultPhoto().apply {
-                    this.id = "${videoInfo.data.bvid} - photo"
+                    this.id = "P_${videoInfo.data.bvid}_$p"
                     title = videoInfo.data.title
                     photoUrl = videoInfo.data.pic
                     thumbnailUrl = videoInfo.data.pic
@@ -228,7 +228,7 @@ object SearchByURI {
                     }
                 },
                 InputInlineQueryResultVideo().apply {
-                    this.id = "${videoInfo.data.bvid} - video"
+                    this.id = "V_${videoInfo.data.bvid}_$p"
                     title = videoInfo.data.title
                     videoUrl = streamInfo.data.durl!!.first().url
                     thumbnailUrl = videoInfo.data.pic
