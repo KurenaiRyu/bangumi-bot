@@ -207,10 +207,14 @@ object SearchByURI {
         val link = "https://www.bilibili.com/video/${videoInfo.data.bvid}?p=$p"
         val up = "UP: [${videoInfo.data.owner.name.markdown()}](https://space.bilibili.com/${videoInfo.data.owner.mid})"
         val playCount = "${((videoInfo.data.stat.view / 10.0).roundToInt() / 100.0).toString().markdown()}K 播放"
-        val partTitle = if (videoInfo.data.pages.size == 1 || page.part == "1") "" else "/ ${page.part.markdown()}"
+        val contentTitle = if (page.part.contains(videoInfo.data.title)) {
+            "[${page.part.markdown()}]($link)"
+        } else {
+            "[${videoInfo.data.title.markdown()}]($link) / ${page.part.markdown()}"
+        }
         val rank =
             if (videoInfo.data.stat.nowRank == 0) "" else "/ ${videoInfo.data.stat.nowRank} 名 / 历史最高 ${videoInfo.data.stat.nowRank} 名"
-        val content = ("[${videoInfo.data.title.markdown()}]($link) $partTitle" +
+        val content = (contentTitle +
             "\n\n$up / $playCount $rank" +
             "\n\n${desc.markdown()}").fmt()
         send {
@@ -220,7 +224,7 @@ object SearchByURI {
             answerInlineQuery(inlineQuery.id, arrayOf(
                 InputInlineQueryResultPhoto().apply {
                     this.id = "P_${videoInfo.data.bvid}_$p"
-                    title = videoInfo.data.title
+                    this.title = "${page.part}/${videoInfo.data.title}"
                     photoUrl = videoInfo.data.pic
                     thumbnailUrl = videoInfo.data.pic
                     inputMessageContent = InputMessagePhoto().apply {
@@ -229,7 +233,7 @@ object SearchByURI {
                 },
                 InputInlineQueryResultVideo().apply {
                     this.id = "V_${videoInfo.data.bvid}_$p"
-                    title = videoInfo.data.title
+                    this.title = "${page.part}/${videoInfo.data.title}"
                     videoUrl = streamInfo.data.durl!!.first().url
                     thumbnailUrl = videoInfo.data.pic
                     mimeType = MimeTypes.Video.MP4
