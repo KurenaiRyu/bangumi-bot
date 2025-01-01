@@ -36,7 +36,8 @@ data class Config(
 
 @Serializable
 data class Bilibili(
-    var cookie: String? = null
+    var cookie: String? = null,
+    var shortLinkHost: List<String> = emptyList()
 )
 
 @Serializable

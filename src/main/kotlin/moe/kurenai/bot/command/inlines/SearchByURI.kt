@@ -2,6 +2,7 @@ package moe.kurenai.bot.command.inlines
 
 import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
+import moe.kurenai.bot.Config.Companion.CONFIG
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.repository.*
 import moe.kurenai.bot.util.MimeTypes
@@ -19,12 +20,18 @@ object SearchByURI {
     private val log = getLogger()
 
     suspend fun execute(inlineQuery: UpdateNewInlineQuery, uri: URI) {
-        when (uri.host) {
+
+        val host = uri.host
+
+        if (CONFIG.bilibili.shortLinkHost.contains(host)) {
+            handleBiliBiliShortLink(inlineQuery, uri)
+            return
+        }
+
+        when (host) {
             "www.sakugabooru.com",
             "sakugabooru.com" -> handleSakugabooru(inlineQuery, uri)
 
-            "b23.wtf" -> handleBiliBiliShortLink(inlineQuery, URI.create(uri.toString().replace("b23.wtf", "b23.tv")))
-            "b23.tv" -> handleBiliBiliShortLink(inlineQuery, uri)
             "www.bilibili.com" -> handleBiliBili(inlineQuery, uri)
             "t.bilibili.com" -> handleBiliDynamic(inlineQuery, uri)
             else -> {
