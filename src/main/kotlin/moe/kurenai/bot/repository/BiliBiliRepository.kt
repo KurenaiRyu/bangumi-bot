@@ -53,10 +53,10 @@ object BiliBiliRepository {
     }
 
     suspend fun getIdAndPByShortLink(uri: URI, redirectUrl: Url): Pair<String, Long> {
-        val segments = redirectUrl.pathSegments
+        val segments = redirectUrl.rawSegments
         if (segments.isEmpty()) error("Get short link error, origin: ${uri}, redirect: ${redirectUrl}, segments: $segments")
         val p = redirectUrl.parameters["p"]?.toLong() ?: 1
-        val id = redirectUrl.pathSegments.last().takeIf { it.isNotBlank() } ?: segments[segments.lastIndex - 1]
+        val id = redirectUrl.rawSegments.last().takeIf { it.isNotBlank() } ?: segments[segments.lastIndex - 1]
         return id to p
     }
 
@@ -78,7 +78,7 @@ object BiliBiliRepository {
             VideoInfo.serializer(),
             client.get("https://api.bilibili.com/x/web-interface/view") {
                 if (id.startsWith("av", true)) {
-                    parameter("aid", id)
+                    parameter("aid", id.substring(2))
                 } else {
                     parameter("bvid", id)
                 }

@@ -9,7 +9,7 @@ data class VideoStreamUrl(
     val code: Int,
     val message: String,
     val ttl: Int,
-    val `data`: Data
+    val `data`: Data? = null
 ) {
     @Serializable
     data class Data(

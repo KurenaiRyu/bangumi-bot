@@ -13,11 +13,15 @@ import moe.kurenai.bot.util.TelegramUtil.markdown
 import moe.kurenai.bot.util.getLogger
 import moe.kurenai.bot.util.trimString
 import java.net.URI
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 object SearchByURI {
 
     private val log = getLogger()
+    private val PUB_DATE_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
     suspend fun execute(inlineQuery: UpdateNewInlineQuery, uri: URI) {
 
@@ -175,7 +179,7 @@ object SearchByURI {
 
         // https://www.bilibili.com/video/BV1Fx4y1w78G/?p=1
         val url = Url(uri)
-        val segments = Url(uri).pathSegments
+        val segments = Url(uri).rawSegments
         val id = segments.last().takeIf { it.isNotBlank() } ?: segments[segments.lastIndex - 1]
         val p = url.parameters["p"]?.toLong() ?: 1L
         handleBiliBili(inlineQuery, id, p)
@@ -185,7 +189,7 @@ object SearchByURI {
         log.info("Handle BiliBili short link")
         val redirectUrl = BiliBiliRepository.getRedirectUrl(uri)
 
-        if (redirectUrl.pathSegments.contains("opus") || redirectUrl.host == "t.bilibili.com") {
+        if (redirectUrl.rawSegments.contains("opus") || redirectUrl.host == "t.bilibili.com") {
             handleBiliDynamic(inlineQuery, redirectUrl.toURI())
             return
         }
@@ -214,34 +218,41 @@ object SearchByURI {
         }
         val rank =
             if (videoInfo.data.stat.nowRank == 0) "" else "/ ${videoInfo.data.stat.nowRank} 名 / 历史最高 ${videoInfo.data.stat.nowRank} 名"
+        val createDate = LocalDateTime.ofEpochSecond(videoInfo.data.pubdate.toLong(), 0, ZoneOffset.ofHours(8))
+            .format(PUB_DATE_PATTERN)
+            .markdown()
         val content = (contentTitle +
-            "\n\n$up / $playCount $rank" +
+            "\n\n$up / $playCount $rank / $createDate" +
             "\n\n${desc.markdown()}").fmt()
+
+        val results = mutableListOf<InputInlineQueryResult>()
+        results.add(InputInlineQueryResultPhoto().apply {
+            this.id = "P_${videoInfo.data.bvid}_$p"
+            this.title = "${page.part}/${videoInfo.data.title}"
+            photoUrl = videoInfo.data.pic
+            thumbnailUrl = videoInfo.data.pic
+            inputMessageContent = InputMessagePhoto().apply {
+                this.caption = content
+            }
+        })
+        streamInfo.data?.run {
+            results.add(InputInlineQueryResultVideo().apply {
+                this.id = "V_${videoInfo.data.bvid}_$p"
+                this.title = "${page.part}/${videoInfo.data.title}"
+                videoUrl = streamInfo.data.durl!!.first().url
+                thumbnailUrl = videoInfo.data.pic
+                mimeType = MimeTypes.Video.MP4
+                inputMessageContent = InputMessageVideo().apply {
+                    this.caption = content
+                }
+            })
+        }
         send {
 //            TelegramUserBot.fetchRemoteFileIdByUrl(videoInfo.data.pic) ?: run {
 //                log.warn("Fetch video image fail.")
 //            }
-            answerInlineQuery(inlineQuery.id, arrayOf(
-                InputInlineQueryResultPhoto().apply {
-                    this.id = "P_${videoInfo.data.bvid}_$p"
-                    this.title = "${page.part}/${videoInfo.data.title}"
-                    photoUrl = videoInfo.data.pic
-                    thumbnailUrl = videoInfo.data.pic
-                    inputMessageContent = InputMessagePhoto().apply {
-                        this.caption = content
-                    }
-                },
-                InputInlineQueryResultVideo().apply {
-                    this.id = "V_${videoInfo.data.bvid}_$p"
-                    this.title = "${page.part}/${videoInfo.data.title}"
-                    videoUrl = streamInfo.data.durl!!.first().url
-                    thumbnailUrl = videoInfo.data.pic
-                    mimeType = MimeTypes.Video.MP4
-                    inputMessageContent = InputMessageVideo().apply {
-                        this.caption = content
-                    }
-                },
-            ))
+
+            answerInlineQuery(inlineQuery.id, results.toTypedArray())
         }
     }
 

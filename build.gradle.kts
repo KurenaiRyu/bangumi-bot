@@ -2,9 +2,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     application
-    kotlin("jvm") version "1.9.24"
-    kotlin("plugin.serialization") version "1.9.24"
-    kotlin("plugin.lombok") version "1.9.24"
+    kotlin("jvm") version "2.1.10"
+    kotlin("plugin.serialization") version "2.1.10"
+    kotlin("plugin.lombok") version "2.1.10"
     id("io.freefair.lombok") version "5.3.0"
 }
 
@@ -29,7 +29,7 @@ repositories {
 object Versions {
     const val vertxVersion = "4.2.3"
     const val log4j = "2.20.0"
-    const val ktor = "2.3.12"
+    const val ktor = "3.1.0"
     const val tdlight = "3.4.0+td.1.8.26"
 }
 dependencies {
@@ -44,12 +44,11 @@ dependencies {
     implementation("io.ktor:ktor-network-tls-certificates:${Versions.ktor}")
     implementation("io.ktor:ktor-client-okhttp:${Versions.ktor}")
     implementation("io.ktor:ktor-server-netty:${Versions.ktor}")
-    implementation("io.ktor:ktor-server-cio:${Versions.ktor}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${Versions.ktor}")
 
     //serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
-    implementation("net.mamoe.yamlkt:yamlkt-jvm:0.12.0")
+    implementation("net.mamoe.yamlkt:yamlkt-jvm:0.13.0")
 
     //cache
     implementation("com.sksamuel.aedile:aedile-core:1.2.0")

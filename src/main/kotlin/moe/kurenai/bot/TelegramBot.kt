@@ -1,6 +1,7 @@
 package moe.kurenai.bot
 
 import com.sksamuel.aedile.core.caffeineBuilder
+import it.tdlight.Init
 import it.tdlight.client.*
 import it.tdlight.jni.TdApi
 import it.tdlight.jni.TdApi.*
@@ -35,6 +36,7 @@ object TelegramBot {
     }.build()
 
     init {
+        Init.init()
         apiToken = APIToken(
             Config.CONFIG.telegram.apiId ?: 94575,
             Config.CONFIG.telegram.apiHash ?: "a3406de8d171bb422bb6ddf3bbd800e2"

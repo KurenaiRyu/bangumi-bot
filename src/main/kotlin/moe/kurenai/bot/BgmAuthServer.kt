@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.timerTask
 import kotlin.time.Duration.Companion.minutes
 
+
 /**
  * @author Kurenai
  * @since 2023/1/26 19:56
@@ -42,37 +43,39 @@ object BgmAuthServer {
 
     internal val timer = Timer("DDOS-Task", true)
 
-    private lateinit var server: ApplicationEngine
+    private lateinit var server: EmbeddedServer<ApplicationEngine, out ApplicationEngine.Configuration>
 
-    fun start() {
+    fun start(sslEnabled: Boolean = true) {
         kotlin.runCatching {
             if (::server.isInitialized.not()) {
-                val environment = applicationEngineEnvironment {
-                    log = LoggerFactory.getLogger("ktor.application")
-
-                    val pw = keyStorePw.toCharArray()
-                    val keyStoreFile = File("./config/keystore.jks")
-                    if (pw.isNotEmpty() && keyStoreFile.exists()) {
-                        sslConnector(
-                            keyStore = KeyStore.getInstance(keyStoreFile, pw),
-                            keyAlias = "bgm.kurenai.moe",
-                            keyStorePassword = { pw },
-                            privateKeyPassword = { pw }) {
-                            keyStorePath = keyStoreFile
-                            if (serverPort > 0) {
-                                port = serverPort
+                server = embeddedServer(
+                    factory = Netty,
+                    environment = applicationEnvironment { log = LoggerFactory.getLogger("ktor.application") },
+                    configure = {
+                        val pw = keyStorePw.toCharArray()
+                        val keyStoreFile = File("./config/keystore.jks")
+                        if (sslEnabled && pw.isNotEmpty() && keyStoreFile.exists()) {
+                            sslConnector(
+                                keyStore = KeyStore.getInstance(keyStoreFile, pw),
+                                keyAlias = "bgm.kurenai.moe",
+                                keyStorePassword = { pw },
+                                privateKeyPassword = { pw }) {
+                                keyStorePath = keyStoreFile
+                                if (serverPort > 0) {
+                                    port = serverPort
+                                }
+                            }
+                        } else {
+                            connector {
+                                if (serverPort > 0) {
+                                    host = "0.0.0.0"
+                                    port = serverPort
+                                }
                             }
                         }
-                    } else {
-                        connector {
-                            if (serverPort > 0) {
-                                port = serverPort
-                            }
-                        }
-                    }
-                    module(Application::authModule)
-                }
-                server = embeddedServer(Netty, environment)
+                    },
+                    module = Application::authModule
+                )
             }
             server.start(false)
         }.onFailure {
