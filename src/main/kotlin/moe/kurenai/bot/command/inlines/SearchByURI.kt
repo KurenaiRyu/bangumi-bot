@@ -17,6 +17,8 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
 object SearchByURI {
 
@@ -221,8 +223,9 @@ object SearchByURI {
         val createDate = LocalDateTime.ofEpochSecond(videoInfo.data.pubdate.toLong(), 0, ZoneOffset.ofHours(8))
             .format(PUB_DATE_PATTERN)
             .markdown()
+        val duration = videoInfo.data.duration.seconds.toString(DurationUnit.MINUTES, 2).markdown()
         val content = (contentTitle +
-            "\n\n$up / $playCount $rank / $createDate" +
+            "\n\n$up / $playCount $rank / $createDate / $duration" +
             "\n\n${desc.markdown()}").fmt()
 
         val results = mutableListOf<InputInlineQueryResult>()
