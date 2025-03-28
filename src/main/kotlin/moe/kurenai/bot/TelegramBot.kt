@@ -7,6 +7,7 @@ import it.tdlight.jni.TdApi
 import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.*
 import moe.kurenai.bot.command.CommandDispatcher
+import moe.kurenai.bot.command.HandlerInitializer
 import moe.kurenai.bot.util.getLogger
 import java.nio.file.Paths
 import kotlin.time.Duration
@@ -53,6 +54,8 @@ object TelegramBot {
     }
 
     fun start() {
+        HandlerInitializer.initialize()
+
         client = SimpleTelegramClientFactory().builder(settings)
             .build(AuthenticationSupplier.bot(Config.CONFIG.telegram.token))
         client.addUpdateHandler(UpdateAuthorizationState::class.java) { update ->
