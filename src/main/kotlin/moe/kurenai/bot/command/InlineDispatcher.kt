@@ -19,7 +19,7 @@ object InlineDispatcher {
     suspend fun execute(inlineQuery: UpdateNewInlineQuery, uri: URI) {
 
         for (handler in registeredHandlers) {
-            if (handler.handle(inlineQuery, uri) == HANDLED) break
+            if (handler.handle(inlineQuery, uri) == HANDLED) return
         }
 
         // default handle bgm.tv
@@ -29,7 +29,9 @@ object InlineDispatcher {
     }
 
     fun registryHandler(handler: InlineHandler, specificOrder: Int = 0) {
-        registeredHandlers.add(HandlerAware(handler, specificOrder))
+        synchronized(this) {
+            registeredHandlers.add(HandlerAware(handler, specificOrder))
+        }
     }
 
     internal suspend fun fallback(inlineQuery: UpdateNewInlineQuery): Boolean {
@@ -41,7 +43,9 @@ object InlineDispatcher {
         val order: Int
     ) : InlineHandler by delegate, Comparable<HandlerAware> {
         override fun compareTo(other: HandlerAware): Int {
-            return order.compareTo(other.order)
+            val orderRes = order.compareTo(other.order)
+            return if (orderRes == 0) this.delegate.javaClass.name.compareTo(other.delegate.javaClass.name)
+            else orderRes
         }
     }
 }

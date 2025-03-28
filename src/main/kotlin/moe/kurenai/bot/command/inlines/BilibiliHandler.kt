@@ -13,12 +13,14 @@ import moe.kurenai.bot.util.MimeTypes
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
 import moe.kurenai.bot.util.TelegramUtil.fmt
 import moe.kurenai.bot.util.TelegramUtil.markdown
-import moe.kurenai.bot.util.format
+import moe.kurenai.bot.util.formatToSeparateUnit
+import moe.kurenai.bot.util.formatToTime
 import moe.kurenai.bot.util.trimString
 import java.net.URI
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 object BilibiliHandler : InlineHandler {
@@ -57,7 +59,7 @@ object BilibiliHandler : InlineHandler {
         val segments = Url(uri).rawSegments
         val id = segments.last().takeIf { it.isNotBlank() } ?: segments[segments.lastIndex - 1]
         val p = url.parameters["p"]?.toInt() ?: 1
-        val t = url.parameters["t"]?.toLong() ?: 0L
+        val t = url.parameters["t"]?.toFloat() ?: 0F
         doHandle(inlineQuery, id, p, t)
     }
 
@@ -140,7 +142,7 @@ object BilibiliHandler : InlineHandler {
 
     }
 
-    private suspend fun doHandle(inlineQuery: UpdateNewInlineQuery, id: String, p: Int, t: Long) {
+    private suspend fun doHandle(inlineQuery: UpdateNewInlineQuery, id: String, p: Int, t: Float) {
         log.info("Handle bilibili: $id, $p, $t")
 
         val videoInfo = BiliBiliRepository.getVideoInfo(id)
@@ -169,8 +171,8 @@ object BilibiliHandler : InlineHandler {
         }
 
         if (t > 0) {
-            val timeStr = t.seconds.format().markdown()
-            contentTitle += " / jump to $timeStr"
+            val timeStr = (t * 1000).toLong().milliseconds.formatToTime().markdown()
+            contentTitle += " / 跳转到 $timeStr"
         }
 
         val rank =
@@ -178,9 +180,10 @@ object BilibiliHandler : InlineHandler {
         val createDate = LocalDateTime.ofEpochSecond(videoInfo.data.pubdate.toLong(), 0, ZoneOffset.ofHours(8))
             .format(PUB_DATE_PATTERN)
             .markdown()
-        val duration = videoInfo.data.duration.seconds.format().markdown()
+        val duration = videoInfo.data.duration.seconds.formatToSeparateUnit().markdown()
         val content = (contentTitle +
-            "\n\n$up / $playCount $rank / $createDate / $duration" +
+            "\n\n$up / $playCount $rank / $duration" +
+            "\n发布时间: $createDate" +
             "\n\n${desc.markdown()}").fmt()
 
         val results = mutableListOf<InputInlineQueryResult>()

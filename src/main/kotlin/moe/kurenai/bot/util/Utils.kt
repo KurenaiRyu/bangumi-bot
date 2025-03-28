@@ -47,11 +47,19 @@ fun Boolean.toInt() = if (this) 1 else 0
 
 fun String.urlBase64() = Base64.getUrlEncoder().encodeToString(this.toByteArray())
 
-fun Duration.format(): String {
+fun Duration.formatToTime(): String {
     return this.toComponents { h, m, s, _ ->
-        var res = s.toString()
-        if (m > 0) res = "$m:$res"
+        var res = "$m:$s"
         if (h > 0) res = "$h:$res"
+        res
+    }
+}
+
+fun Duration.formatToSeparateUnit(): String {
+    return this.toComponents { h, m, s, _ ->
+        var res = "${s}s"
+        if (m > 0) res = "${m}m$res"
+        if (h > 0) res = "${h}h$res"
         res
     }
 }

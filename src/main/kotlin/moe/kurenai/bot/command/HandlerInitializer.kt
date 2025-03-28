@@ -6,8 +6,7 @@ import moe.kurenai.bot.command.inlines.SakugabooruHandler
 
 object HandlerInitializer {
 
-    var initialized = false
-        private set
+    private var initialized = false
 
     fun initialize() {
         if (initialized) return
@@ -16,6 +15,8 @@ object HandlerInitializer {
         SakugabooruHandler
         BilibiliHandler
         BgmHandler
+
+        initialized = true
     }
 
 }
