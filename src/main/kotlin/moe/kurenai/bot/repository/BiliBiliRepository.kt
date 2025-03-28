@@ -52,12 +52,13 @@ object BiliBiliRepository {
         return Url(redirectUrl)
     }
 
-    suspend fun getIdAndPByShortLink(uri: URI, redirectUrl: Url): Pair<String, Long> {
+    suspend fun getIdAndPByShortLink(uri: URI, redirectUrl: Url): Triple<String, Int, Long> {
         val segments = redirectUrl.rawSegments
         if (segments.isEmpty()) error("Get short link error, origin: ${uri}, redirect: ${redirectUrl}, segments: $segments")
-        val p = redirectUrl.parameters["p"]?.toLong() ?: 1
+        val p = redirectUrl.parameters["p"]?.toInt() ?: 1
+        val t = redirectUrl.parameters["t"]?.toLong() ?: 0L
         val id = redirectUrl.rawSegments.last().takeIf { it.isNotBlank() } ?: segments[segments.lastIndex - 1]
-        return id to p
+        return Triple(id, p, t)
     }
 
     suspend fun getPlayUrl(bvid: String, cid: Long) = urlCache.get(bvid) { _ ->

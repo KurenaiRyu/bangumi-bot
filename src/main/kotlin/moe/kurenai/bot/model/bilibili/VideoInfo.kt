@@ -132,7 +132,7 @@ data class VideoInfo(
         @Serializable
         data class Page(
             val cid: Long,
-            val page: Long,
+            val page: Int,
             val from: String,
             val part: String,
             val duration: Int,

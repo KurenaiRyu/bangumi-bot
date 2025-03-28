@@ -9,6 +9,7 @@ import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.exists
 import kotlin.io.path.inputStream
+import kotlin.time.Duration
 
 /**
  * @author Kurenai
@@ -45,3 +46,12 @@ fun String.trimString(size: Int = 100) = if (this.length > size + 20) this.subst
 fun Boolean.toInt() = if (this) 1 else 0
 
 fun String.urlBase64() = Base64.getUrlEncoder().encodeToString(this.toByteArray())
+
+fun Duration.format(): String {
+    return this.toComponents { h, m, s, _ ->
+        var res = s.toString()
+        if (m > 0) res = "$m:$res"
+        if (h > 0) res = "$h:$res"
+        res
+    }
+}

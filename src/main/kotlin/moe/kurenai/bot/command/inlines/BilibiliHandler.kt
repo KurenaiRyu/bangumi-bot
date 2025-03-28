@@ -13,13 +13,13 @@ import moe.kurenai.bot.util.MimeTypes
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
 import moe.kurenai.bot.util.TelegramUtil.fmt
 import moe.kurenai.bot.util.TelegramUtil.markdown
+import moe.kurenai.bot.util.format
 import moe.kurenai.bot.util.trimString
 import java.net.URI
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.DurationUnit
 
 object BilibiliHandler : InlineHandler {
 
@@ -56,8 +56,9 @@ object BilibiliHandler : InlineHandler {
         val url = Url(uri)
         val segments = Url(uri).rawSegments
         val id = segments.last().takeIf { it.isNotBlank() } ?: segments[segments.lastIndex - 1]
-        val p = url.parameters["p"]?.toLong() ?: 1L
-        doHandle(inlineQuery, id, p)
+        val p = url.parameters["p"]?.toInt() ?: 1
+        val t = url.parameters["t"]?.toLong() ?: 0L
+        doHandle(inlineQuery, id, p, t)
     }
 
     private suspend fun handleShortLink(inlineQuery: UpdateNewInlineQuery, uri: URI) {
@@ -69,8 +70,8 @@ object BilibiliHandler : InlineHandler {
             return
         }
 
-        val (id, p) = BiliBiliRepository.getIdAndPByShortLink(uri, redirectUrl)
-        doHandle(inlineQuery, id, p)
+        val (id, p, t) = BiliBiliRepository.getIdAndPByShortLink(uri, redirectUrl)
+        doHandle(inlineQuery, id, p, t)
     }
 
     private suspend fun handleDynamic(inlineQuery: UpdateNewInlineQuery, uri: URI) {
@@ -139,8 +140,8 @@ object BilibiliHandler : InlineHandler {
 
     }
 
-    private suspend fun doHandle(inlineQuery: UpdateNewInlineQuery, id: String, p: Long) {
-        log.info("Handle bilibili: $id, $p")
+    private suspend fun doHandle(inlineQuery: UpdateNewInlineQuery, id: String, p: Int, t: Long) {
+        log.info("Handle bilibili: $id, $p, $t")
 
         val videoInfo = BiliBiliRepository.getVideoInfo(id)
         val desc = videoInfo.data.desc.trimString()
@@ -149,20 +150,35 @@ object BilibiliHandler : InlineHandler {
             return
         }
         val streamInfo = BiliBiliRepository.getPlayUrl(videoInfo.data.bvid, page.cid)
-        val link = "https://www.bilibili.com/video/${videoInfo.data.bvid}?p=$p"
+        var link = "https://www.bilibili.com/video/${videoInfo.data.bvid}"
+
+        val parameters = mutableListOf<String>()
+        if (p > 1) parameters.add("p=$p")
+        if (t > 0) parameters.add("t=$t")
+        if (parameters.isNotEmpty()) {
+            val paramStr = parameters.joinToString("&")
+            link += "?$paramStr"
+        }
+
         val up = "UP: [${videoInfo.data.owner.name.markdown()}](https://space.bilibili.com/${videoInfo.data.owner.mid})"
         val playCount = "${((videoInfo.data.stat.view / 10.0).roundToInt() / 100.0).toString().markdown()}K 播放"
-        val contentTitle = if (page.part.contains(videoInfo.data.title)) {
+        var contentTitle = if (page.part.contains(videoInfo.data.title)) {
             "[${page.part.markdown()}]($link)"
         } else {
             "[${videoInfo.data.title.markdown()}]($link) / ${page.part.markdown()}"
         }
+
+        if (t > 0) {
+            val timeStr = t.seconds.format().markdown()
+            contentTitle += " / jump to $timeStr"
+        }
+
         val rank =
             if (videoInfo.data.stat.nowRank == 0) "" else "/ ${videoInfo.data.stat.nowRank} 名 / 历史最高 ${videoInfo.data.stat.nowRank} 名"
         val createDate = LocalDateTime.ofEpochSecond(videoInfo.data.pubdate.toLong(), 0, ZoneOffset.ofHours(8))
             .format(PUB_DATE_PATTERN)
             .markdown()
-        val duration = videoInfo.data.duration.seconds.toString(DurationUnit.MINUTES, 2).markdown()
+        val duration = videoInfo.data.duration.seconds.format().markdown()
         val content = (contentTitle +
             "\n\n$up / $playCount $rank / $createDate / $duration" +
             "\n\n${desc.markdown()}").fmt()
