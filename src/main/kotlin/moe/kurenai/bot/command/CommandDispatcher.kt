@@ -9,6 +9,9 @@ import moe.kurenai.bot.TelegramBot.getChat
 import moe.kurenai.bot.TelegramBot.getUsername
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.command.commands.*
+import moe.kurenai.bot.command.inlines.BgmHandler
+import moe.kurenai.bot.command.inlines.BilibiliHandler
+import moe.kurenai.bot.command.inlines.SakugabooruHandler
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQueryEmpty
 import moe.kurenai.bot.util.TelegramUtil.text
 import moe.kurenai.bot.util.getLogger
@@ -17,6 +20,13 @@ import java.time.Instant
 import it.tdlight.client.Result as TdResult
 
 object CommandDispatcher {
+
+    init {
+        // access handler for initialization
+        SakugabooruHandler
+        BilibiliHandler
+        BgmHandler
+    }
 
     private val log = getLogger()
 
