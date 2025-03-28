@@ -9,7 +9,6 @@ import moe.kurenai.bot.TelegramBot.getChat
 import moe.kurenai.bot.TelegramBot.getUsername
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.command.commands.*
-import moe.kurenai.bot.command.inlines.SearchByURI
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQueryEmpty
 import moe.kurenai.bot.util.TelegramUtil.text
 import moe.kurenai.bot.util.getLogger
@@ -29,7 +28,7 @@ object CommandDispatcher {
         }
     }
 
-    val uriInlineCommandHandler = SearchByURI
+    val uriInlineCommandHandler = InlineDispatcher
 
     fun handle(update: Update) = CoroutineScope(Dispatchers.Default).launch {
         log.trace("Incoming update: {}", update.toString().trim())
