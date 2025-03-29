@@ -104,7 +104,6 @@ data class DynamicInfo(
                 data class ModuleDynamic(
                     val desc: TextNode? = null,
                     val major: Major? = null,
-                    val topic: String? = null,
                 ) {
 
                     @Serializable
