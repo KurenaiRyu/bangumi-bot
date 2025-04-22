@@ -180,7 +180,7 @@ object BilibiliHandler : InlineHandler {
         val createDate = LocalDateTime.ofEpochSecond(videoInfo.data.pubdate.toLong(), 0, ZoneOffset.ofHours(8))
             .format(PUB_DATE_PATTERN)
             .markdown()
-        val duration = videoInfo.data.duration.seconds.formatToSeparateUnit().markdown()
+        val duration = page.duration.seconds.formatToSeparateUnit().markdown()
         val content = (contentTitle +
             "\n\n$up / $playCount $rank / $duration" +
             "\n发布时间: $createDate" +
