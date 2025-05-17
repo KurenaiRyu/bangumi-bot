@@ -7,7 +7,7 @@ import moe.kurenai.bot.BangumiBot.send
 import moe.kurenai.bot.TelegramBot.sendAlbumPhoto
 import moe.kurenai.bot.TelegramBot.sendPhoto
 import moe.kurenai.bot.command.CommandHandler
-import moe.kurenai.bot.repository.SubjectRepository
+import moe.kurenai.bot.repository.bangumi.SubjectRepository
 import moe.kurenai.bot.util.TelegramUtil.asText
 import java.time.LocalDate
 

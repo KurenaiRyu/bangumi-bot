@@ -4,10 +4,10 @@ import it.tdlight.jni.TdApi
 import it.tdlight.jni.TdApi.Message
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.command.CommandHandler
-import moe.kurenai.bot.repository.CharacterRepository
-import moe.kurenai.bot.repository.PersonRepository
 import moe.kurenai.bot.repository.SakugabooruRepository
-import moe.kurenai.bot.repository.SubjectRepository
+import moe.kurenai.bot.repository.bangumi.CharacterRepository
+import moe.kurenai.bot.repository.bangumi.PersonRepository
+import moe.kurenai.bot.repository.bangumi.SubjectRepository
 import moe.kurenai.bot.util.TelegramUtil.asText
 import moe.kurenai.bot.util.TelegramUtil.messageText
 

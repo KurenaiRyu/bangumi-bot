@@ -8,10 +8,10 @@ import moe.kurenai.bot.command.HandleResult
 import moe.kurenai.bot.command.InlineDispatcher.fallback
 import moe.kurenai.bot.command.InlineHandler
 import moe.kurenai.bot.command.UNHANDLED
-import moe.kurenai.bot.repository.CharacterRepository
-import moe.kurenai.bot.repository.PersonRepository
-import moe.kurenai.bot.repository.SubjectRepository
-import moe.kurenai.bot.repository.TokenRepository
+import moe.kurenai.bot.repository.bangumi.CharacterRepository
+import moe.kurenai.bot.repository.bangumi.PersonRepository
+import moe.kurenai.bot.repository.bangumi.SubjectRepository
+import moe.kurenai.bot.repository.bangumi.TokenRepository
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
 import java.net.URI
 

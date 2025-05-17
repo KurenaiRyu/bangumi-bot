@@ -8,8 +8,8 @@ import moe.kurenai.bgm.request.user.GetCollections
 import moe.kurenai.bgm.request.user.GetMe
 import moe.kurenai.bot.BangumiBot.send
 import moe.kurenai.bot.command.CommandHandler
-import moe.kurenai.bot.repository.SubjectRepository
-import moe.kurenai.bot.repository.TokenRepository
+import moe.kurenai.bot.repository.bangumi.SubjectRepository
+import moe.kurenai.bot.repository.bangumi.TokenRepository
 import moe.kurenai.bot.util.TelegramUtil.asText
 import moe.kurenai.bot.util.TelegramUtil.fmt
 import moe.kurenai.bot.util.TelegramUtil.markdown

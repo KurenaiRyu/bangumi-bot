@@ -15,7 +15,7 @@ import kotlinx.coroutines.runBlocking
 import moe.kurenai.bgm.exception.BgmException
 import moe.kurenai.bot.BgmAuthServer.authCache
 import moe.kurenai.bot.TelegramBot.getUsername
-import moe.kurenai.bot.repository.TokenRepository
+import moe.kurenai.bot.repository.bangumi.TokenRepository
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.security.KeyStore

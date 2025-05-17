@@ -1,4 +1,4 @@
-package moe.kurenai.bot.repository
+package moe.kurenai.bot.repository.bangumi
 
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder

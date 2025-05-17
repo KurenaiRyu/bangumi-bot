@@ -1,4 +1,4 @@
-package moe.kurenai.bot.repository
+package moe.kurenai.bot.repository.bangumi
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex

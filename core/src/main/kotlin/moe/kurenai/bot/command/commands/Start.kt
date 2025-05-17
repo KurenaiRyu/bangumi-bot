@@ -12,7 +12,7 @@ import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.TelegramBot.sendPhoto
 import moe.kurenai.bot.command.CommandDispatcher
 import moe.kurenai.bot.command.CommandHandler
-import moe.kurenai.bot.repository.TokenRepository
+import moe.kurenai.bot.repository.bangumi.TokenRepository
 import moe.kurenai.bot.util.TelegramUtil.asText
 import moe.kurenai.bot.util.TelegramUtil.fmt
 import moe.kurenai.bot.util.TelegramUtil.markdown

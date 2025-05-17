@@ -13,7 +13,7 @@ import moe.kurenai.bgm.util.DefaultMapper.MAPPER
 import moe.kurenai.bot.BangumiBot.send
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.command.CommandHandler
-import moe.kurenai.bot.repository.TokenRepository
+import moe.kurenai.bot.repository.bangumi.TokenRepository
 import moe.kurenai.bot.util.TelegramUtil.asText
 import moe.kurenai.bot.util.TelegramUtil.messageDocument
 import moe.kurenai.bot.util.TelegramUtil.messageText
