@@ -28,6 +28,12 @@ class SearchSubjectsRequestFilterTest : ShouldSpec() {
             //modelInstance.type shouldBe ("TODO")
         }
 
+        // to test the property `metaTags` - 公共标签。多个值之间为 `且` 关系。可以用 `-` 排除标签。比如 `-科幻` 可以排除科幻标签。
+        should("test metaTags") {
+            // uncomment below to test the property
+            //modelInstance.metaTags shouldBe ("TODO")
+        }
+
         // to test the property `tag` - 标签，可以多次出现。多值之间为 `且` 关系。
         should("test tag") {
             // uncomment below to test the property

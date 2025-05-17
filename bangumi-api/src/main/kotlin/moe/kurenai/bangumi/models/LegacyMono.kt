@@ -19,7 +19,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * Person
+ * 人物
  *
  * @param id 人物 ID
  * @param url 人物地址

@@ -37,6 +37,7 @@ import kotlinx.serialization.Serializable
  * @param totalEpisodes 数据库中的章节数量
  * @param rating
  * @param collection
+ * @param metaTags 由维基人维护的 tag
  * @param tags
  * @param date air date in `YYYY-MM-DD` format
  * @param infobox
@@ -94,6 +95,10 @@ data class Subject(
 
     @SerialName(value = "collection")
     val collection: Collection,
+
+    /* 由维基人维护的 tag */
+    @SerialName(value = "meta_tags")
+    val metaTags: kotlin.collections.List<kotlin.String>,
 
     @SerialName(value = "tags")
     val tags: kotlin.collections.List<Tag>,

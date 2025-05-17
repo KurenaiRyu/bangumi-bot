@@ -15,7 +15,11 @@
 
 package moe.kurenai.bangumi.models
 
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
+
+import moe.kurenai.bangumi.models.GetUserSubjectEpisodeCollection200Response
+import moe.kurenai.bangumi.models.UserEpisodeCollection
 
 class GetUserSubjectEpisodeCollection200ResponseTest : ShouldSpec() {
     init {

@@ -3,7 +3,7 @@
     "info": {
         "title": "Bangumi API",
         "description": "你可以在 <https://next.bgm.tv/demo/access-token> 生成一个 Access Token\n\n## [关于 User Agent](https://github.com/bangumi/api/blob/master/docs-raw/user%20agent.md)\n\n如果你在使用中遇到了问题，请优先使用 GitHub issue 提交问题。在 bangumi 小组发帖可能无法得到及时反馈。\n",
-        "version": "2024-10-1",
+        "version": "2025-02-5",
         "contact": {
             "name": "Bangumi API",
             "url": "https://github.com/bangumi/api/"
@@ -11,45 +11,40 @@
     },
     "servers": [
         {
-            "url": "https://api.bgm.tv",
-            "description": "The API server"
-        },
-        {
-            "url": "https://bgm.tv",
-            "description": "The OAuth server"
+            "url": "https://api.bgm.tv"
         }
     ],
     "tags": [
         {
-            "name": "Subject"
+            "name": "条目"
         },
         {
-            "name": "Episode"
+            "name": "章节"
         },
         {
-            "name": "Character"
+            "name": "角色"
         },
         {
-            "name": "Person"
+            "name": "人物"
         },
         {
-            "name": "User"
+            "name": "用户"
         },
         {
-            "name": "Collection"
+            "name": "收藏"
         },
         {
-            "name": "Revision"
+            "name": "编辑历史"
         },
         {
-            "name": "Index"
+            "name": "目录"
         }
     ],
     "paths": {
         "/calendar": {
             "get": {
                 "tags": [
-                    "Subject"
+                    "条目"
                 ],
                 "summary": "每日放送",
                 "operationId": "getCalendar",
@@ -102,7 +97,7 @@
         "/search/subject/{keywords}": {
             "get": {
                 "tags": [
-                    "Search"
+                    "搜索"
                 ],
                 "summary": "条目搜索",
                 "operationId": "searchSubjectByKeywords",
@@ -227,11 +222,11 @@
         "/v0/search/subjects": {
             "post": {
                 "tags": [
-                    "Subject"
+                    "条目"
                 ],
                 "summary": "条目搜索",
                 "operationId": "searchSubjects",
-                "description": "## 实验性 API， 本 schema 和实际的 API 行为都可能随时发生改动\n\n目前支持的筛选条件包括:\n- `type`: 条目类型，参照 `SubjectType` enum， `或`。\n- `tag`: 标签，可以多次出现。`且` 关系。\n- `airdate`: 播出日期/发售日期。`且` 关系。\n- `rating`: 用于搜索指定评分的条目。`且` 关系。\n- `rank`: 用于搜索指定排名的条目。`且` 关系。\n- `nsfw`: 使用 `include` 包含NSFW搜索结果。默认排除搜索NSFW条目。无权限情况下忽略此选项，不会返回NSFW条目。\n\n不同筛选条件之间为 `且`\n\n\n由于目前 meilisearch 的一些问题，条目排名更新并不会触发搜索数据更新，所以条目排名可能是过期数据。\n\n希望未来版本的 meilisearch 能解决相关的问题。\n",
+                "description": "## 实验性 API， 本 schema 和实际的 API 行为都可能随时发生改动\n\n目前支持的筛选条件包括:\n- `type`: 条目类型，参照 `SubjectType` enum， `或`。\n- `tag`: 标签，可以多次出现。`且` 关系。\n- `airdate`: 播出日期/发售日期。`且` 关系。\n- `rating`: 用于搜索指定评分的条目。`且` 关系。\n- `rank`: 用于搜索指定排名的条目。`且` 关系。\n- `nsfw`: 使用 `include` 包含NSFW搜索结果。默认排除搜索NSFW条目。无权限情况下忽略此选项，不会返回NSFW条目。\n\n不同筛选条件之间为 `且`\n",
                 "parameters": [
                     {
                         "name": "limit",
@@ -286,6 +281,17 @@
                                                     "$ref": "#/components/schemas/SubjectType"
                                                 },
                                                 "description": "条目类型，参照 `SubjectType` enum，多值之间为 `或` 的关系。"
+                                            },
+                                            "meta_tags": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "example": [
+                                                    "童年",
+                                                    "原创"
+                                                ],
+                                                "description": "公共标签。多个值之间为 `且` 关系。可以用 `-` 排除标签。比如 `-科幻` 可以排除科幻标签。"
                                             },
                                             "tag": {
                                                 "type": "array",
@@ -348,84 +354,152 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "description": "用户信息",
-                                    "type": "object",
-                                    "properties": {
-                                        "total": {
-                                            "description": "搜索结果数量",
-                                            "type": "integer",
-                                            "example": 100
-                                        },
-                                        "limit": {
-                                            "description": "当前分页参数",
-                                            "type": "integer",
-                                            "example": 100
-                                        },
-                                        "offset": {
-                                            "description": "当前分页参数",
-                                            "type": "integer",
-                                            "example": 100
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "required": [
-                                                    "score",
-                                                    "id",
-                                                    "rank",
-                                                    "tags",
-                                                    "name",
-                                                    "name_cn",
-                                                    "image",
-                                                    "date",
-                                                    "summary"
-                                                ],
-                                                "properties": {
-                                                    "id": {
-                                                        "description": "条目ID",
-                                                        "type": "integer",
-                                                        "example": 8
-                                                    },
-                                                    "type": {
-                                                        "$ref": "#/components/schemas/SubjectType"
-                                                    },
-                                                    "date": {
-                                                        "type": "string",
-                                                        "description": "上映/开播/连载开始日期，可能为空字符串"
-                                                    },
-                                                    "image": {
-                                                        "type": "string",
-                                                        "format": "url",
-                                                        "description": "封面"
-                                                    },
-                                                    "summary": {
-                                                        "type": "string",
-                                                        "description": "条目描述"
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "description": "条目原名"
-                                                    },
-                                                    "name_cn": {
-                                                        "type": "string",
-                                                        "description": "条目中文名"
-                                                    },
-                                                    "tags": {
-                                                        "$ref": "#/components/schemas/SubjectTags"
-                                                    },
-                                                    "score": {
-                                                        "description": "评分",
-                                                        "type": "number"
-                                                    },
-                                                    "rank": {
-                                                        "description": "排名",
-                                                        "type": "integer"
-                                                    }
-                                                }
+                                    "$ref": "#/components/schemas/Paged_Subject"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v0/search/characters": {
+            "post": {
+                "tags": [
+                    "角色"
+                ],
+                "summary": "角色搜索",
+                "operationId": "searchCharacters",
+                "description": "## 实验性 API， 本 schema 和实际的 API 行为都可能随时发生改动\n\n目前支持的筛选条件包括:\n- `nsfw`: 使用 `include` 包含NSFW搜索结果。默认排除搜索NSFW条目。无权限情况下忽略此选项，不会返回NSFW条目。\n",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "分页参数",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "分页参数",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "keyword"
+                                ],
+                                "properties": {
+                                    "keyword": {
+                                        "type": "string"
+                                    },
+                                    "filter": {
+                                        "type": "object",
+                                        "description": "不同条件之间是 `且` 的关系",
+                                        "properties": {
+                                            "nsfw": {
+                                                "type": "boolean",
+                                                "description": "无权限的用户会直接忽略此字段，不会返回 R18 角色。\n\n默认或者 `null` 会返回包含 R18 的所有搜索结果。\n\n`true` 只会返回 R18 角色。\n\n`false` 只会返回非 R18 角色。\n"
                                             }
                                         }
                                     }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "返回搜索结果",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Paged_Character"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v0/search/persons": {
+            "post": {
+                "tags": [
+                    "人物"
+                ],
+                "summary": "人物搜索",
+                "operationId": "searchPersons",
+                "description": "## 实验性 API， 本 schema 和实际的 API 行为都可能随时发生改动\n\n目前支持的筛选条件包括:\n- `career`: 职业，可以多次出现。`且` 关系。\n\n不同筛选条件之间为 `且`\n",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "分页参数",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "分页参数",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "keyword"
+                                ],
+                                "properties": {
+                                    "keyword": {
+                                        "type": "string"
+                                    },
+                                    "filter": {
+                                        "type": "object",
+                                        "description": "不同条件之间是 `且` 的关系",
+                                        "properties": {
+                                            "career": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "example": [
+                                                    "artist",
+                                                    "director"
+                                                ],
+                                                "description": "职业，可以多次出现。多值之间为 `且` 关系。"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "返回搜索结果",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Paged_Person"
                                 }
                             }
                         }
@@ -436,7 +510,7 @@
         "/v0/subjects": {
             "get": {
                 "tags": [
-                    "Subject"
+                    "条目"
                 ],
                 "summary": "浏览条目",
                 "description": "第一页会 cache 24h，之后会 cache 1h",
@@ -555,7 +629,7 @@
         "/v0/subjects/{subject_id}": {
             "get": {
                 "tags": [
-                    "Subject"
+                    "条目"
                 ],
                 "summary": "获取条目",
                 "description": "cache with 300s",
@@ -607,7 +681,7 @@
         "/v0/subjects/{subject_id}/image": {
             "get": {
                 "tags": [
-                    "Subject"
+                    "条目"
                 ],
                 "summary": "Get Subject Image",
                 "operationId": "getSubjectImageById",
@@ -669,7 +743,7 @@
         "/v0/subjects/{subject_id}/persons": {
             "get": {
                 "tags": [
-                    "Subject"
+                    "条目"
                 ],
                 "summary": "Get Subject Persons",
                 "operationId": "getRelatedPersonsBySubjectId",
@@ -723,7 +797,7 @@
         "/v0/subjects/{subject_id}/characters": {
             "get": {
                 "tags": [
-                    "Subject"
+                    "条目"
                 ],
                 "summary": "Get Subject Characters",
                 "operationId": "getRelatedCharactersBySubjectId",
@@ -777,7 +851,7 @@
         "/v0/subjects/{subject_id}/subjects": {
             "get": {
                 "tags": [
-                    "Subject"
+                    "条目"
                 ],
                 "summary": "Get Subject Relations",
                 "operationId": "getRelatedSubjectsBySubjectId",
@@ -831,7 +905,7 @@
         "/v0/episodes": {
             "get": {
                 "tags": [
-                    "Episode"
+                    "章节"
                 ],
                 "summary": "Get Episodes",
                 "operationId": "getEpisodes",
@@ -848,8 +922,7 @@
                                     "$ref": "#/components/schemas/EpType"
                                 }
                             ],
-                            "description": "参照章节的`type`",
-                            "type": "integer"
+                            "description": "参照章节的`type`"
                         },
                         "name": "type",
                         "in": "query"
@@ -922,7 +995,7 @@
         "/v0/episodes/{episode_id}": {
             "get": {
                 "tags": [
-                    "Episode"
+                    "章节"
                 ],
                 "summary": "Get Episode",
                 "operationId": "getEpisodeById",
@@ -973,7 +1046,7 @@
         "/v0/characters/{character_id}": {
             "get": {
                 "tags": [
-                    "Character"
+                    "角色"
                 ],
                 "summary": "Get Character Detail",
                 "description": "cache with 60s",
@@ -989,7 +1062,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/CharacterDetail"
+                                    "$ref": "#/components/schemas/Character"
                                 }
                             }
                         }
@@ -1020,7 +1093,7 @@
         "/v0/characters/{character_id}/image": {
             "get": {
                 "tags": [
-                    "Character"
+                    "角色"
                 ],
                 "summary": "Get Character Image",
                 "operationId": "getCharacterImageById",
@@ -1082,7 +1155,7 @@
         "/v0/characters/{character_id}/subjects": {
             "get": {
                 "tags": [
-                    "Character"
+                    "角色"
                 ],
                 "summary": "get character related subjects",
                 "operationId": "getRelatedSubjectsByCharacterId",
@@ -1131,7 +1204,7 @@
         "/v0/characters/{character_id}/persons": {
             "get": {
                 "tags": [
-                    "Character"
+                    "角色"
                 ],
                 "summary": "get character related persons",
                 "operationId": "getRelatedPersonsByCharacterId",
@@ -1180,7 +1253,7 @@
         "/v0/characters/{character_id}/collect": {
             "post": {
                 "tags": [
-                    "Character"
+                    "角色"
                 ],
                 "summary": "Collect character for current user",
                 "operationId": "collectCharacterByCharacterIdAndUserId",
@@ -1233,7 +1306,7 @@
             },
             "delete": {
                 "tags": [
-                    "Character"
+                    "角色"
                 ],
                 "summary": "Uncollect character for current user",
                 "operationId": "uncollectCharacterByCharacterIdAndUserId",
@@ -1288,7 +1361,7 @@
         "/v0/persons/{person_id}": {
             "get": {
                 "tags": [
-                    "Person"
+                    "人物"
                 ],
                 "summary": "Get Person",
                 "description": "cache with 60s",
@@ -1335,7 +1408,7 @@
         "/v0/persons/{person_id}/image": {
             "get": {
                 "tags": [
-                    "Person"
+                    "人物"
                 ],
                 "summary": "Get Person Image",
                 "operationId": "getPersonImageById",
@@ -1397,7 +1470,7 @@
         "/v0/persons/{person_id}/subjects": {
             "get": {
                 "tags": [
-                    "Person"
+                    "人物"
                 ],
                 "summary": "get person related subjects",
                 "operationId": "getRelatedSubjectsByPersonId",
@@ -1446,7 +1519,7 @@
         "/v0/persons/{person_id}/characters": {
             "get": {
                 "tags": [
-                    "Person"
+                    "人物"
                 ],
                 "summary": "get person related characters",
                 "operationId": "getRelatedCharactersByPersonId",
@@ -1495,7 +1568,7 @@
         "/v0/persons/{person_id}/collect": {
             "post": {
                 "tags": [
-                    "Person"
+                    "人物"
                 ],
                 "summary": "Collect person for current user",
                 "operationId": "collectPersonByPersonIdAndUserId",
@@ -1548,7 +1621,7 @@
             },
             "delete": {
                 "tags": [
-                    "Person"
+                    "人物"
                 ],
                 "summary": "Uncollect person for current user",
                 "operationId": "uncollectPersonByPersonIdAndUserId",
@@ -1603,7 +1676,7 @@
         "/v0/users/{username}": {
             "get": {
                 "tags": [
-                    "User"
+                    "用户"
                 ],
                 "summary": "Get User by name",
                 "description": "获取用户信息",
@@ -1650,7 +1723,7 @@
         "/v0/users/{username}/avatar": {
             "get": {
                 "tags": [
-                    "User"
+                    "用户"
                 ],
                 "summary": "Get User Avatar by name",
                 "description": "获取用户头像，302 重定向至头像地址，设置了 username 之后无法使用 UID 查询。",
@@ -1708,7 +1781,7 @@
         "/v0/me": {
             "get": {
                 "tags": [
-                    "User"
+                    "用户"
                 ],
                 "summary": "Get User",
                 "description": "返回当前 Access Token 对应的用户信息",
@@ -1724,8 +1797,24 @@
                                             "$ref": "#/components/schemas/User"
                                         },
                                         {
+                                            "required": [
+                                                "email",
+                                                "reg_time"
+                                            ]
+                                        },
+                                        {
                                             "type": "object",
                                             "properties": {
+                                                "email": {
+                                                    "description": "用户绑定的邮箱地址",
+                                                    "type": "string",
+                                                    "format": "email"
+                                                },
+                                                "reg_time": {
+                                                    "description": "用户注册时间。比如 2017-12-03T08:51:16+08:00",
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
                                                 "time_offset": {
                                                     "description": "用户设置的时区偏移，以小时为单位。比如 GMT+8（shanghai/beijing）为 8",
                                                     "type": "integer"
@@ -1737,7 +1826,7 @@
                             }
                         }
                     },
-                    "403": {
+                    "401": {
                         "description": "unauthorized",
                         "content": {
                             "application/json": {
@@ -1758,7 +1847,7 @@
         "/v0/users/{username}/collections": {
             "get": {
                 "tags": [
-                    "Collection"
+                    "收藏"
                 ],
                 "summary": "获取用户收藏",
                 "description": "获取对应用户的收藏，查看私有收藏需要access token。",
@@ -1784,8 +1873,7 @@
                                 {
                                     "$ref": "#/components/schemas/SubjectCollectionType"
                                 }
-                            ],
-                            "type": "integer"
+                            ]
                         },
                         "name": "type",
                         "in": "query"
@@ -1839,7 +1927,7 @@
         "/v0/users/{username}/collections/{subject_id}": {
             "get": {
                 "tags": [
-                    "Collection"
+                    "收藏"
                 ],
                 "summary": "获取用户单个条目收藏",
                 "description": "获取对应用户的收藏，查看私有收藏需要 access token",
@@ -1894,7 +1982,7 @@
         "/v0/users/-/collections/{subject_id}": {
             "post": {
                 "tags": [
-                    "Collection"
+                    "收藏"
                 ],
                 "summary": "新增或修改用户单个条目收藏",
                 "description": "修改条目收藏状态, 如果不存在则创建，如果存在则修改\n\n由于直接修改剧集条目的完成度可能会引起意料之外效果，只能用于修改书籍类条目的完成度。\n\n方法的所有请求体字段均可选\n",
@@ -1956,7 +2044,7 @@
             },
             "patch": {
                 "tags": [
-                    "Collection"
+                    "收藏"
                 ],
                 "summary": "修改用户单个收藏",
                 "description": "修改条目收藏状态\n\n由于直接修改剧集条目的完成度可能会引起意料之外效果，只能用于修改书籍类条目的完成度。\n\nPATCH 方法的所有请求体字段均可选\n",
@@ -2020,7 +2108,7 @@
         "/v0/users/-/collections/{subject_id}/episodes": {
             "get": {
                 "tags": [
-                    "Collection"
+                    "收藏"
                 ],
                 "summary": "章节收藏信息",
                 "operationId": "getUserSubjectEpisodeCollection",
@@ -2119,7 +2207,7 @@
             },
             "patch": {
                 "tags": [
-                    "Collection"
+                    "收藏"
                 ],
                 "summary": "章节收藏信息",
                 "description": "同时会重新计算条目的完成度\n",
@@ -2203,7 +2291,7 @@
         "/v0/users/-/collections/-/episodes/{episode_id}": {
             "get": {
                 "tags": [
-                    "Collection"
+                    "收藏"
                 ],
                 "summary": "章节收藏信息",
                 "operationId": "getUserEpisodeCollection",
@@ -2262,7 +2350,7 @@
             },
             "put": {
                 "tags": [
-                    "Collection"
+                    "收藏"
                 ],
                 "summary": "更新章节收藏信息",
                 "operationId": "putUserEpisodeCollection",
@@ -2333,7 +2421,7 @@
         "/v0/users/{username}/collections/-/characters": {
             "get": {
                 "tags": [
-                    "Collection"
+                    "收藏"
                 ],
                 "summary": "获取用户角色收藏列表",
                 "operationId": "getUserCharacterCollections",
@@ -2369,7 +2457,7 @@
         "/v0/users/{username}/collections/-/characters/{character_id}": {
             "get": {
                 "tags": [
-                    "Collection"
+                    "收藏"
                 ],
                 "summary": "获取用户单个角色收藏信息",
                 "operationId": "getUserCharacterCollection",
@@ -2418,7 +2506,7 @@
         "/v0/users/{username}/collections/-/persons": {
             "get": {
                 "tags": [
-                    "Collection"
+                    "收藏"
                 ],
                 "summary": "获取用户人物收藏列表",
                 "operationId": "getUserPersonCollections",
@@ -2454,7 +2542,7 @@
         "/v0/users/{username}/collections/-/persons/{person_id}": {
             "get": {
                 "tags": [
-                    "Collection"
+                    "收藏"
                 ],
                 "summary": "获取用户单个人物收藏信息",
                 "operationId": "getUserPersonCollection",
@@ -2503,7 +2591,7 @@
         "/v0/revisions/persons": {
             "get": {
                 "tags": [
-                    "Revision"
+                    "编辑历史"
                 ],
                 "summary": "Get Person Revisions",
                 "operationId": "getPersonRevisions",
@@ -2553,7 +2641,7 @@
         "/v0/revisions/persons/{revision_id}": {
             "get": {
                 "tags": [
-                    "Revision"
+                    "编辑历史"
                 ],
                 "summary": "Get Person Revision",
                 "operationId": "getPersonRevisionByRevisionId",
@@ -2607,7 +2695,7 @@
         "/v0/revisions/characters": {
             "get": {
                 "tags": [
-                    "Revision"
+                    "编辑历史"
                 ],
                 "summary": "Get Character Revisions",
                 "operationId": "getCharacterRevisions",
@@ -2657,7 +2745,7 @@
         "/v0/revisions/characters/{revision_id}": {
             "get": {
                 "tags": [
-                    "Revision"
+                    "编辑历史"
                 ],
                 "summary": "Get Character Revision",
                 "operationId": "getCharacterRevisionByRevisionId",
@@ -2703,7 +2791,7 @@
         "/v0/revisions/subjects": {
             "get": {
                 "tags": [
-                    "Revision"
+                    "编辑历史"
                 ],
                 "summary": "Get Subject Revisions",
                 "operationId": "getSubjectRevisions",
@@ -2753,7 +2841,7 @@
         "/v0/revisions/subjects/{revision_id}": {
             "get": {
                 "tags": [
-                    "Revision"
+                    "编辑历史"
                 ],
                 "summary": "Get Subject Revision",
                 "operationId": "getSubjectRevisionByRevisionId",
@@ -2799,7 +2887,7 @@
         "/v0/revisions/episodes": {
             "get": {
                 "tags": [
-                    "Revision"
+                    "编辑历史"
                 ],
                 "summary": "Get Episode Revisions",
                 "operationId": "getEpisodeRevisions",
@@ -2849,7 +2937,7 @@
         "/v0/revisions/episodes/{revision_id}": {
             "get": {
                 "tags": [
-                    "Revision"
+                    "编辑历史"
                 ],
                 "summary": "Get Episode Revision",
                 "operationId": "getEpisodeRevisionByRevisionId",
@@ -2895,7 +2983,7 @@
         "/v0/indices": {
             "post": {
                 "tags": [
-                    "Index"
+                    "目录"
                 ],
                 "summary": "Create a new index",
                 "operationId": "newIndex",
@@ -2931,7 +3019,7 @@
         "/v0/indices/{index_id}": {
             "get": {
                 "tags": [
-                    "Index"
+                    "目录"
                 ],
                 "summary": "Get Index By ID",
                 "operationId": "getIndexById",
@@ -2963,7 +3051,7 @@
             },
             "put": {
                 "tags": [
-                    "Index"
+                    "目录"
                 ],
                 "summary": "Edit index's information",
                 "operationId": "editIndexById",
@@ -3012,7 +3100,7 @@
         "/v0/indices/{index_id}/subjects": {
             "get": {
                 "tags": [
-                    "Index"
+                    "目录"
                 ],
                 "summary": "Get Index Subjects",
                 "operationId": "getIndexSubjectsByIndexId",
@@ -3055,7 +3143,7 @@
             },
             "post": {
                 "tags": [
-                    "Index"
+                    "目录"
                 ],
                 "summary": "Add a subject to Index",
                 "operationId": "addSubjectToIndexByIndexId",
@@ -3097,7 +3185,7 @@
         "/v0/indices/{index_id}/subjects/{subject_id}": {
             "put": {
                 "tags": [
-                    "Index"
+                    "目录"
                 ],
                 "summary": "Edit subject information in a index",
                 "operationId": "editIndexSubjectsByIndexIdAndSubjectID",
@@ -3141,7 +3229,7 @@
             },
             "delete": {
                 "tags": [
-                    "Index"
+                    "目录"
                 ],
                 "summary": "Delete a subject from a Index",
                 "operationId": "delelteSubjectFromIndexByIndexIdAndSubjectID",
@@ -3174,7 +3262,7 @@
         "/v0/indices/{index_id}/collect": {
             "post": {
                 "tags": [
-                    "Index"
+                    "目录"
                 ],
                 "summary": "Collect index for current user",
                 "operationId": "collectIndexByIndexIdAndUserId",
@@ -3206,7 +3294,7 @@
             },
             "delete": {
                 "tags": [
-                    "Index"
+                    "目录"
                 ],
                 "summary": "Uncollect index for current user",
                 "operationId": "uncollectIndexByIndexIdAndUserId",
@@ -3856,7 +3944,7 @@
                 }
             },
             "Legacy_Mono": {
-                "description": "Person",
+                "description": "人物",
                 "allOf": [
                     {
                         "$ref": "#/components/schemas/Legacy_MonoBase"
@@ -4108,8 +4196,8 @@
                     "O"
                 ]
             },
-            "CharacterDetail": {
-                "title": "CharacterDetail",
+            "Character": {
+                "title": "Character",
                 "required": [
                     "id",
                     "name",
@@ -5223,6 +5311,64 @@
                     }
                 }
             },
+            "Paged_Character": {
+                "title": "Paged[Character]",
+                "type": "object",
+                "properties": {
+                    "total": {
+                        "title": "Total",
+                        "type": "integer",
+                        "default": 0
+                    },
+                    "limit": {
+                        "title": "Limit",
+                        "type": "integer",
+                        "default": 0
+                    },
+                    "offset": {
+                        "title": "Offset",
+                        "type": "integer",
+                        "default": 0
+                    },
+                    "data": {
+                        "title": "Data",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Character"
+                        },
+                        "default": []
+                    }
+                }
+            },
+            "Paged_Person": {
+                "title": "Paged[Person]",
+                "type": "object",
+                "properties": {
+                    "total": {
+                        "title": "Total",
+                        "type": "integer",
+                        "default": 0
+                    },
+                    "limit": {
+                        "title": "Limit",
+                        "type": "integer",
+                        "default": 0
+                    },
+                    "offset": {
+                        "title": "Offset",
+                        "type": "integer",
+                        "default": 0
+                    },
+                    "data": {
+                        "title": "Data",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Person"
+                        },
+                        "default": []
+                    }
+                }
+            },
             "Paged_Episode": {
                 "title": "Paged[Episode]",
                 "type": "object",
@@ -5945,6 +6091,7 @@
                     "nsfw",
                     "locked",
                     "platform",
+                    "meta_tags",
                     "volumes",
                     "eps",
                     "series",
@@ -6116,6 +6263,13 @@
                                 "title": "Dropped",
                                 "type": "integer"
                             }
+                        }
+                    },
+                    "meta_tags": {
+                        "description": "由维基人维护的 tag",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
                         }
                     },
                     "tags": {

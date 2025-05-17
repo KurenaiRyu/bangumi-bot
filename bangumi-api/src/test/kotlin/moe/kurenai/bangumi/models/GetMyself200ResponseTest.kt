@@ -15,7 +15,12 @@
 
 package moe.kurenai.bangumi.models
 
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
+
+import moe.kurenai.bangumi.models.GetMyself200Response
+import moe.kurenai.bangumi.models.Avatar
+import moe.kurenai.bangumi.models.UserGroup
 
 class GetMyself200ResponseTest : ShouldSpec() {
     init {
@@ -56,6 +61,18 @@ class GetMyself200ResponseTest : ShouldSpec() {
         should("test sign") {
             // uncomment below to test the property
             //modelInstance.sign shouldBe ("TODO")
+        }
+
+        // to test the property `email` - 用户绑定的邮箱地址
+        should("test email") {
+            // uncomment below to test the property
+            //modelInstance.email shouldBe ("TODO")
+        }
+
+        // to test the property `regTime` - 用户注册时间。比如 2017-12-03T08:51:16+08:00
+        should("test regTime") {
+            // uncomment below to test the property
+            //modelInstance.regTime shouldBe ("TODO")
         }
 
         // to test the property `timeOffset` - 用户设置的时区偏移，以小时为单位。比如 GMT+8（shanghai/beijing）为 8

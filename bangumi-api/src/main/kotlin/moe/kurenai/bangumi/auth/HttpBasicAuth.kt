@@ -1,6 +1,6 @@
 package moe.kurenai.bangumi.auth
 
-import io.ktor.util.*
+import io.ktor.util.encodeBase64
 
 class HttpBasicAuth : Authentication {
     var username: String? = null

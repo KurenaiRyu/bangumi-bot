@@ -15,7 +15,12 @@
 
 package moe.kurenai.bangumi.models
 
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
+
+import moe.kurenai.bangumi.models.PersonRevisionDataItem
+import moe.kurenai.bangumi.models.PersonRevisionProfession
+import moe.kurenai.bangumi.models.RevisionExtra
 
 class PersonRevisionDataItemTest : ShouldSpec() {
     init {

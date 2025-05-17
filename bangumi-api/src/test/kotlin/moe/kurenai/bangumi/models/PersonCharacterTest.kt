@@ -15,7 +15,13 @@
 
 package moe.kurenai.bangumi.models
 
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
+
+import moe.kurenai.bangumi.models.PersonCharacter
+import moe.kurenai.bangumi.models.CharacterType
+import moe.kurenai.bangumi.models.PersonImages
+import moe.kurenai.bangumi.models.SubjectType
 
 class PersonCharacterTest : ShouldSpec() {
     init {

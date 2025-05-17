@@ -15,7 +15,13 @@
 
 package moe.kurenai.bangumi.models
 
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
+
+import moe.kurenai.bangumi.models.LegacySubjectSmall
+import moe.kurenai.bangumi.models.LegacySubjectSmallCollection
+import moe.kurenai.bangumi.models.LegacySubjectSmallImages
+import moe.kurenai.bangumi.models.LegacySubjectSmallRating
 
 class LegacySubjectSmallTest : ShouldSpec() {
     init {

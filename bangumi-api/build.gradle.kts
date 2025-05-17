@@ -44,7 +44,6 @@ fun generateAction(
                 "dateLibrary" to "java8",
                 "serializationLibrary" to "kotlinx_serialization",
                 "enumPropertyNaming" to "UPPERCASE",
-//            "generateOneOfAnyOfWrappers" to "true",
                 "omitGradleWrapper" to "true",
             ),
         )

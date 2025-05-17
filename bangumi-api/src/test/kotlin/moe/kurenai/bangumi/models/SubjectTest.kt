@@ -112,6 +112,12 @@ class SubjectTest : ShouldSpec() {
             //modelInstance.collection shouldBe ("TODO")
         }
 
+        // to test the property `metaTags` - 由维基人维护的 tag
+        should("test metaTags") {
+            // uncomment below to test the property
+            //modelInstance.metaTags shouldBe ("TODO")
+        }
+
         // to test the property `tags`
         should("test tags") {
             // uncomment below to test the property

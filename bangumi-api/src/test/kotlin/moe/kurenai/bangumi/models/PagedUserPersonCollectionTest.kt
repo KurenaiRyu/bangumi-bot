@@ -15,7 +15,11 @@
 
 package moe.kurenai.bangumi.models
 
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
+
+import moe.kurenai.bangumi.models.PagedUserPersonCollection
+import moe.kurenai.bangumi.models.UserPersonCollection
 
 class PagedUserPersonCollectionTest : ShouldSpec() {
     init {

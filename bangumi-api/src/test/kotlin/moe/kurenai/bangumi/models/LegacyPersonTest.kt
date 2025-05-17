@@ -15,7 +15,12 @@
 
 package moe.kurenai.bangumi.models
 
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
+
+import moe.kurenai.bangumi.models.LegacyPerson
+import moe.kurenai.bangumi.models.LegacyMonoBaseImages
+import moe.kurenai.bangumi.models.LegacyMonoInfo
 
 class LegacyPersonTest : ShouldSpec() {
     init {

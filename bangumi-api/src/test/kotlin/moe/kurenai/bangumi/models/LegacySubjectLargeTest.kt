@@ -15,7 +15,18 @@
 
 package moe.kurenai.bangumi.models
 
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
+
+import moe.kurenai.bangumi.models.LegacySubjectLarge
+import moe.kurenai.bangumi.models.LegacyBlog
+import moe.kurenai.bangumi.models.LegacyEpisode
+import moe.kurenai.bangumi.models.LegacySubjectMediumAllOfCrt
+import moe.kurenai.bangumi.models.LegacySubjectMediumAllOfStaff
+import moe.kurenai.bangumi.models.LegacySubjectSmallCollection
+import moe.kurenai.bangumi.models.LegacySubjectSmallImages
+import moe.kurenai.bangumi.models.LegacySubjectSmallRating
+import moe.kurenai.bangumi.models.LegacyTopic
 
 class LegacySubjectLargeTest : ShouldSpec() {
     init {

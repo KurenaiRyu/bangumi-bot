@@ -15,7 +15,12 @@
 
 package moe.kurenai.bangumi.models
 
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
+
+import moe.kurenai.bangumi.models.Index
+import moe.kurenai.bangumi.models.Creator
+import moe.kurenai.bangumi.models.Stat
 
 class IndexTest : ShouldSpec() {
     init {

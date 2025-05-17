@@ -23,6 +23,7 @@ import kotlinx.serialization.Serializable
  * 不同条件之间是 `且` 的关系
  *
  * @param type 条目类型，参照 `SubjectType` enum，多值之间为 `或` 的关系。
+ * @param metaTags 公共标签。多个值之间为 `且` 关系。可以用 `-` 排除标签。比如 `-科幻` 可以排除科幻标签。
  * @param tag 标签，可以多次出现。多值之间为 `且` 关系。
  * @param airDate 播出日期/发售日期，日期必需为 `YYYY-MM-DD` 格式。多值之间为 `且` 关系。
  * @param rating 用于搜索指定评分的条目，多值之间为 `且` 关系。
@@ -36,6 +37,10 @@ data class SearchSubjectsRequestFilter(
     /* 条目类型，参照 `SubjectType` enum，多值之间为 `或` 的关系。 */
     @SerialName(value = "type")
     val type: kotlin.collections.List<@Contextual SubjectType>? = null,
+
+    /* 公共标签。多个值之间为 `且` 关系。可以用 `-` 排除标签。比如 `-科幻` 可以排除科幻标签。 */
+    @SerialName(value = "meta_tags")
+    val metaTags: kotlin.collections.List<kotlin.String>? = null,
 
     /* 标签，可以多次出现。多值之间为 `且` 关系。 */
     @SerialName(value = "tag")

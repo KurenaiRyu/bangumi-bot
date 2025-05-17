@@ -15,8 +15,12 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.GetCalendar200ResponseInnerWeekday
+import moe.kurenai.bangumi.models.LegacySubjectSmall
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  *

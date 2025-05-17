@@ -15,7 +15,11 @@
 
 package moe.kurenai.bangumi.models
 
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
+
+import moe.kurenai.bangumi.models.PagedEpisode
+import moe.kurenai.bangumi.models.Episode
 
 class PagedEpisodeTest : ShouldSpec() {
     init {
