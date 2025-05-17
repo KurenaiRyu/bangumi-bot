@@ -1,0 +1,137 @@
+openapi: 3.0.3
+info:
+    title: "Bangumi OAuth API"
+    version: "v0"
+servers:
+    -   url: https://bgm.tv
+tags:
+    -   name: oauth
+paths:
+    /oauth/authorize:
+        get:
+            tags:
+                - oauth
+            summary: "获取授权"
+            description: "第三方应用引导用户访问 Bangumi 授权页获取授权"
+            operationId: authorize
+            parameters:
+                -   name: client_id
+                    in: query
+                    required: true
+                    schema:
+                        type: string
+                    description: "App ID，注册应用时获取"
+                -   name: response_type
+                    in: query
+                    required: true
+                    schema:
+                        type: string
+                    description: "验证类型，目前仅支持 code"
+                -   name: redirect_uri
+                    in: query
+                    schema:
+                        type: string
+                    description: "回调 URL，在后台设置的回调地址"
+                -   name: scope
+                    in: query
+                    schema:
+                        type: string
+                    description: "请求权限，尚未实现"
+                -   name: state
+                    in: query
+                    schema:
+                        type: string
+                    description: "随机参数，随机生产的参数，便于开发者防止跨站攻击"
+            responses:
+                301:
+                    description: "用户授权后，Bangumi 将会跳转回第三方应用提供的回调地址， 如 [https://sample.com/callback?code=CODE]。code 的有效期为 60 秒。"
+    /oauth/access_token:
+        post:
+            tags:
+                - oauth
+            summary: "获取 Access Token"
+            description: "第三方应用使用 code（验证代码）/ Refresh Token 换取 Access Token"
+            operationId: getAccessToken
+            requestBody:
+                content:
+                    'application/json':
+                        schema:
+                            "$ref": "#/components/schemas/AccessTokenRequest"
+            responses:
+                200:
+                    content:
+                        'application/json':
+                            schema:
+                                $ref: "#/components/schemas/UserAccessToken"
+                    description: "返回Access Token"
+components:
+    schemas:
+        AccessTokenRequest:
+            title: "AccessTokenRequest"
+            required:
+                - grant_type
+                - client_id
+                - client_secret
+                - redirect_uri
+            type: object
+            properties:
+                grant_type:
+                    title: String
+                    description: "授权方式，`authorization_code` 需要用到code，refresh_token需要用到"
+                    type: string
+                    enum:
+                        - authorization_code
+                        - refresh_token
+                client_id:
+                    title: String
+                    description: "App ID"
+                    type: string
+                client_secret:
+                    title: String
+                    description: "App Secret"
+                    type: string
+                refresh_token:
+                    title: String
+                    description: "Refresh Token"
+                    type: string
+                code:
+                    title: String
+                    description: "验证代码"
+                    type: string
+                redirect_uri:
+                    title: String
+                    description: "回调 URL"
+                    type: string
+                state:
+                    title: String
+                    description: "随机参数"
+                    type: string
+        UserAccessToken:
+            title: "UserAccessToken"
+            required:
+                - access_token
+                - expires_in
+                - refresh_token
+                - user_id
+            type: object
+            properties:
+                access_token:
+                    title: String
+                    type: string
+                expires_in:
+                    title: Long
+                    type: integer
+                    format: int64
+                refresh_token:
+                    title: String
+                    type: string
+                user_id:
+                    title: Int,
+                    type: integer
+                    format: int32
+            example:
+                access_token: "YOUR_NEW_ACCESS_TOKEN"
+                expires_in: 604800
+                token_type: "Bearer"
+                scope: null
+                refresh_token: "YOUR_NEW_REFRESH_TOKEN"
