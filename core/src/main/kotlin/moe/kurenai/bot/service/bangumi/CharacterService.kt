@@ -1,17 +1,17 @@
-package moe.kurenai.bot.repository.bangumi
+package moe.kurenai.bot.service.bangumi
 
 import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
-import moe.kurenai.bgm.model.character.CharacterDetail
-import moe.kurenai.bgm.model.character.CharacterPerson
-import moe.kurenai.bgm.model.subject.getLarge
-import moe.kurenai.bgm.model.subject.getSmall
-import moe.kurenai.bot.repository.bangumi.BangumiApi.characterCache
-import moe.kurenai.bot.repository.bangumi.BangumiApi.characterPersonCache
-import moe.kurenai.bot.repository.bangumi.BangumiApi.result
-import moe.kurenai.bot.repository.bangumi.BangumiApi.useApi
+import moe.kurenai.bangumi.models.CharacterDetail
+import moe.kurenai.bangumi.models.CharacterPerson
+import moe.kurenai.bot.service.bangumi.BangumiApi.characterCache
+import moe.kurenai.bot.service.bangumi.BangumiApi.characterPersonCache
+import moe.kurenai.bot.service.bangumi.BangumiApi.result
+import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
 import moe.kurenai.bot.util.BgmUtil.format
 import moe.kurenai.bot.util.BgmUtil.formatToList
+import moe.kurenai.bot.util.BgmUtil.getLarge
+import moe.kurenai.bot.util.BgmUtil.getSmall
 import moe.kurenai.bot.util.BgmUtil.toGrid
 import moe.kurenai.bot.util.HttpUtil
 
@@ -19,7 +19,7 @@ import moe.kurenai.bot.util.HttpUtil
  * @author Kurenai
  * @since 2023/1/26 14:59
  */
-internal object CharacterRepository {
+internal object CharacterService {
 
     suspend fun findById(id: Int, token: String? = null): CharacterDetail {
         return characterCache.get(id) { k ->
@@ -72,7 +72,7 @@ internal object CharacterRepository {
         val resultList = mutableListOf(
             InputInlineQueryResultArticle().apply {
                 id = "C${character.id} - txt"
-                thumbnailUrl = character.images.getLarge().toGrid()
+                thumbnailUrl = character.images?.grid?.toGrid()
                 this.title = character.name
                 this.inputMessageContent = InputMessageText().apply {
                     this.text = FormattedText(

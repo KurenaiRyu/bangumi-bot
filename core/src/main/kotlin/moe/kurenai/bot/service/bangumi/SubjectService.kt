@@ -1,18 +1,18 @@
-package moe.kurenai.bot.repository.bangumi
+package moe.kurenai.bot.service.bangumi
 
 import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import moe.kurenai.bgm.model.SubjectType
-import moe.kurenai.bgm.model.subject.Subject
-import moe.kurenai.bgm.model.subject.getLarge
-import moe.kurenai.bot.repository.bangumi.BangumiApi.result
-import moe.kurenai.bot.repository.bangumi.BangumiApi.subjectCache
-import moe.kurenai.bot.repository.bangumi.BangumiApi.useApi
+import moe.kurenai.bangumi.models.Subject
+import moe.kurenai.bangumi.models.SubjectType
+import moe.kurenai.bot.service.bangumi.BangumiApi.result
+import moe.kurenai.bot.service.bangumi.BangumiApi.subjectCache
+import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
 import moe.kurenai.bot.util.BgmUtil.category
 import moe.kurenai.bot.util.BgmUtil.formatToList
+import moe.kurenai.bot.util.BgmUtil.getLarge
 import moe.kurenai.bot.util.BgmUtil.toGrid
 import moe.kurenai.bot.util.HttpUtil
 
@@ -20,7 +20,7 @@ import moe.kurenai.bot.util.HttpUtil
  * @author Kurenai
  * @since 2023/1/26 14:59
  */
-internal object SubjectRepository {
+internal object SubjectService {
 
     private val mainInfoProperties =
         listOf("中文名", "话数", "放送开始", "原作", "导演", "音乐", "人物设定", "系列构成", "总作画监督", "製作", "动画制作", "别名", "官方网站", "Copyright")
@@ -53,7 +53,7 @@ internal object SubjectRepository {
         val title = "[${sub.type.category()}]　${sub.name}"
         val infoBox = sub.infobox?.formatToList() ?: emptyList()
         val simpleInfoBot =
-            if (sub.type == SubjectType.ANIME) infoBox.filter { mainInfoProperties.contains(it.first) } else infoBox
+            if (sub.type == SubjectType.Anime) infoBox.filter { mainInfoProperties.contains(it.first) } else infoBox
         val content = simpleInfoBot.joinToString("\n") { (k, v) ->
             "$k: $v"
         }

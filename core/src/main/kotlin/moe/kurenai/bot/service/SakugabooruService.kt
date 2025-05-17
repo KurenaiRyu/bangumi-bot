@@ -1,4 +1,4 @@
-package moe.kurenai.bot.repository
+package moe.kurenai.bot.service
 
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
@@ -17,7 +17,7 @@ import kotlin.time.Duration.Companion.days
  * @author Kurenai
  * @since 2023/1/26 14:59
  */
-internal object SakugabooruRepository {
+internal object SakugabooruService {
 
     val client = HttpClient()
 

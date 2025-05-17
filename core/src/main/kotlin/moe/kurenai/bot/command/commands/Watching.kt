@@ -1,15 +1,12 @@
 package moe.kurenai.bot.command.commands
 
 import it.tdlight.jni.TdApi
-import moe.kurenai.bgm.model.CollectionType
-import moe.kurenai.bgm.model.SubjectType
-import moe.kurenai.bgm.request.subject.GetCalendar
-import moe.kurenai.bgm.request.user.GetCollections
-import moe.kurenai.bgm.request.user.GetMe
-import moe.kurenai.bot.BangumiBot.send
+import moe.kurenai.bangumi.models.SubjectCollectionType
+import moe.kurenai.bangumi.models.SubjectType
 import moe.kurenai.bot.command.CommandHandler
-import moe.kurenai.bot.repository.bangumi.SubjectRepository
-import moe.kurenai.bot.repository.bangumi.TokenRepository
+import moe.kurenai.bot.service.bangumi.MicService
+import moe.kurenai.bot.service.bangumi.SubjectService
+import moe.kurenai.bot.service.bangumi.UserService
 import moe.kurenai.bot.util.TelegramUtil.asText
 import moe.kurenai.bot.util.TelegramUtil.fmt
 import moe.kurenai.bot.util.TelegramUtil.markdown
@@ -25,22 +22,17 @@ class Watching : CommandHandler {
     }
 
     override suspend fun execute(message: TdApi.Message, sender: TdApi.MessageSenderUser, args: List<String>) {
-        TokenRepository.findById(sender.userId)?.let { token ->
-            val me = GetMe().apply {
-                this.token = token.accessToken
-            }.send()
-            val collections = GetCollections(me.username).apply {
-                subjectType = SubjectType.ANIME
-                type = CollectionType.DOING
-            }.send()
-            val subjects = SubjectRepository.findByIds(collections.data.map { it.subjectId }).toList()
-            val ids = GetCalendar().send().flatMap { it.items }.map { it.id }
-            messageText(message.chatId,
-                subjects.filter { ids.contains(it.id) }
-                    .joinToString("\n\n") { "[${it.name.markdown()}](https://bgm.tv/subject/${it.id})" }.fmt()
-            )
-        } ?: kotlin.run {
+        val collections = UserService.getCollections(sender.userId, SubjectType.Anime, SubjectCollectionType.Doing)
+        if (collections == null) {
             messageText(message.chatId, "未授权，请私聊机器人发送/start进行授权".asText())
+            return
         }
+
+        val subjects = SubjectService.findByIds(collections.data?.map { it.subjectId } ?: arrayListOf()).toList()
+        val ids = MicService.getCalendar(sender.userId).flatMap { it.items ?: listOf() }.map { it.id }
+        messageText(message.chatId,
+            subjects.filter { s -> ids.contains(s.id) }
+                .joinToString("\n\n") { "[${it.name.markdown()}](https://bgm.tv/subject/${it.id})" }.fmt()
+        )
     }
 }

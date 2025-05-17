@@ -12,10 +12,10 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.runBlocking
-import moe.kurenai.bgm.exception.BgmException
 import moe.kurenai.bot.BgmAuthServer.authCache
 import moe.kurenai.bot.TelegramBot.getUsername
-import moe.kurenai.bot.repository.bangumi.TokenRepository
+import moe.kurenai.bot.service.bangumi.OauthService
+import moe.kurenai.bot.service.bangumi.TokenService
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.security.KeyStore
@@ -129,16 +129,13 @@ fun Application.authModule() {
                     authCache.getIfPresent(randomCode)?.also { userId ->
                         kotlin.runCatching {
                             log.info("Attempt bind user: $userId")
-                            val token = BangumiBot.bgmClient.getToken(code)
-                            TokenRepository.put(userId, token)
+                            val token = OauthService.grantToken(code)
+                            TokenService.put(userId, token)
                             log.info("Bind telegram id $userId to bangumi id ${token.userId}")
                             call.respondRedirect("https://t.me/${getUsername()}?start=success")
                             authCache.invalidate(randomCode)
                         }.onFailure {
-                            val message = if (it is BgmException) {
-                                val error = it.error
-                                "${error.error} ${error.errorDescription}".ifBlank { it.message }
-                            } else it.message
+                            val message = it.message
                             log.error(message, it)
                             call.respondText { "Error: $message \n请从新发送指令进行绑定！" }
                         }

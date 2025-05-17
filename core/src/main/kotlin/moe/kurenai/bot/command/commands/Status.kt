@@ -4,8 +4,8 @@ import it.tdlight.jni.TdApi
 import it.tdlight.jni.TdApi.Message
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.command.CommandHandler
-import moe.kurenai.bot.repository.SakugabooruRepository
-import moe.kurenai.bot.repository.bangumi.BangumiApi
+import moe.kurenai.bot.service.SakugabooruService
+import moe.kurenai.bot.service.bangumi.BangumiApi
 import moe.kurenai.bot.util.TelegramUtil.asText
 import moe.kurenai.bot.util.TelegramUtil.messageText
 
@@ -32,9 +32,9 @@ class Status : CommandHandler {
             BangumiApi.counter.snapshot().loadCount()
         } (${BangumiApi.counter.snapshot().hitRate()})
             SakugabooruCache: ${
-            SakugabooruRepository.cacheStats.snapshot().hitCount()
-        } / ${SakugabooruRepository.cacheStats.snapshot().loadCount()} (${
-            SakugabooruRepository.cacheStats.snapshot().hitRate()
+            SakugabooruService.cacheStats.snapshot().hitCount()
+        } / ${SakugabooruService.cacheStats.snapshot().loadCount()} (${
+            SakugabooruService.cacheStats.snapshot().hitRate()
         })
         """.trimIndent()
 

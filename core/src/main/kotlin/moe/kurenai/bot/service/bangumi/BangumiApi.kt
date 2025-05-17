@@ -1,4 +1,4 @@
-package moe.kurenai.bot.repository.bangumi
+package moe.kurenai.bot.service.bangumi
 
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
@@ -7,10 +7,11 @@ import moe.kurenai.bangumi.apis.DefaultApi
 import moe.kurenai.bangumi.apis.OauthBangumiApi
 import moe.kurenai.bangumi.infrastructure.ApiClient
 import moe.kurenai.bangumi.infrastructure.HttpResponse
-import moe.kurenai.bgm.model.character.CharacterDetail
-import moe.kurenai.bgm.model.character.CharacterPerson
-import moe.kurenai.bgm.model.person.PersonDetail
-import moe.kurenai.bgm.model.subject.Subject
+import moe.kurenai.bangumi.models.CharacterDetail
+import moe.kurenai.bangumi.models.CharacterPerson
+import moe.kurenai.bangumi.models.PersonDetail
+import moe.kurenai.bangumi.models.Subject
+import moe.kurenai.bot.Config.Companion.CONFIG
 import org.apache.commons.pool2.PooledObject
 import org.apache.commons.pool2.PooledObjectFactory
 import org.apache.commons.pool2.impl.DefaultPooledObject
@@ -20,7 +21,13 @@ import kotlin.time.Duration.Companion.days
 internal object BangumiApi {
 
     private val defaultApiPool = GenericObjectPool(buildFactory { DefaultApi() })
-    private val oathApiPool = GenericObjectPool(buildFactory { OauthBangumiApi() })
+    private val oathApiPool = GenericObjectPool(buildFactory {
+        OauthBangumiApi().apply {
+            CONFIG.bgm.appId
+            CONFIG.bgm.appSecret
+            CONFIG.bgm.redirectUrl
+        }
+    })
 
     val counter = ConcurrentStatsCounter()
 

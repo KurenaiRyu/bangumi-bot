@@ -18,7 +18,6 @@ object Versions {
     const val tdlight = "3.4.0+td.1.8.26"
 }
 dependencies {
-    implementation(project(":sdk"))
     implementation(project(":bangumi-api"))
 
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.10"))

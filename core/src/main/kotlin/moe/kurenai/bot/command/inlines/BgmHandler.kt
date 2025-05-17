@@ -8,10 +8,10 @@ import moe.kurenai.bot.command.HandleResult
 import moe.kurenai.bot.command.InlineDispatcher.fallback
 import moe.kurenai.bot.command.InlineHandler
 import moe.kurenai.bot.command.UNHANDLED
-import moe.kurenai.bot.repository.bangumi.CharacterRepository
-import moe.kurenai.bot.repository.bangumi.PersonRepository
-import moe.kurenai.bot.repository.bangumi.SubjectRepository
-import moe.kurenai.bot.repository.bangumi.TokenRepository
+import moe.kurenai.bot.service.bangumi.CharacterService
+import moe.kurenai.bot.service.bangumi.PersonService
+import moe.kurenai.bot.service.bangumi.SubjectService
+import moe.kurenai.bot.service.bangumi.TokenService
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
 import java.net.URI
 
@@ -30,13 +30,13 @@ object BgmHandler : InlineHandler {
         log.info("Handle Bangumi")
         val id = params[2].toInt()
         val userId = inlineQuery.senderUserId
-        val token = TokenRepository.findById(userId)?.accessToken
+        val token = TokenService.findById(userId)?.accessToken
         when (params[1]) {
             "subject" -> {
                 send {
                     answerInlineQuery(
                         inlineQuery.id,
-                        SubjectRepository.getContent(SubjectRepository.findById(id, token), uri.toString())
+                        SubjectService.getContent(SubjectService.findById(id, token), uri.toString())
                     )
                 }
             }
@@ -45,18 +45,18 @@ object BgmHandler : InlineHandler {
                 send {
                     answerInlineQuery(
                         inlineQuery.id,
-                        PersonRepository.getContent(PersonRepository.findById(id, token), uri.toString())
+                        PersonService.getContent(PersonService.findById(id, token), uri.toString())
                     )
                 }
             }
 
             "character" -> {
-                val character = CharacterRepository.findById(id, token)
-                val persons = CharacterRepository.findPersons(id, token)
+                val character = CharacterService.findById(id, token)
+                val persons = CharacterService.findPersons(id, token)
                 send {
                     answerInlineQuery(
                         inlineQuery.id,
-                        CharacterRepository.getContent(character, uri.toString(), persons)
+                        CharacterService.getContent(character, uri.toString(), persons)
                     )
                 }
             }

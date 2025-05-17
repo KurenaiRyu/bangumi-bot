@@ -1,4 +1,4 @@
-package moe.kurenai.bot.repository.bangumi
+package moe.kurenai.bot.service.bangumi
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -7,9 +7,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
-import moe.kurenai.bgm.exception.BgmException
-import moe.kurenai.bgm.model.auth.AccessToken
-import moe.kurenai.bot.BangumiBot
+import moe.kurenai.bangumi.models.UserAccessToken
 import moe.kurenai.bot.util.json
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
@@ -26,21 +24,20 @@ import kotlin.time.Duration.Companion.seconds
  * @author Kurenai
  * @since 2023/1/26 18:37
  */
-internal object TokenRepository {
+internal object TokenService {
 
-    private val log = LoggerFactory.getLogger(TokenRepository::class.java)
+    private val log = LoggerFactory.getLogger(TokenService::class.java)
     private const val tokenFilePath = "config/token.json"
     private val lock = Mutex()
-    private val fileLock = Mutex()
 
     @Serializable
     data class TokenEntity(
         val userId: Long,
-        val accessToken: AccessToken,
+        val accessToken: UserAccessToken,
         val expires: Long
     )
 
-    internal val tokens: ConcurrentHashMap<Long, TokenEntity> = ConcurrentHashMap(loadToken().associateBy { it.userId })
+    private val tokens: ConcurrentHashMap<Long, TokenEntity> = ConcurrentHashMap(loadToken().associateBy { it.userId })
 
     private fun loadToken(): List<TokenEntity> {
         val tokenPath = Path.of(tokenFilePath)
@@ -61,7 +58,7 @@ internal object TokenRepository {
         }.getOrThrow()
     }
 
-    suspend fun findById(userId: Long): AccessToken? {
+    suspend fun findById(userId: Long): UserAccessToken? {
         return tokens[userId]?.let { entity ->
             lock.withLock {
                 withTimeout(30.seconds) {
@@ -69,11 +66,9 @@ internal object TokenRepository {
                         entity.accessToken
                     } else {
                         kotlin.runCatching {
-                            BangumiBot.bgmClient.refreshToken(entity.accessToken.refreshToken)
+                            OauthService.refreshToken(entity.accessToken)
                         }.onFailure {
-                            if (it.cause is BgmException) {
-                                tokens.remove(userId)
-                            }
+                            tokens.remove(userId)
                         }.onSuccess {
                             tokens[userId] = entity.copy(accessToken = it, expires = it.expiresIn + getNowSeconds())
                         }.getOrNull().also {
@@ -92,20 +87,20 @@ internal object TokenRepository {
         }
     }
 
-    suspend fun put(userId: Long, accessToken: AccessToken) = lock.withLock {
+    suspend fun put(userId: Long, accessToken: UserAccessToken) = lock.withLock {
         val old = tokens[userId]
         tokens[userId] = old?.copy(accessToken = accessToken, expires = accessToken.expiresIn + getNowSeconds())
             ?: TokenEntity(userId, accessToken, accessToken.computeExpires())
         save()
     }
 
-    suspend fun putIfAbsent(userId: Long, accessToken: AccessToken) = lock.withLock {
+    suspend fun putIfAbsent(userId: Long, accessToken: UserAccessToken) = lock.withLock {
         tokens.putIfAbsent(userId, TokenEntity(userId, accessToken, accessToken.computeExpires()))
         save()
     }
 
     private fun getNowSeconds(): Long = LocalDateTime.now().atOffset(ZoneOffset.ofHours(8)).toEpochSecond()
 
-    private fun AccessToken.computeExpires() = this.expiresIn + getNowSeconds()
+    private fun UserAccessToken.computeExpires() = this.expiresIn + getNowSeconds()
 
 }

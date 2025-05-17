@@ -8,7 +8,7 @@ import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.command.*
 import moe.kurenai.bot.command.InlineDispatcher.PUB_DATE_PATTERN
 import moe.kurenai.bot.command.InlineDispatcher.fallback
-import moe.kurenai.bot.repository.BiliBiliRepository
+import moe.kurenai.bot.service.BiliBiliService
 import moe.kurenai.bot.util.MimeTypes
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
 import moe.kurenai.bot.util.TelegramUtil.fmt
@@ -65,14 +65,14 @@ object BilibiliHandler : InlineHandler {
 
     private suspend fun handleShortLink(inlineQuery: UpdateNewInlineQuery, uri: URI) {
         log.info("Handle BiliBili short link")
-        val redirectUrl = BiliBiliRepository.getRedirectUrl(uri)
+        val redirectUrl = BiliBiliService.getRedirectUrl(uri)
 
         if (redirectUrl.rawSegments.contains("opus") || redirectUrl.host == "t.bilibili.com") {
             handleDynamic(inlineQuery, redirectUrl.toURI())
             return
         }
 
-        val (id, p, t) = BiliBiliRepository.getIdAndPByShortLink(uri, redirectUrl)
+        val (id, p, t) = BiliBiliService.getIdAndPByShortLink(uri, redirectUrl)
         doHandle(inlineQuery, id, p, t)
     }
 
@@ -82,7 +82,7 @@ object BilibiliHandler : InlineHandler {
             fallback(inlineQuery)
             return
         }
-        val info = BiliBiliRepository.getDynamicDetail(id)
+        val info = BiliBiliService.getDynamicDetail(id)
         val moduleDynamic = info.data.item.modules.moduleDynamic
 
         val content = moduleDynamic.major?.opus?.summary?.text ?: moduleDynamic.desc?.text ?: ""
@@ -145,13 +145,13 @@ object BilibiliHandler : InlineHandler {
     private suspend fun doHandle(inlineQuery: UpdateNewInlineQuery, id: String, p: Int, t: Float) {
         log.info("Handle bilibili: $id, $p, $t")
 
-        val videoInfo = BiliBiliRepository.getVideoInfo(id)
+        val videoInfo = BiliBiliService.getVideoInfo(id)
         val desc = videoInfo.data.desc.trimString()
         val page = videoInfo.data.pages.find { it.page == p } ?: run {
             fallback(inlineQuery)
             return
         }
-        val streamInfo = BiliBiliRepository.getPlayUrl(videoInfo.data.bvid, page.cid)
+        val streamInfo = BiliBiliService.getPlayUrl(videoInfo.data.bvid, page.cid)
         var link = "https://www.bilibili.com/video/${videoInfo.data.bvid}"
 
         val parameters = mutableListOf<String>()

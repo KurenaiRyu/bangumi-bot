@@ -4,7 +4,7 @@ import it.tdlight.jni.TdApi.*
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.TelegramBot.sendAlbumPhoto
 import moe.kurenai.bot.command.CommandHandler
-import moe.kurenai.bot.repository.BiliBiliRepository
+import moe.kurenai.bot.service.BiliBiliService
 import moe.kurenai.bot.util.TelegramUtil.asText
 
 class BiliDynamic : CommandHandler {
@@ -15,7 +15,7 @@ class BiliDynamic : CommandHandler {
     override suspend fun execute(message: Message, sender: MessageSenderUser, args: List<String>) {
         val url = args.firstOrNull() ?: return
         val id = url.substringAfterLast("/")
-        val info = BiliBiliRepository.getDynamicDetail(id)
+        val info = BiliBiliService.getDynamicDetail(id)
 
         val modules = if (info.data.item.orig != null) info.data.item.orig.modules else info.data.item.modules
         val summary = modules.moduleDynamic.major!!.opus.summary.text

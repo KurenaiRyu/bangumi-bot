@@ -1,4 +1,4 @@
-package moe.kurenai.bot.repository
+package moe.kurenai.bot.service
 
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.client.*
@@ -24,7 +24,7 @@ import kotlin.time.Duration.Companion.minutes
  * @author Kurenai
  * @since 2023/1/26 14:59
  */
-internal object BiliBiliRepository {
+internal object BiliBiliService {
 
     private const val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0"
 
