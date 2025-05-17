@@ -26,7 +26,7 @@ import kotlin.time.Duration.Companion.seconds
  * @author Kurenai
  * @since 2023/1/26 18:37
  */
-object TokenRepository {
+internal object TokenRepository {
 
     private val log = LoggerFactory.getLogger(TokenRepository::class.java)
     private const val tokenFilePath = "config/token.json"

@@ -17,7 +17,7 @@ import kotlin.time.Duration.Companion.days
  * @author Kurenai
  * @since 2023/1/26 14:59
  */
-object SakugabooruRepository {
+internal object SakugabooruRepository {
 
     val client = HttpClient()
 

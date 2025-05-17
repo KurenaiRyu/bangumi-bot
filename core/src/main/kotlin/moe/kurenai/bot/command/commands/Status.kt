@@ -5,9 +5,7 @@ import it.tdlight.jni.TdApi.Message
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.command.CommandHandler
 import moe.kurenai.bot.repository.SakugabooruRepository
-import moe.kurenai.bot.repository.bangumi.CharacterRepository
-import moe.kurenai.bot.repository.bangumi.PersonRepository
-import moe.kurenai.bot.repository.bangumi.SubjectRepository
+import moe.kurenai.bot.repository.bangumi.BangumiApi
 import moe.kurenai.bot.util.TelegramUtil.asText
 import moe.kurenai.bot.util.TelegramUtil.messageText
 
@@ -30,20 +28,14 @@ class Status : CommandHandler {
             总可用内存: ${arr[0]}/${arr[1]}
             剩余可用分配内存: ${arr[2]}/${arr[3]}
             --------------------------------------
-            SubjectCache: ${
-            SubjectRepository.cacheStats.snapshot().hitCount()
-        } / ${SubjectRepository.cacheStats.snapshot().loadCount()} (${
-            SubjectRepository.cacheStats.snapshot().hitRate()
+            SubjectCache: ${BangumiApi.counter.snapshot().hitCount()} / ${
+            BangumiApi.counter.snapshot().loadCount()
+        } (${BangumiApi.counter.snapshot().hitRate()})
+            SakugabooruCache: ${
+            SakugabooruRepository.cacheStats.snapshot().hitCount()
+        } / ${SakugabooruRepository.cacheStats.snapshot().loadCount()} (${
+            SakugabooruRepository.cacheStats.snapshot().hitRate()
         })
-            PersonCache: ${PersonRepository.cacheStats.snapshot().hitCount()} / ${PersonRepository.cacheStats.snapshot().loadCount()} (${
-            PersonRepository.cacheStats.snapshot().hitRate()
-        })
-            CharacterCache: ${CharacterRepository.cacheStats.snapshot().hitCount()} / ${
-            CharacterRepository.cacheStats.snapshot().loadCount()
-        } (${CharacterRepository.cacheStats.snapshot().hitRate()})
-            SakugabooruCache: ${SakugabooruRepository.cacheStats.snapshot().hitCount()} / ${
-            SakugabooruRepository.cacheStats.snapshot().loadCount()
-        } (${SakugabooruRepository.cacheStats.snapshot().hitRate()})
         """.trimIndent()
 
         send(messageText(message.chatId, msg.asText()))

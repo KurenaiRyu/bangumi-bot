@@ -1,70 +1,54 @@
 package moe.kurenai.bot.repository.bangumi
 
-import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
-import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import moe.kurenai.bgm.model.character.CharacterDetail
 import moe.kurenai.bgm.model.character.CharacterPerson
 import moe.kurenai.bgm.model.subject.getLarge
 import moe.kurenai.bgm.model.subject.getSmall
-import moe.kurenai.bgm.request.charater.GetCharacterDetail
-import moe.kurenai.bgm.request.charater.GetCharacterRelatedPersons
-import moe.kurenai.bot.BangumiBot
+import moe.kurenai.bot.repository.bangumi.BangumiApi.characterCache
+import moe.kurenai.bot.repository.bangumi.BangumiApi.characterPersonCache
+import moe.kurenai.bot.repository.bangumi.BangumiApi.result
+import moe.kurenai.bot.repository.bangumi.BangumiApi.useApi
 import moe.kurenai.bot.util.BgmUtil.format
 import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.toGrid
 import moe.kurenai.bot.util.HttpUtil
-import kotlin.time.Duration.Companion.days
 
 /**
  * @author Kurenai
  * @since 2023/1/26 14:59
  */
-object CharacterRepository {
-
-    val cacheStats = ConcurrentStatsCounter()
-    private val cache = caffeineBuilder<Int, CharacterDetail> {
-        maximumSize = 200
-        expireAfterWrite = 7.days
-        expireAfterAccess = 1.days
-        statsCounter = cacheStats
-    }.build()
-
-    private val personCache = caffeineBuilder<Int, List<CharacterPerson>> {
-        maximumSize = 200
-        expireAfterWrite = 7.days
-        expireAfterAccess = 1.days
-        statsCounter = cacheStats
-    }.build()
+internal object CharacterRepository {
 
     suspend fun findById(id: Int, token: String? = null): CharacterDetail {
-        return cache.get(id) { k ->
-            BangumiBot.bgmClient.send(GetCharacterDetail(k).apply { this.token = token })
+        return characterCache.get(id) { k ->
+            useApi(token) {
+                it.getCharacterById(k).result()
+            }
         }
     }
 
     suspend fun findPersons(id: Int, token: String? = null): List<CharacterPerson> {
-        return personCache.get(id) { k ->
-            BangumiBot.bgmClient.send(GetCharacterRelatedPersons(k).apply { this.token = token })
+        return characterPersonCache.get(id) { k ->
+            useApi(token) {
+                it.getRelatedPersonsByCharacterId(k).result()
+            }
         }
     }
 
-    suspend fun findByIds(ids: Collection<Int>, token: String? = null): Collection<CharacterDetail> {
-        return cache.getAll(ids) { keys ->
-            keys.map { k ->
-                CoroutineScope(Dispatchers.IO).async {
-                    BangumiBot.bgmClient.send(GetCharacterDetail(k).apply { this.token = token })
-                }
-            }.associate {
-                val subject = it.await()
-                subject.id to subject
-            }
-        }.values
-    }
+//    suspend fun findByIds(ids: Collection<Int>, token: String? = null): Collection<CharacterDetail> {
+//        return cache.getAll(ids) { keys ->
+//            keys.map { k ->
+//                CoroutineScope(Dispatchers.IO).async {
+//                    BangumiBot.bgmClient.send(GetCharacterDetail(k).apply { this.token = token })
+//                }
+//            }.associate {
+//                val subject = it.await()
+//                subject.id to subject
+//            }
+//        }.values
+//    }
 
     suspend fun getContent(
         character: CharacterDetail,

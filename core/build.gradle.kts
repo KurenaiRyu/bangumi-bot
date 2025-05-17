@@ -19,6 +19,7 @@ object Versions {
 }
 dependencies {
     implementation(project(":sdk"))
+    implementation(project(":bangumi-api"))
 
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.10"))
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
@@ -39,6 +40,7 @@ dependencies {
     implementation("com.sksamuel.aedile:aedile-core:1.2.0")
 
     implementation("org.jsoup:jsoup:1.15.3")
+    implementation("org.apache.commons:commons-pool2:2.11.1")
 
     //tdlib
     implementation(platform("it.tdlight:tdlight-java-bom:${Versions.tdlight}"))

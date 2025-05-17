@@ -1,7 +1,5 @@
 package moe.kurenai.bot.repository.bangumi
 
-import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
-import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.CoroutineScope
@@ -10,41 +8,38 @@ import kotlinx.coroutines.async
 import moe.kurenai.bgm.model.SubjectType
 import moe.kurenai.bgm.model.subject.Subject
 import moe.kurenai.bgm.model.subject.getLarge
-import moe.kurenai.bgm.request.subject.GetSubject
-import moe.kurenai.bot.BangumiBot
+import moe.kurenai.bot.repository.bangumi.BangumiApi.result
+import moe.kurenai.bot.repository.bangumi.BangumiApi.subjectCache
+import moe.kurenai.bot.repository.bangumi.BangumiApi.useApi
 import moe.kurenai.bot.util.BgmUtil.category
 import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.toGrid
 import moe.kurenai.bot.util.HttpUtil
-import kotlin.time.Duration.Companion.days
 
 /**
  * @author Kurenai
  * @since 2023/1/26 14:59
  */
-object SubjectRepository {
-    val cacheStats = ConcurrentStatsCounter()
-    private val cache = caffeineBuilder<Int, Subject> {
-        maximumSize = 200
-        expireAfterWrite = 7.days
-        expireAfterAccess = 1.days
-        statsCounter = cacheStats
-    }.build()
+internal object SubjectRepository {
 
     private val mainInfoProperties =
         listOf("中文名", "话数", "放送开始", "原作", "导演", "音乐", "人物设定", "系列构成", "总作画监督", "製作", "动画制作", "别名", "官方网站", "Copyright")
 
     suspend fun findById(id: Int, token: String? = null): Subject {
-        return cache.get(id) { k ->
-            BangumiBot.bgmClient.send(GetSubject(k).apply { this.token = token })
+        return subjectCache.get(id) { _ ->
+            useApi(token) {
+                it.getSubjectById(id).result()
+            }
         }
     }
 
     suspend fun findByIds(ids: Collection<Int>, token: String? = null): Collection<Subject> {
-        return cache.getAll(ids) { keys ->
+        return subjectCache.getAll(ids) { keys ->
             keys.map { k ->
                 CoroutineScope(Dispatchers.IO).async {
-                    BangumiBot.bgmClient.send(GetSubject(k).apply { this.token = token })
+                    useApi(token) {
+                        it.getSubjectById(k).result<Subject>()
+                    }
                 }
             }.associate {
                 val subject = it.await()
