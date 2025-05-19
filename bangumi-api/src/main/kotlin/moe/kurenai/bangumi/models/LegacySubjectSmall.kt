@@ -104,12 +104,16 @@ data class LegacySubjectSmall(
     enum class Type(val value: kotlin.Int) {
         @SerialName(value = "1")
         Book(1),
+
         @SerialName(value = "2")
         Anime(2),
+
         @SerialName(value = "3")
         Music(3),
+
         @SerialName(value = "4")
         Game(4),
+
         @SerialName(value = "6")
         Real(6);
     }

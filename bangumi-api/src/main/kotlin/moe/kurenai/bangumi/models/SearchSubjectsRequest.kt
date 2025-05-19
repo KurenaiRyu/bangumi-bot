@@ -50,10 +50,13 @@ data class SearchSubjectsRequest(
     enum class Sort(val value: kotlin.String) {
         @SerialName(value = "match")
         MATCH("match"),
+
         @SerialName(value = "heat")
         HEAT("heat"),
+
         @SerialName(value = "rank")
         RANK("rank"),
+
         @SerialName(value = "score")
         SCORE("score");
     }

@@ -15,12 +15,9 @@
 
 package moe.kurenai.bangumi.models
 
-import moe.kurenai.bangumi.models.Images
-import moe.kurenai.bangumi.models.Item
-
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * 同名字段意义同<a href=\"#model-Subject\">Subject</a>
@@ -57,7 +54,7 @@ data class IndexSubject(
     val images: Images? = null,
 
     @SerialName(value = "infobox")
-    val infobox: kotlin.collections.List<Item>? = null,
+    val infobox: kotlin.collections.List<InfoBox>? = null,
 
     @SerialName(value = "date")
     val date: kotlin.String? = null

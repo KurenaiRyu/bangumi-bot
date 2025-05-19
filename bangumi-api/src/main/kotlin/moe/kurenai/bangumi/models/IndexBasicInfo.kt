@@ -16,9 +16,8 @@
 package moe.kurenai.bangumi.models
 
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
  * 新增或修改条目的内容，同名字段意义同<a href=\"#model-Subject\">Subject</a>

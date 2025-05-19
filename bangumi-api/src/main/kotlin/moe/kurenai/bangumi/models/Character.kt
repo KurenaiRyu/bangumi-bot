@@ -15,14 +15,9 @@
 
 package moe.kurenai.bangumi.models
 
-import moe.kurenai.bangumi.models.BloodType
-import moe.kurenai.bangumi.models.CharacterType
-import moe.kurenai.bangumi.models.PersonImages
-import moe.kurenai.bangumi.models.Stat
-
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  *
@@ -34,7 +29,7 @@ import kotlinx.serialization.Contextual
  * @param locked
  * @param stat
  * @param images object with some size of images, this object maybe `null`
- * @param infobox server parsed infobox, a map from key to string or tuple null if server infobox is not valid
+ * @param infobox
  * @param gender parsed from wiki, maybe null
  * @param bloodType parsed from wiki, maybe null, `1, 2, 3, 4` for `A, B, AB, O`
  * @param birthYear parsed from wiki, maybe `null`
@@ -68,9 +63,8 @@ data class Character(
     @SerialName(value = "images")
     val images: PersonImages? = null,
 
-    /* server parsed infobox, a map from key to string or tuple null if server infobox is not valid */
     @SerialName(value = "infobox")
-    val infobox: kotlin.collections.List<@Contextual kotlin.Any>? = null,
+    val infobox: kotlin.collections.List<InfoBox>? = null,
 
     /* parsed from wiki, maybe null */
     @SerialName(value = "gender")

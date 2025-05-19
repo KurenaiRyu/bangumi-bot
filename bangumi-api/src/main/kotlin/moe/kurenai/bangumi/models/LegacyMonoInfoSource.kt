@@ -17,8 +17,6 @@ package moe.kurenai.bangumi.models
 
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
 
 /**
  * 引用来源

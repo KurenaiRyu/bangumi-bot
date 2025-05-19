@@ -16,9 +16,8 @@
 package moe.kurenai.bangumi.models
 
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
  * 新增某条目到目录的请求信息

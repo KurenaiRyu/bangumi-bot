@@ -16,9 +16,8 @@
 package moe.kurenai.bangumi.models
 
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
  *
@@ -74,6 +73,7 @@ data class AccessTokenRequest(
     enum class GrantType(val value: kotlin.String) {
         @SerialName(value = "authorization_code")
         AUTHORIZATION_CODE("authorization_code"),
+
         @SerialName(value = "refresh_token")
         REFRESH_TOKEN("refresh_token");
     }

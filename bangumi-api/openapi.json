@@ -4244,12 +4244,7 @@
                         "type": "boolean"
                     },
                     "infobox": {
-                        "title": "Infobox",
-                        "type": "array",
-                        "items": {
-                            "type": "object"
-                        },
-                        "description": "server parsed infobox, a map from key to string or tuple\nnull if server infobox is not valid"
+                        "$ref": "#/components/schemas/WikiV0"
                     },
                     "gender": {
                         "title": "Gender",
@@ -5734,12 +5729,7 @@
                         "format": "date-time"
                     },
                     "infobox": {
-                        "title": "Infobox",
-                        "type": "array",
-                        "items": {
-                            "type": "object"
-                        },
-                        "description": "server parsed infobox, a map from key to string or tuple\nnull if server infobox is not valid"
+                        "$ref": "#/components/schemas/WikiV0"
                     },
                     "gender": {
                         "title": "Gender",

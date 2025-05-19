@@ -15,12 +15,8 @@
 
 package moe.kurenai.bangumi.models
 
-import moe.kurenai.bangumi.models.LegacyMonoInfoAlias
-import moe.kurenai.bangumi.models.LegacyMonoInfoSource
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
  * 人物信息

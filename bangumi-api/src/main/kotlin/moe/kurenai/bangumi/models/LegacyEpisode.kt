@@ -15,11 +15,9 @@
 
 package moe.kurenai.bangumi.models
 
-import moe.kurenai.bangumi.models.LegacyEpisodeType
-
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * 章节信息
@@ -94,8 +92,10 @@ data class LegacyEpisode(
     enum class Status(val value: kotlin.String) {
         @SerialName(value = "Air")
         AIR("Air"),
+
         @SerialName(value = "Today")
         TODAY("Today"),
+
         @SerialName(value = "NA")
         NA("NA");
     }

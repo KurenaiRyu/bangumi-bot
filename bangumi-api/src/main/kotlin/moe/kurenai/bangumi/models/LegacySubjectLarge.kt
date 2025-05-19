@@ -15,8 +15,18 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.LegacyBlog
+import moe.kurenai.bangumi.models.LegacyEpisode
+import moe.kurenai.bangumi.models.LegacySubjectMediumAllOfCrt
+import moe.kurenai.bangumi.models.LegacySubjectMediumAllOfStaff
+import moe.kurenai.bangumi.models.LegacySubjectSmallCollection
+import moe.kurenai.bangumi.models.LegacySubjectSmallImages
+import moe.kurenai.bangumi.models.LegacySubjectSmallRating
+import moe.kurenai.bangumi.models.LegacyTopic
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  *
@@ -124,12 +134,16 @@ data class LegacySubjectLarge(
     enum class Type(val value: kotlin.Int) {
         @SerialName(value = "1")
         Book(1),
+
         @SerialName(value = "2")
         Anime(2),
+
         @SerialName(value = "3")
         Music(3),
+
         @SerialName(value = "4")
         Game(4),
+
         @SerialName(value = "6")
         Real(6);
     }
