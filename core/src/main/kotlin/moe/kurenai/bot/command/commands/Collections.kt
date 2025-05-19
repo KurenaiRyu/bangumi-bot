@@ -27,7 +27,7 @@ class Collections : CommandHandler {
     override val description: String = "返回用户收藏列表json，CD时间1小时"
 
     private val lock = Mutex()
-    private val doneUsers = caffeineBuilder<Long, Int> {
+    private val doneUsers = caffeineBuilder<Int, Int> {
         expireAfterWrite = 1.hours
     }.build()
 
