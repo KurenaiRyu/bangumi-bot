@@ -27,8 +27,8 @@ class BiliBiliTest {
         }.use { client ->
             val response = client.get(url)
             val redirectUrl = Url(Jsoup.parse(response.bodyAsText()).select("a").attr("href"))
-            val segments = redirectUrl.pathSegments
-            println(redirectUrl.pathSegments.last().takeIf { it.isNotBlank() } ?: segments[segments.lastIndex - 1])
+            val segments = redirectUrl.rawSegments
+            println(redirectUrl.rawSegments.last().takeIf { it.isNotBlank() } ?: segments[segments.lastIndex - 1])
         }
     }
 

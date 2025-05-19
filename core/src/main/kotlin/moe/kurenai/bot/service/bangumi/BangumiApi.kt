@@ -2,7 +2,10 @@ package moe.kurenai.bot.service.bangumi
 
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
+import io.ktor.client.call.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.statement.*
+import io.ktor.serialization.kotlinx.json.*
 import moe.kurenai.bangumi.apis.DefaultApi
 import moe.kurenai.bangumi.apis.OauthBangumiApi
 import moe.kurenai.bangumi.infrastructure.ApiClient
@@ -11,7 +14,7 @@ import moe.kurenai.bangumi.models.CharacterDetail
 import moe.kurenai.bangumi.models.CharacterPerson
 import moe.kurenai.bangumi.models.PersonDetail
 import moe.kurenai.bangumi.models.Subject
-import moe.kurenai.bot.Config.Companion.CONFIG
+import moe.kurenai.bot.util.json
 import org.apache.commons.pool2.PooledObject
 import org.apache.commons.pool2.PooledObjectFactory
 import org.apache.commons.pool2.impl.DefaultPooledObject
@@ -20,12 +23,18 @@ import kotlin.time.Duration.Companion.days
 
 internal object BangumiApi {
 
-    private val defaultApiPool = GenericObjectPool(buildFactory { DefaultApi() })
+    private val defaultApiPool = GenericObjectPool(buildFactory {
+        DefaultApi {
+            it.install(ContentNegotiation) {
+                json(json)
+            }
+        }
+    })
     private val oathApiPool = GenericObjectPool(buildFactory {
-        OauthBangumiApi().apply {
-            CONFIG.bgm.appId
-            CONFIG.bgm.appSecret
-            CONFIG.bgm.redirectUrl
+        OauthBangumiApi {
+            it.install(ContentNegotiation) {
+                json(json)
+            }
         }
     })
 
@@ -61,7 +70,7 @@ internal object BangumiApi {
 
     internal suspend fun <T> useApi(token: String? = null, block: suspend (DefaultApi) -> T): T {
         val api = defaultApiPool.borrowObject()
-        api.setBearerToken(token ?: "")
+        api.setAccessToken(token ?: "")
         try {
             return block(api)
         } finally {
@@ -71,7 +80,7 @@ internal object BangumiApi {
 
     suspend fun <T> useOauthApi(token: String? = null, block: suspend (OauthBangumiApi) -> T): T {
         val api = oathApiPool.borrowObject()
-        api.setBearerToken(token ?: "")
+        api.setAccessToken(token ?: "")
         try {
             return block(api)
         } finally {
@@ -100,9 +109,9 @@ internal object BangumiApi {
     }
 
     @Suppress("UNCHECKED_CAST")
-    suspend fun <T> HttpResponse<*>.result(): T {
+    suspend inline fun <reified T> HttpResponse<*>.result(): T {
         if (this.success) {
-            return this.body() as T
+            return this.response.body<T>()
         } else {
             throw IllegalStateException("[${this.status}] ${this.response.bodyAsText()}")
         }

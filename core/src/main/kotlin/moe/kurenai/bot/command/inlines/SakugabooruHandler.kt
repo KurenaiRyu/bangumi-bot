@@ -1,12 +1,12 @@
 package moe.kurenai.bot.command.inlines
 
 import it.tdlight.jni.TdApi.UpdateNewInlineQuery
-import moe.kurenai.bgm.util.getLogger
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.command.*
 import moe.kurenai.bot.command.InlineDispatcher.fallback
 import moe.kurenai.bot.service.SakugabooruService
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
+import moe.kurenai.bot.util.getLogger
 import java.net.URI
 
 object SakugabooruHandler : InlineHandler {

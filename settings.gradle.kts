@@ -3,6 +3,5 @@ plugins {
 }
 
 rootProject.name = "bangumi-bot"
-include(":sdk")
 include(":core")
 include(":bangumi-api")

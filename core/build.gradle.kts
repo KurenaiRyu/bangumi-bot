@@ -14,7 +14,7 @@ version = "1.0-SNAPSHOT"
 object Versions {
     const val vertxVersion = "4.2.3"
     const val log4j = "2.20.0"
-    const val ktor = "3.1.0"
+    const val ktor = "3.1.3"
     const val tdlight = "3.4.0+td.1.8.26"
 }
 dependencies {
@@ -24,11 +24,12 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation("io.ktor:ktor-client-core:${Versions.ktor}")
     implementation("io.ktor:ktor-network-tls-certificates:${Versions.ktor}")
     implementation("io.ktor:ktor-client-okhttp:${Versions.ktor}")
     implementation("io.ktor:ktor-server-netty:${Versions.ktor}")
+    implementation("io.ktor:ktor-client-content-negotiation:${Versions.ktor}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${Versions.ktor}")
 
     //serialization
