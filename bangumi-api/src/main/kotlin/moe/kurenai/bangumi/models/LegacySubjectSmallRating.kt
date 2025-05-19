@@ -39,7 +39,7 @@ data class LegacySubjectSmallRating(
 
     /* 评分 */
     @Contextual @SerialName(value = "score")
-    val score: java.math.BigDecimal? = null
+    val score: Float? = null
 
 ) {
 

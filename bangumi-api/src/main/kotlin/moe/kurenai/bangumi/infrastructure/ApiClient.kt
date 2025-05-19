@@ -29,10 +29,12 @@ open class ApiClient(
         httpClientEngine?.let { HttpClient(it, clientConfig) } ?: HttpClient(clientConfig)
     }
 
-    private val authentications: kotlin.collections.Map<String, Authentication>? = null
+    private val oAuth = OAuth()
+    private val authentications: kotlin.collections.Map<String, Authentication> =
+        mapOf("HTTPBearer" to oAuth, "OptionalHTTPBearer" to oAuth)
 
     companion object {
-        const val BASE_URL: String = "https://bgm.tv"
+        const val BASE_URL: String = "https://api.bgm.tv"
         const val OAUTH_BASE_URL = "https://bgm.tv"
         protected val UNSAFE_HEADERS: List<String> = listOf(HttpHeaders.ContentType)
     }

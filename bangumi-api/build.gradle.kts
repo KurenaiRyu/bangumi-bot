@@ -9,8 +9,8 @@ plugins {
 
 dependencies {
 
-    implementation("io.ktor:ktor-client-okhttp:3.0.0")
-    implementation("io.ktor:ktor-client-content-negotiation:3.0.0")
+    implementation("io.ktor:ktor-client-okhttp:3.1.3")
+    implementation("io.ktor:ktor-client-content-negotiation:3.1.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
 
@@ -46,6 +46,12 @@ fun generateAction(
                 "enumPropertyNaming" to "UPPERCASE",
                 "omitGradleWrapper" to "true",
             ),
+        )
+
+        typeMappings.set(
+            mapOf(
+                "number" to "Float"
+            )
         )
 
         generateModelTests.set(true)

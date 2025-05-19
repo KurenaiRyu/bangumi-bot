@@ -66,7 +66,7 @@ data class SearchSubjects200ResponseDataInner(
 
     /* 评分 */
     @Contextual @SerialName(value = "score")
-    val score: java.math.BigDecimal,
+    val score: Float,
 
     /* 排名 */
     @SerialName(value = "rank")

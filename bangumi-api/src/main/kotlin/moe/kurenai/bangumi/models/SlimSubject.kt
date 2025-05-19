@@ -73,7 +73,7 @@ data class SlimSubject(
 
     /* 分数 */
     @Contextual @SerialName(value = "score")
-    val score: java.math.BigDecimal,
+    val score: Float,
 
     /* 排名 */
     @SerialName(value = "rank")

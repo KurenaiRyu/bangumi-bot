@@ -41,7 +41,7 @@ data class Rating(
     val count: Count,
 
     @Contextual @SerialName(value = "score")
-    val score: java.math.BigDecimal
+    val score: Float
 
 ) {
 
