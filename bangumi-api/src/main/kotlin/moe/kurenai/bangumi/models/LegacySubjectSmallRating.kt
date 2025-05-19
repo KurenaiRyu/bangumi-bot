@@ -15,7 +15,6 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -38,8 +37,8 @@ data class LegacySubjectSmallRating(
     val count: LegacySubjectSmallRatingCount? = null,
 
     /* 评分 */
-    @Contextual @SerialName(value = "score")
-    val score: Float? = null
+    @SerialName(value = "score")
+    val score: kotlin.Float? = null
 
 ) {
 

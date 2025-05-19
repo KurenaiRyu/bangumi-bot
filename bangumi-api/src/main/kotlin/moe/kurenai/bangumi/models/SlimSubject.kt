@@ -72,8 +72,8 @@ data class SlimSubject(
     val collectionTotal: kotlin.Int,
 
     /* 分数 */
-    @Contextual @SerialName(value = "score")
-    val score: Float,
+    @SerialName(value = "score")
+    val score: kotlin.Float,
 
     /* 排名 */
     @SerialName(value = "rank")

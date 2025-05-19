@@ -15,7 +15,6 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -40,8 +39,8 @@ data class Rating(
     @SerialName(value = "count")
     val count: Count,
 
-    @Contextual @SerialName(value = "score")
-    val score: Float
+    @SerialName(value = "score")
+    val score: kotlin.Float
 
 ) {
 

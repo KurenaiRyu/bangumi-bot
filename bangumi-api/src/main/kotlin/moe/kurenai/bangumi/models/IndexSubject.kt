@@ -15,9 +15,12 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.Images
+import moe.kurenai.bangumi.models.Item
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  * 同名字段意义同<a href=\"#model-Subject\">Subject</a>

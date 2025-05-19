@@ -135,3 +135,13 @@ components:
                 token_type: "Bearer"
                 scope: null
                 refresh_token: "YOUR_NEW_REFRESH_TOKEN"
+    securitySchemes:
+        OptionalHTTPBearer:
+            type: "http"
+            description: "Some api like getting a subject doesn't require any authorization. \nBut NSFW contents are only visible to authorized user, non-authorized user will get 404 response.\nYou can create a access token here [https://bgm.tv/dev/app](https://bgm.tv/dev/app)\n"
+            scheme: "bearer"
+        HTTPBearer:
+            type: "http"
+            description: "require a authorization"
+            scheme: "bearer"
+

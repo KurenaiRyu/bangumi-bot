@@ -108,7 +108,7 @@ data class Subject(
     val date: kotlin.String? = null,
 
     @SerialName(value = "infobox")
-    val infobox: kotlin.collections.List<InfoBox>? = null
+    val infobox: kotlin.collections.List<Item>? = null
 
 ) {
 

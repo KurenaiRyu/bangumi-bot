@@ -15,10 +15,59 @@
 
 package moe.kurenai.bangumi.apis
 
-import io.ktor.client.*
-import io.ktor.client.engine.*
+import moe.kurenai.bangumi.models.Character
+import moe.kurenai.bangumi.models.CharacterPerson
+import moe.kurenai.bangumi.models.CharacterRevision
+import moe.kurenai.bangumi.models.DetailedRevision
+import moe.kurenai.bangumi.models.EpType
+import moe.kurenai.bangumi.models.EpisodeDetail
+import moe.kurenai.bangumi.models.ErrorDetail
+import moe.kurenai.bangumi.models.GetCalendar200ResponseInner
+import moe.kurenai.bangumi.models.GetMyself200Response
+import moe.kurenai.bangumi.models.GetUserSubjectEpisodeCollection200Response
+import moe.kurenai.bangumi.models.Index
+import moe.kurenai.bangumi.models.IndexBasicInfo
+import moe.kurenai.bangumi.models.IndexSubjectAddInfo
+import moe.kurenai.bangumi.models.IndexSubjectEditInfo
+import moe.kurenai.bangumi.models.LegacySubjectType
+import moe.kurenai.bangumi.models.PagedCharacter
+import moe.kurenai.bangumi.models.PagedEpisode
+import moe.kurenai.bangumi.models.PagedPerson
+import moe.kurenai.bangumi.models.PagedRevision
+import moe.kurenai.bangumi.models.PagedSubject
+import moe.kurenai.bangumi.models.PagedUserCharacterCollection
+import moe.kurenai.bangumi.models.PagedUserCollection
+import moe.kurenai.bangumi.models.PagedUserPersonCollection
+import moe.kurenai.bangumi.models.PatchUserSubjectEpisodeCollectionRequest
+import moe.kurenai.bangumi.models.PersonCharacter
+import moe.kurenai.bangumi.models.PersonDetail
+import moe.kurenai.bangumi.models.PersonRevision
+import moe.kurenai.bangumi.models.PutUserEpisodeCollectionRequest
+import moe.kurenai.bangumi.models.RelatedCharacter
+import moe.kurenai.bangumi.models.RelatedPerson
+import moe.kurenai.bangumi.models.SearchCharactersRequest
+import moe.kurenai.bangumi.models.SearchPersonsRequest
+import moe.kurenai.bangumi.models.SearchSubjectByKeywords200Response
+import moe.kurenai.bangumi.models.SearchSubjectsRequest
+import moe.kurenai.bangumi.models.Subject
+import moe.kurenai.bangumi.models.SubjectCategory
+import moe.kurenai.bangumi.models.SubjectCollectionType
+import moe.kurenai.bangumi.models.SubjectRevision
+import moe.kurenai.bangumi.models.SubjectType
+import moe.kurenai.bangumi.models.User
+import moe.kurenai.bangumi.models.UserCharacterCollection
+import moe.kurenai.bangumi.models.UserEpisodeCollection
+import moe.kurenai.bangumi.models.UserPersonCollection
+import moe.kurenai.bangumi.models.UserSubjectCollection
+import moe.kurenai.bangumi.models.UserSubjectCollectionModifyPayload
+import moe.kurenai.bangumi.models.V0RelatedSubject
+import moe.kurenai.bangumi.models.V0SubjectRelation
+
 import moe.kurenai.bangumi.infrastructure.*
-import moe.kurenai.bangumi.models.*
+import io.ktor.client.HttpClientConfig
+import io.ktor.client.request.forms.formData
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.http.ParametersBuilder
 
 open class DefaultApi(
     baseUrl: String = ApiClient.BASE_URL,

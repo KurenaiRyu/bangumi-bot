@@ -15,9 +15,11 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.EpType
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  *
@@ -52,8 +54,8 @@ data class EpisodeDetail(
     val nameCn: kotlin.String,
 
     /* 同类条目的排序和集数 */
-    @Contextual @SerialName(value = "sort")
-    val sort: Float,
+    @SerialName(value = "sort")
+    val sort: kotlin.Float,
 
     @SerialName(value = "airdate")
     val airdate: kotlin.String,
@@ -76,8 +78,8 @@ data class EpisodeDetail(
     val subjectId: kotlin.Int,
 
     /* 条目内的集数, 从`1`开始。非本篇剧集的此字段无意义 */
-    @Contextual @SerialName(value = "ep")
-    val ep: Float? = null
+    @SerialName(value = "ep")
+    val ep: kotlin.Float? = null
 
 ) {
 

@@ -50,7 +50,7 @@ fun generateAction(
 
         typeMappings.set(
             mapOf(
-                "number" to "Float"
+                "number" to "kotlin.Float"
             )
         )
 

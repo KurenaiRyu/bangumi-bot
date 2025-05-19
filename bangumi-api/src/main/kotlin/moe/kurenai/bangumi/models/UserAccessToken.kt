@@ -41,7 +41,7 @@ data class UserAccessToken(
     val refreshToken: kotlin.String,
 
     @SerialName(value = "user_id")
-    val userId: kotlin.Long
+    val userId: kotlin.Int
 
 ) {
 
