@@ -3,6 +3,7 @@ package moe.kurenai.bot.service.bangumi
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.client.call.*
+import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -13,7 +14,7 @@ import moe.kurenai.bangumi.apis.DefaultApi
 import moe.kurenai.bangumi.apis.OauthBangumiApi
 import moe.kurenai.bangumi.infrastructure.ApiClient
 import moe.kurenai.bangumi.infrastructure.HttpResponse
-import moe.kurenai.bangumi.models.CharacterDetail
+import moe.kurenai.bangumi.models.Character
 import moe.kurenai.bangumi.models.CharacterPerson
 import moe.kurenai.bangumi.models.PersonDetail
 import moe.kurenai.bangumi.models.Subject
@@ -27,7 +28,7 @@ import kotlin.time.Duration.Companion.days
 internal object BangumiApi {
 
     private val defaultApiPool = GenericObjectPool(buildFactory {
-        DefaultApi {
+        DefaultApi(httpClientEngine = OkHttp.create()) {
             it.install(ContentNegotiation) {
                 json(json)
             }
@@ -36,20 +37,19 @@ internal object BangumiApi {
             }
         }
     })
-    private val oathApiPool = GenericObjectPool(buildFactory {
-        OauthBangumiApi {
-            it.install(ContentNegotiation) {
-                json(json)
-            }
-            it.defaultRequest {
-                header(HttpHeaders.UserAgent, "kurenai/bangumi-bot")
-            }
+
+    internal val oauthApi = OauthBangumiApi(httpClientEngine = OkHttp.create()) {
+        it.install(ContentNegotiation) {
+            json(json)
         }
-    })
+        it.defaultRequest {
+            header(HttpHeaders.UserAgent, "kurenai/bangumi-bot")
+        }
+    }
 
     val counter = ConcurrentStatsCounter()
 
-    val characterCache = caffeineBuilder<Int, CharacterDetail> {
+    val characterCache = caffeineBuilder<Int, Character> {
         maximumSize = 200
         expireAfterWrite = 7.days
         expireAfterAccess = 1.days
@@ -79,21 +79,11 @@ internal object BangumiApi {
 
     internal suspend fun <T> useApi(token: String? = null, block: suspend (DefaultApi) -> T): T {
         val api = defaultApiPool.borrowObject()
-        api.setAccessToken(token ?: "")
+        api.setBearerToken(token ?: "")
         try {
             return block(api)
         } finally {
             defaultApiPool.returnObject(api)
-        }
-    }
-
-    suspend fun <T> useOauthApi(token: String? = null, block: suspend (OauthBangumiApi) -> T): T {
-        val api = oathApiPool.borrowObject()
-        api.setAccessToken(token ?: "")
-        try {
-            return block(api)
-        } finally {
-            oathApiPool.returnObject(api)
         }
     }
 

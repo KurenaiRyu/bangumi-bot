@@ -2,7 +2,7 @@ package moe.kurenai.bot.service.bangumi
 
 import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
-import moe.kurenai.bangumi.models.CharacterDetail
+import moe.kurenai.bangumi.models.Character
 import moe.kurenai.bangumi.models.CharacterPerson
 import moe.kurenai.bot.service.bangumi.BangumiApi.characterCache
 import moe.kurenai.bot.service.bangumi.BangumiApi.characterPersonCache
@@ -21,7 +21,7 @@ import moe.kurenai.bot.util.HttpUtil
  */
 internal object CharacterService {
 
-    suspend fun findById(id: Int, token: String? = null): CharacterDetail {
+    suspend fun findById(id: Int, token: String? = null): Character {
         return characterCache.get(id) { k ->
             useApi(token) {
                 it.getCharacterById(k).result()
@@ -51,7 +51,7 @@ internal object CharacterService {
 //    }
 
     suspend fun getContent(
-        character: CharacterDetail,
+        character: Character,
         link: String,
         persons: List<CharacterPerson>? = null
     ): Array<InputInlineQueryResult> {

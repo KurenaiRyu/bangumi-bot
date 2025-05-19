@@ -45,6 +45,7 @@ dependencies {
     //tdlib
     implementation(platform("it.tdlight:tdlight-java-bom:${Versions.tdlight}"))
     implementation("it.tdlight:tdlight-java")
+    implementation("io.ktor:ktor-client-okhttp-jvm:3.1.3")
     val hostOs = System.getProperty("os.name")
     val isWin = hostOs.startsWith("Windows")
     val classifier = when {
