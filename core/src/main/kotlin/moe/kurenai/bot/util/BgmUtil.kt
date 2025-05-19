@@ -85,7 +85,8 @@ object BgmUtil {
     fun buildOauthUrl(state: String? = null): String {
         val appId = CONFIG.bgm.appId
         val redirectUri = CONFIG.bgm.redirectUrl
-        val url = "${ApiClient.OAUTH_BASE_URL}/authorize?client_id=$appId&response_type=code&redirect_uri=$redirectUri"
+        val url =
+            "${ApiClient.OAUTH_BASE_URL}/oauth/authorize?client_id=$appId&response_type=code&redirect_uri=$redirectUri"
         return state?.let { "$url&state=$state" } ?: url
     }
 
