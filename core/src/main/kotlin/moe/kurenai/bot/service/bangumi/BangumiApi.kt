@@ -3,8 +3,11 @@ package moe.kurenai.bot.service.bangumi
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.client.call.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import moe.kurenai.bangumi.apis.DefaultApi
 import moe.kurenai.bangumi.apis.OauthBangumiApi
@@ -28,12 +31,18 @@ internal object BangumiApi {
             it.install(ContentNegotiation) {
                 json(json)
             }
+            it.defaultRequest {
+                header(HttpHeaders.UserAgent, "kurenai/bangumi-bot")
+            }
         }
     })
     private val oathApiPool = GenericObjectPool(buildFactory {
         OauthBangumiApi {
             it.install(ContentNegotiation) {
                 json(json)
+            }
+            it.defaultRequest {
+                header(HttpHeaders.UserAgent, "kurenai/bangumi-bot")
             }
         }
     })
