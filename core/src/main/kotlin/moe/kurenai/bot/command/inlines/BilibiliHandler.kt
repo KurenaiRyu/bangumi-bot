@@ -54,7 +54,7 @@ object BilibiliHandler : InlineHandler {
         val url = Url(uri)
         val segments = Url(uri).rawSegments
         val id = segments.last().takeIf { it.isNotBlank() } ?: segments[segments.lastIndex - 1]
-        val p = url.parameters["p"]?.toInt() ?: 1
+        val p = url.parameters["p"]?.toInt() ?: 0
         val t = url.parameters["t"]?.toFloat() ?: 0F
         doHandle(inlineQuery, id, p, t)
     }
@@ -143,7 +143,7 @@ object BilibiliHandler : InlineHandler {
 
         val videoInfo = BiliBiliService.getVideoInfo(id)
         val desc = videoInfo.data.desc.trimString()
-        val page = videoInfo.data.pages.find { it.page == p } ?: run {
+        val page = videoInfo.data.pages.find { it.page == p.coerceAtLeast(1) } ?: run {
             fallback(inlineQuery)
             return
         }
@@ -151,7 +151,7 @@ object BilibiliHandler : InlineHandler {
         var link = "https://www.bilibili.com/video/${videoInfo.data.bvid}"
 
         val parameters = mutableListOf<String>()
-        if (p > 1) parameters.add("p=$p")
+        if (p > 0) parameters.add("p=$p")
         if (t > 0) parameters.add("t=$t")
         if (parameters.isNotEmpty()) {
             val paramStr = parameters.joinToString("&")
@@ -160,10 +160,12 @@ object BilibiliHandler : InlineHandler {
 
         val up = "UP: [${videoInfo.data.owner.name.markdown()}](https://space.bilibili.com/${videoInfo.data.owner.mid})"
         val playCount = "${((videoInfo.data.stat.view / 10.0).roundToInt() / 100.0).toString().markdown()}K 播放"
-        var contentTitle = if (page.part.contains(videoInfo.data.title)) {
-            "[${page.part.markdown()}]($link)"
+        val videoTitle = videoInfo.data.title.trim()
+        val partTitle = page.part.trim()
+        var contentTitle = if (p == 0 || (videoTitle.contains(partTitle) || partTitle.contains(videoTitle))) {
+            "[${videoTitle.markdown()}]($link)"
         } else {
-            "[${videoInfo.data.title.markdown()}]($link) / ${page.part.markdown()}"
+            "[${videoTitle.markdown()}]($link) / ${partTitle.markdown()}"
         }
 
         if (t > 0) {
@@ -185,7 +187,7 @@ object BilibiliHandler : InlineHandler {
         val results = mutableListOf<InputInlineQueryResult>()
         results.add(InputInlineQueryResultPhoto().apply {
             this.id = "P_${videoInfo.data.bvid}_$p"
-            this.title = "${page.part}/${videoInfo.data.title}"
+            this.title = "$partTitle/$videoTitle"
             photoUrl = videoInfo.data.pic
             thumbnailUrl = videoInfo.data.pic
             inputMessageContent = InputMessagePhoto().apply {
@@ -195,7 +197,7 @@ object BilibiliHandler : InlineHandler {
         streamInfo.data?.run {
             results.add(InputInlineQueryResultVideo().apply {
                 this.id = "V_${videoInfo.data.bvid}_$p"
-                this.title = "${page.part}/${videoInfo.data.title}"
+                this.title = "$partTitle/$videoTitle"
                 videoUrl = streamInfo.data.durl!!.first().url
                 thumbnailUrl = videoInfo.data.pic
                 mimeType = MimeTypes.Video.MP4
