@@ -2,7 +2,6 @@ package moe.kurenai.bot.util
 
 import it.tdlight.jni.TdApi
 import moe.kurenai.bot.TelegramBot
-
 /**
  * @author Kurenai
  * @since 2023/3/2 4:19
@@ -19,8 +18,11 @@ object TelegramUtil {
         return result
     }
 
-    suspend inline fun String.fmt(mode: TdApi.TextParseModeMarkdown = TdApi.TextParseModeMarkdown(2)): TdApi.FormattedText =
-        TelegramBot.send { TdApi.ParseTextEntities(this, mode) }
+    suspend inline fun String.fmt(mode: TdApi.TextParseModeMarkdown = TdApi.TextParseModeMarkdown(2)): TdApi.FormattedText {
+        return if (TelegramBot.isClientInitialized()) TelegramBot.send { TdApi.ParseTextEntities(this, mode) }
+        else this.asText()
+    }
+
 
     fun String.asText() = TdApi.FormattedText().apply { text = this@asText }
 
@@ -125,3 +127,4 @@ object TelegramUtil {
     fun TdApi.User.username() = this.usernames.activeUsernames.firstOrNull() ?: this.id.toString()
 
 }
+

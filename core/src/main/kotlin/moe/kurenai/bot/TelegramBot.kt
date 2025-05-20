@@ -31,6 +31,8 @@ object TelegramBot {
 
     lateinit var client: SimpleTelegramClient
 
+    fun isClientInitialized(): Boolean = ::client.isInitialized
+
     val pendingMessage = caffeineBuilder<Long, CancellableContinuation<TdResult<Object>>> {
         maximumSize = 200
         expireAfterWrite = 5.minutes

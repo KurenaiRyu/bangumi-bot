@@ -140,13 +140,25 @@ object BilibiliHandler : InlineHandler {
 
     private suspend fun doHandle(inlineQuery: UpdateNewInlineQuery, id: String, p: Int, t: Float) {
         log.info("Handle bilibili: $id, $p, $t")
-
-        val videoInfo = BiliBiliService.getVideoInfo(id)
-        val desc = videoInfo.data.desc.trimString()
-        val page = videoInfo.data.pages.find { it.page == p.coerceAtLeast(1) } ?: run {
+        val results = doHandle(id, p, t)?: run {
             fallback(inlineQuery)
             return
         }
+
+        send {
+//            TelegramUserBot.fetchRemoteFileIdByUrl(videoInfo.data.pic) ?: run {
+//                log.warn("Fetch video image fail.")
+//            }
+
+            answerInlineQuery(inlineQuery.id, results.toTypedArray())
+        }
+    }
+
+    suspend internal fun doHandle(id: String, p: Int, t: Float): List<InputInlineQueryResult>? {
+
+        val videoInfo = BiliBiliService.getVideoInfo(id)
+        val desc = videoInfo.data.desc.trimString()
+        val page = videoInfo.data.pages.find { it.page == p.coerceAtLeast(1) } ?: return null
         val streamInfo = BiliBiliService.getPlayUrl(videoInfo.data.bvid, page.cid)
         var link = "https://www.bilibili.com/video/${videoInfo.data.bvid}"
 
@@ -162,9 +174,16 @@ object BilibiliHandler : InlineHandler {
         val playCount = "${((videoInfo.data.stat.view / 10.0).roundToInt() / 100.0).toString().markdown()}K 播放"
         val videoTitle = videoInfo.data.title.trim()
         val partTitle = page.part.trim()
-        var contentTitle = if (p == 0 || (videoTitle.contains(partTitle) || partTitle.contains(videoTitle))) {
+        val inlineTitle: String
+        var contentTitle = if (p == 0 || videoInfo.data.pages.size == 1 || videoTitle.contains(partTitle)) {
+            inlineTitle = videoTitle
             "[${videoTitle.markdown()}]($link)"
+        } else if (partTitle.startsWith(videoTitle) || partTitle.endsWith(videoTitle)) {
+            val partTitleCp = partTitle.replace(videoTitle, "").trim()
+            inlineTitle = "$videoTitle / $partTitleCp"
+            "[${videoTitle.markdown()}]($link) / $partTitleCp"
         } else {
+            inlineTitle = "$videoTitle / $partTitle"
             "[${videoTitle.markdown()}]($link) / ${partTitle.markdown()}"
         }
 
@@ -187,7 +206,7 @@ object BilibiliHandler : InlineHandler {
         val results = mutableListOf<InputInlineQueryResult>()
         results.add(InputInlineQueryResultPhoto().apply {
             this.id = "P_${videoInfo.data.bvid}_$p"
-            this.title = "$partTitle/$videoTitle"
+            this.title = inlineTitle
             photoUrl = videoInfo.data.pic
             thumbnailUrl = videoInfo.data.pic
             inputMessageContent = InputMessagePhoto().apply {
@@ -197,7 +216,7 @@ object BilibiliHandler : InlineHandler {
         streamInfo.data?.run {
             results.add(InputInlineQueryResultVideo().apply {
                 this.id = "V_${videoInfo.data.bvid}_$p"
-                this.title = "$partTitle/$videoTitle"
+                this.title = inlineTitle
                 videoUrl = streamInfo.data.durl!!.first().url
                 thumbnailUrl = videoInfo.data.pic
                 mimeType = MimeTypes.Video.MP4
@@ -206,13 +225,8 @@ object BilibiliHandler : InlineHandler {
                 }
             })
         }
-        send {
-//            TelegramUserBot.fetchRemoteFileIdByUrl(videoInfo.data.pic) ?: run {
-//                log.warn("Fetch video image fail.")
-//            }
 
-            answerInlineQuery(inlineQuery.id, results.toTypedArray())
-        }
+        return results
     }
 
 }

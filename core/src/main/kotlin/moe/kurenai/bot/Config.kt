@@ -6,11 +6,10 @@ import java.io.File
 
 @Serializable
 data class Config(
-    var redis: Redis = Redis(),
     var telegram: Telegram = Telegram(),
     var bgm: Bgm = Bgm(),
     var bilibili: Bilibili = Bilibili(),
-    var debug: Boolean = false
+    var debug: Boolean = false,
 ) {
 
     companion object {
