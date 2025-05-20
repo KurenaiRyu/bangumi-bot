@@ -2,10 +2,12 @@ package moe.kurenai.bot.service.bangumi
 
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -29,22 +31,11 @@ internal object BangumiApi {
 
     private val defaultApiPool = GenericObjectPool(buildFactory {
         DefaultApi(httpClientEngine = OkHttp.create()) {
-            it.install(ContentNegotiation) {
-                json(json)
-            }
-            it.defaultRequest {
-                header(HttpHeaders.UserAgent, "kurenai/bangumi-bot")
-            }
+            it.configHttpClient()
         }
     })
-
     internal val oauthApi = OauthBangumiApi(httpClientEngine = OkHttp.create()) {
-        it.install(ContentNegotiation) {
-            json(json)
-        }
-        it.defaultRequest {
-            header(HttpHeaders.UserAgent, "kurenai/bangumi-bot")
-        }
+        it.configHttpClient()
     }
 
     val counter = ConcurrentStatsCounter()
@@ -76,6 +67,21 @@ internal object BangumiApi {
         expireAfterAccess = 1.days
         statsCounter = counter
     }.build()
+
+    private fun HttpClientConfig<*>.configHttpClient() {
+        install(Logging) {
+            logger = Logger.DEFAULT
+            level = LogLevel.ALL
+            sanitizeHeader { header -> header == HttpHeaders.Authorization }
+        }
+        install(ContentNegotiation) {
+            json(json)
+        }
+        defaultRequest {
+            header(HttpHeaders.UserAgent, "kurenai/bangumi-bot")
+        }
+    }
+
 
     internal suspend fun <T> useApi(token: String? = null, block: suspend (DefaultApi) -> T): T {
         val api = defaultApiPool.borrowObject()

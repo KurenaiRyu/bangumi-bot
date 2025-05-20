@@ -3,8 +3,11 @@ package moe.kurenai.bot.service
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
 import moe.kurenai.bot.util.MimeTypes
 import moe.kurenai.bot.util.TelegramUtil.fmt
@@ -19,7 +22,19 @@ import kotlin.time.Duration.Companion.days
  */
 internal object SakugabooruService {
 
-    val client = HttpClient()
+    val client = HttpClient(OkHttp) {
+        engine {
+            config {
+                followRedirects(true)
+            }
+        }
+        install(Logging) {
+            logger = Logger.DEFAULT
+            level = LogLevel.ALL
+            sanitizeHeader { header -> header == HttpHeaders.Cookie }
+        }
+
+    }
 
     val cacheStats = ConcurrentStatsCounter()
     private val cache = caffeineBuilder<URI, InputInlineQueryResult> {
