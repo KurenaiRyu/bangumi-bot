@@ -36,29 +36,22 @@ internal object BiliBiliService {
     private const val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0"
 
     private val log = getLogger()
+
+    private val httpLogger = object : Logger {
+        override fun log(message: String) {
+            log.info(message)
+        }
+    }
+
     private val dontRedirectClient = HttpClient(OkHttp) {
-        engine {
-            config {
-                followRedirects(false)
-            }
-        }
-        install(Logging) {
-            logger = Logger.DEFAULT
-            level = LogLevel.ALL
-            sanitizeHeader { header -> header == HttpHeaders.Cookie }
-        }
+        followRedirects = false
         defaultRequest {
             header(HttpHeaders.UserAgent, USER_AGENT)
         }
     }
     private val client = HttpClient(OkHttp) {
-        engine {
-            config {
-                followRedirects(true)
-            }
-        }
         install(Logging) {
-            logger = Logger.DEFAULT
+            logger = httpLogger
             level = LogLevel.ALL
             sanitizeHeader { header -> header == HttpHeaders.Cookie }
         }
@@ -83,8 +76,11 @@ internal object BiliBiliService {
     }.build()
 
     suspend fun getRedirectUrl(uri: URI): Url {
-        val doc = Jsoup.parse(dontRedirectClient.get(Url(uri)).bodyAsText())
-        val redirectUrl = doc.select("a").attr("href")
+        val response = dontRedirectClient.get(Url(uri))
+        val redirectUrl = (response.headers[HttpHeaders.Location]?: let {
+            val doc = Jsoup.parse(response.bodyAsText())
+            doc.select("a").attr("href")
+        }).substringBefore('?')
         log.info("Get redirect url: $redirectUrl")
         return Url(redirectUrl)
     }
