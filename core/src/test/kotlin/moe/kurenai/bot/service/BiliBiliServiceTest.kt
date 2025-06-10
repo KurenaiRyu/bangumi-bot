@@ -14,6 +14,11 @@ class BiliBiliServiceTest {
     }
 
     @Test
+    fun testOfficialAccountDynamic(): Unit = runBlocking {
+        BiliBiliService.getDynamicDetail("1076398325726445590")
+    }
+
+    @Test
     fun testRedirection() = runBlocking {
         println(BiliBiliService.getRedirectUrl(URI("https://b23.tv/1XUGxgS")))
     }

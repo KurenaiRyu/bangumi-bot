@@ -11,6 +11,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
@@ -19,12 +20,12 @@ import moe.kurenai.bot.Config.Companion.CONFIG
 import moe.kurenai.bot.model.bilibili.DynamicInfo
 import moe.kurenai.bot.model.bilibili.VideoInfo
 import moe.kurenai.bot.model.bilibili.VideoStreamUrl
+import moe.kurenai.bot.util.HttpUtil
 import moe.kurenai.bot.util.getLogger
 import moe.kurenai.bot.util.json
 import org.jsoup.Jsoup
 import java.net.URI
 import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.minutes
 
 
 /**
@@ -33,7 +34,7 @@ import kotlin.time.Duration.Companion.minutes
  */
 internal object BiliBiliService {
 
-    private const val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0"
+    private val USER_AGENT = runBlocking { HttpUtil.getLatestUA() }
 
     private val log = getLogger()
 
@@ -67,12 +68,13 @@ internal object BiliBiliService {
     private val cache = caffeineBuilder<String, VideoInfo> {
         maximumSize = 200
         expireAfterWrite = 7.days
-        expireAfterWrite = 7.days
+        expireAfterAccess = 7.days
     }.build()
 
     private val urlCache = caffeineBuilder<String, VideoStreamUrl> {
         maximumSize = 200
-        expireAfterWrite = 100.minutes
+        expireAfterWrite = 7.days
+        expireAfterAccess
     }.build()
 
     suspend fun getRedirectUrl(uri: URI): Url {
@@ -94,7 +96,7 @@ internal object BiliBiliService {
         return Triple(id, p, t)
     }
 
-    suspend fun getPlayUrl(bvid: String, cid: Long) = urlCache.get(bvid) { _ ->
+    suspend fun getPlayUrl(bvid: String, cid: Long): VideoStreamUrl = urlCache.get(bvid) { _ ->
         client.get("https://api.bilibili.com/x/player/playurl") {
             parameter("bvid", bvid)
             parameter("cid", cid)
@@ -102,7 +104,7 @@ internal object BiliBiliService {
         }.body()
     }
 
-    suspend fun getVideoInfo(id: String) = cache.get(id) { _ ->
+    suspend fun getVideoInfo(id: String): VideoInfo = cache.get(id) { _ ->
         client.get("https://api.bilibili.com/x/web-interface/view") {
             if (id.startsWith("av", true)) {
                 parameter("aid", id.substring(2))
