@@ -32,10 +32,8 @@ object HttpUtil {
         get() = uaRef.get()
 
     val DYNAMIC_USER_AGENT = createClientPlugin("DynamicUserAgent") {
-        onRequest { _, _ ->
-            request {
-                header("User-Agent", uaRef.get())
-            }
+        onRequest { req, _ ->
+            req.header(HttpHeaders.UserAgent, uaRef.get())
         }
     }
 
@@ -51,6 +49,7 @@ object HttpUtil {
                 delay(1.days)
             }
         }
+        uaRef.set(runBlocking { getLatestUA() })
     }
 
     private suspend fun getLatestUA(): String {
