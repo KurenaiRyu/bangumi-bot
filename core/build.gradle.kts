@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     application
     kotlin("jvm") version "2.1.10"
@@ -96,8 +94,8 @@ tasks.jar {
     archiveFileName.set("${rootProject.name}.jar")
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
+kotlin {
+    compilerOptions {
         freeCompilerArgs = listOf(
             "-Xjsr305=strict",
         )
