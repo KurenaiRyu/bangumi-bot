@@ -11,7 +11,6 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
@@ -20,7 +19,7 @@ import moe.kurenai.bot.Config.Companion.CONFIG
 import moe.kurenai.bot.model.bilibili.DynamicInfo
 import moe.kurenai.bot.model.bilibili.VideoInfo
 import moe.kurenai.bot.model.bilibili.VideoStreamUrl
-import moe.kurenai.bot.util.HttpUtil
+import moe.kurenai.bot.util.HttpUtil.DYNAMIC_USER_AGENT
 import moe.kurenai.bot.util.getLogger
 import moe.kurenai.bot.util.json
 import org.jsoup.Jsoup
@@ -34,8 +33,6 @@ import kotlin.time.Duration.Companion.days
  */
 internal object BiliBiliService {
 
-    private val USER_AGENT = runBlocking { HttpUtil.getLatestUA() }
-
     private val log = getLogger()
 
     private val httpLogger = object : Logger {
@@ -46,9 +43,7 @@ internal object BiliBiliService {
 
     private val dontRedirectClient = HttpClient(OkHttp) {
         followRedirects = false
-        defaultRequest {
-            header(HttpHeaders.UserAgent, USER_AGENT)
-        }
+        install(DYNAMIC_USER_AGENT)
     }
     private val client = HttpClient(OkHttp) {
         install(Logging) {
@@ -60,9 +55,9 @@ internal object BiliBiliService {
             json(json)
         }
         defaultRequest {
-            header(HttpHeaders.UserAgent, USER_AGENT)
             header(HttpHeaders.Cookie, CONFIG.bilibili.cookie)
         }
+        install(DYNAMIC_USER_AGENT)
     }
 
     private val cache = caffeineBuilder<String, VideoInfo> {
