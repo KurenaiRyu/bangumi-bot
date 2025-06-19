@@ -5,3 +5,4 @@ plugins {
 rootProject.name = "bangumi-bot"
 include(":core")
 include(":bangumi-api")
+include("mi-ho-yo")
