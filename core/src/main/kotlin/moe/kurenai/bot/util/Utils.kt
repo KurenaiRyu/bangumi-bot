@@ -3,9 +3,12 @@
 package moe.kurenai.bot.util
 
 import kotlinx.serialization.json.Json
+import okio.ByteString.Companion.encodeUtf8
+import okio.ByteString.Companion.toByteString
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
+import java.security.MessageDigest
 import java.util.*
 import kotlin.io.path.exists
 import kotlin.io.path.inputStream
@@ -46,6 +49,8 @@ fun String.trimString(size: Int = 100) = if (this.length > size + 20) this.subst
 fun Boolean.toInt() = if (this) 1 else 0
 
 fun String.urlBase64() = Base64.getUrlEncoder().encodeToString(this.toByteArray())
+
+fun ByteArray.md5() = MessageDigest.getInstance("MD5").digest(this)
 
 fun Duration.formatToTime(): String {
     return this.toComponents { h, m, s, _ ->

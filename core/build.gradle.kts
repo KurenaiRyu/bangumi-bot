@@ -55,7 +55,8 @@ dependencies {
     implementation(group = "it.tdlight", name = "tdlight-natives", classifier = classifier)
     implementation(group = "it.tdlight", name = "tdlight-natives", classifier = "linux_amd64_gnu_ssl1")
     //qrcode
-    implementation("com.google.zxing:core:3.5.1")
+    implementation("com.google.zxing:core:3.5.2")
+    implementation("com.google.zxing:javase:3.5.2")
 
     //logging
     implementation("org.slf4j:slf4j-api:2.0.6")
