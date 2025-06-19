@@ -17,12 +17,19 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
 import moe.kurenai.common.util.getLogger
 import moe.kurenai.common.util.md5
+import moe.kurenai.mihoyo.MiHoYo.APP_ID
 import moe.kurenai.mihoyo.module.*
-import moe.kurenai.mihoyo.util.EncryptUtil.APP_ID
+import moe.kurenai.mihoyo.module.zzz.Challenge
+import moe.kurenai.mihoyo.module.zzz.MemDetail
 import moe.kurenai.mihoyo.util.MiHoYoHeaders
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 import java.util.*
+import kotlin.io.path.createDirectories
+import kotlin.io.path.readLines
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
@@ -33,33 +40,65 @@ class MiHoYoApiTest {
         const val lettersAndNumbers = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
     }
 
+    val dataPath = Path.of("./data")
+
+    val zzzPath = dataPath.resolve("ZZZ")
+    val zzzPage = "v2.0.4_#/zzz"
+
+
     val uuid = UUID.nameUUIDFromBytes("Kurenai".toByteArray())
     val androidVersion = 13
     val deviceModel = "redmi k50 ultra"
     val miHoYoBBSVersion = "2.71.1"
     val K2 = "rtvTthKxEyreVXQCnhluFgLXPOFKPHlA"
+    val salt_4X = "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs"
     val UA = "Mozilla/5.0 (Linux; Android $androidVersion; $deviceModel Build/TKQ1.220829.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/108.0.5359.128 Mobile Safari/537.36 miHoYoBBS/$miHoYoBBSVersion"
     @OptIn(ExperimentalStdlibApi::class)
     private val miHoYoPlugin = createClientPlugin("MihoyoPlugin") {
         onRequest {req, content ->
-            req.header("x-rpc-client_type", "2") // 安卓端APP
+
             req.header("x-rpc-sys_version", androidVersion) // 安卓系统（或iOS）大版本号
             req.header("x-rpc-channel", "xiaomi")
             req.header("x-rpc-device_name", "xiaomi $deviceModel")
             req.header("x-rpc-device_model", deviceModel)
             req.header("x-rpc-device_id", uuid)
+            req.header("x-rpc-app_version", miHoYoBBSVersion)
             req.header("X-Requested-With", "com.mihoyo.hyperion")
 
             val host = req.url.host
             req.header(HttpHeaders.Origin, "https://$host")
             req.header(HttpHeaders.Host, host)
             req.header(HttpHeaders.Referrer, "https://app.mihoyo.com")
+            req.header(HttpHeaders.UserAgent, UA)
 
             val t = System.currentTimeMillis()
-            val r = lettersAndNumbers.asSequence().shuffled().take(6).toString()
-            val main = "salt=$K2&t=$t&r=$r"
-            val ds = main.toByteArray(StandardCharsets.UTF_8).md5().toHexString()
-            req.header("DS", ds)
+
+            val clientType = req.headers["x-rpc-client_type"]
+            val ds = when (clientType) {
+                "2" -> {
+                    val r = lettersAndNumbers.asSequence().shuffled().take(6).toString()
+                    val main = "salt=$K2&t=$t&r=$r".toByteArray(StandardCharsets.UTF_8)
+                    main.md5().toHexString()
+                }
+                "5" -> {
+                    var r = (100000..200000).random()
+                    if (r == 100000) r=642367
+                    val parameters = req.url.parameters
+                    val q = if (parameters.names().isEmpty()) ""
+                    else {
+                        parameters.names().asSequence().sorted().joinToString("&") {
+                            "$it=${parameters[it]}"
+                        }
+                    }
+                    val b = ""
+                    val main = "salt=$salt_4X&t=$t&b=$b&q=$q"
+                    "$t,$r,${main.toByteArray(StandardCharsets.UTF_8).md5().toHexString()}"
+                }
+
+                else -> {""}
+            }
+
+            if (ds.isNotBlank()) req.header("DS", ds)
 
         }
     }
@@ -74,7 +113,6 @@ class MiHoYoApiTest {
         install(Logging) {
             logger = httpLogger
             level = LogLevel.ALL
-            sanitizeHeader { header -> header == HttpHeaders.Cookie }
         }
         install(ContentNegotiation) {
             json(Json{
@@ -84,9 +122,70 @@ class MiHoYoApiTest {
     }
 
     @Test
+    fun testBinding(): Unit = runBlocking {
+        val cookie = dataPath.resolve("MiHoYoBBSLogin.cookie").readLines().joinToString("; ") {
+            it.substringBefore(";")
+        }
+        println(client.get("https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie") {
+            header("x-rpc-client_type", 5)
+            header(HttpHeaders.Cookie, cookie)
+        }.body<BindInfoList>())
+    }
+
+    @Test
+    fun testZZZChallenge(): Unit = runBlocking {
+        val bindInfoList = Json.decodeFromString(BindInfoList.serializer(), dataPath.resolve("BindInfo.json").readText()).list
+        val info = bindInfoList.find { "nap_cn" == it.gameBiz }!!
+        val cookie = dataPath.resolve("MiHoYoBBSLogin.cookie").readLines().joinToString("; ") {
+            it.substringBefore(";")
+        }
+        val challengeRes = client.get("https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/challenge?schedule_type=1") {
+            parameter("server", info.region)
+            parameter("role_id", info.gameUid)
+
+//            val geeTest = Json.encodeToString(buildJsonObject {
+//                put("viewUid", info.gameUid)
+//                put("server", info.region)
+//                put("gameId", 8)
+//                put("page", zzzPage)
+//                put("isHost", 1)
+//                put("viewSource", 3)
+//                put("actionSource", 127)
+//            })
+
+            header("x-rpc-client_type", 5)
+//            header("x-rpc-page", zzzPage)
+//            header("x-rpc-geetest_ext", geeTest)
+//            header("x-rpc-platform", 2)
+            header(HttpHeaders.Cookie, cookie)
+        }.body<BaseResponse<Challenge>>()
+
+        zzzPath.resolve("Challenge.json").writeText(Json.encodeToString(challengeRes.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+    }
+
+    @Test
+    fun testZZZMemDetail(): Unit = runBlocking {
+        val bindInfoList = Json.decodeFromString(BindInfoList.serializer(), dataPath.resolve("BindInfo.json").readText()).list
+        val info = bindInfoList.find { "nap_cn" == it.gameBiz }!!
+        val cookie = dataPath.resolve("MiHoYoBBSLogin.cookie").readLines().joinToString("; ") {
+            it.substringBefore(";")
+        }
+        val memDetailRes = client.get("https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/mem_detail?schedule_type=1") {
+            parameter("uid", info.gameUid)
+            parameter("region", info.region)
+
+            header(HttpHeaders.Cookie, cookie)
+        }.body<BaseResponse<MemDetail>>()
+        val zzzPath = dataPath.resolve("ZZZ")
+        zzzPath.createDirectories()
+        zzzPath.resolve("MemDetail.json").writeText(Json.encodeToString(memDetailRes.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+    }
+
+    @Test
     fun testCreateLogin() = runBlocking {
         val ret = client.post("https://passport-api.miyoushe.com/account/ma-cn-passport/web/createQRLogin"){
             header("x-rpc-app_id", APP_ID)
+            header("x-rpc-client_type", 2)
         }.body<BaseResponse<CreateQRCodeLogin>>()
         if (ret.retcode != 0) return@runBlocking
         val createQALogin = ret.data?:throw IllegalStateException("No data.")
@@ -97,8 +196,11 @@ class MiHoYoApiTest {
             val qrStatusResponse = kotlin.runCatching {
                 client.post("https://passport-api.miyoushe.com/account/ma-cn-passport/web/queryQRLoginStatus") {
                     header(MiHoYoHeaders.X_RPC_APP_ID, APP_ID)
+                    header("x-rpc-client_type", 2)
                     contentType(ContentType.Application.Json)
-                    setBody(Json.encodeToString(mapOf("ticket" to "createQALogin.ticket")))
+                    setBody(buildJsonObject {
+                        put("ticket", ret.data?.ticket)
+                    })
                 }
             }.getOrNull()
             if (qrStatusResponse != null) {
@@ -106,6 +208,10 @@ class MiHoYoApiTest {
                 if (qrStatusRet.retcode == 0) {
                     val status = qrStatusRet.data!!.status
                     if (status == QRCodeStatus.CONFIRMED) {
+                        for (cookie in qrStatusResponse.setCookie()) {
+                            Path.of("./data/MiHoYoBBSLogin.cookie").writeText("${cookie.name}=${cookie.value}\r\n", StandardCharsets.UTF_8, StandardOpenOption.APPEND, StandardOpenOption.CREATE)
+                        }
+                        Path.of("./data/MiHoYoBBSLogin.json").writeText(Json.encodeToString(qrStatusRet.data), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
                         break
                     }
                 }
@@ -147,7 +253,7 @@ class MiHoYoApiTest {
 
     private fun genQRCodeImg(url: String) {
         val qrCode = MultiFormatWriter().encode(url, BarcodeFormat.QR_CODE, 300, 300)
-        MatrixToImageWriter.writeToPath(qrCode, "jpg", Path.of( "./qrcode.jpg", ))
+        MatrixToImageWriter.writeToPath(qrCode, "jpg", Path.of( "./data/qrcode.jpg", ))
     }
 
     @Test
