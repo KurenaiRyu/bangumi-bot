@@ -25,6 +25,7 @@ import moe.kurenai.bot.util.json
 import org.jsoup.Jsoup
 import java.net.URI
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.minutes
 
 
 /**
@@ -68,7 +69,7 @@ internal object BiliBiliService {
 
     private val urlCache = caffeineBuilder<String, VideoStreamUrl> {
         maximumSize = 200
-        expireAfterWrite = 7.days
+        expireAfterWrite = 100.minutes
         expireAfterAccess
     }.build()
 
