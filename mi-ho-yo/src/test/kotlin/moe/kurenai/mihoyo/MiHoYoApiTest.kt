@@ -12,7 +12,6 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.util.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
@@ -86,7 +85,7 @@ class MiHoYoApiTest {
     fun testCreateLogin() = runBlocking {
         val ret = client.post("https://passport-api.miyoushe.com/account/ma-cn-passport/web/createQRLogin"){
             header("x-rpc-app_id", "bll8iq97cem8")
-        }.body<BaseResponse<CreateQALogin>>()
+        }.body<BaseResponse<CreateQRCodeLogin>>()
         if (ret.retcode != 0) return@runBlocking
         val createQALogin = ret.data?:throw IllegalStateException("No data.")
         genQRCodeImg(createQALogin.url)

@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class QueryQRCodeStatus(
+class QueryQRCodeStatus(
     @SerialName("app_id")
     val appId: String,
     @SerialName("client_type")
@@ -22,7 +22,7 @@ data class QueryQRCodeStatus(
     @SerialName("user_info")
     val userInfo: UserInfo? = null
 ) {
-
+    var cookie: String = ""
 
     @Serializable
     data class RealNameInfo(
