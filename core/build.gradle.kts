@@ -9,43 +9,30 @@ plugins {
 group = "moe.kurenai.bot"
 version = "1.0-SNAPSHOT"
 
-object Versions {
-    const val vertxVersion = "4.2.3"
-    const val log4j = "2.20.0"
-    const val ktor = "3.1.3"
-    const val tdlight = "3.4.0+td.1.8.26"
-}
 dependencies {
     implementation(project(":bangumi-api"))
     implementation(project(":common"))
 
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.10"))
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
+    implementation(platform(libs.kotlin.bom))
+    implementation(libs.kotlin.gradle)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-    implementation("io.ktor:ktor-client-core:${Versions.ktor}")
-    implementation("io.ktor:ktor-network-tls-certificates:${Versions.ktor}")
-    implementation("io.ktor:ktor-client-okhttp:${Versions.ktor}")
-    implementation("io.ktor:ktor-server-netty:${Versions.ktor}")
-    implementation("io.ktor:ktor-client-content-negotiation:${Versions.ktor}")
-    implementation("io.ktor:ktor-client-logging:${Versions.ktor}")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:${Versions.ktor}")
+    implementation(libs.kotlinx.coroutines)
+    implementation(libs.kotlinx.json)
+    implementation(libs.bundles.ktorClient)
+    implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.tls)
 
-    //serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
-    implementation("net.mamoe.yamlkt:yamlkt-jvm:0.13.0")
+    implementation(libs.serialization.yaml)
 
     //cache
-    implementation("com.sksamuel.aedile:aedile-core:1.2.0")
+    implementation(libs.caffeine)
 
-    implementation("org.jsoup:jsoup:1.15.3")
-    implementation("org.apache.commons:commons-pool2:2.11.1")
+    implementation(libs.jsoup)
+    implementation(libs.apache.commons.pool2)
 
     //tdlib
-    implementation(platform("it.tdlight:tdlight-java-bom:${Versions.tdlight}"))
-    implementation("it.tdlight:tdlight-java")
-    implementation("io.ktor:ktor-client-okhttp-jvm:3.1.3")
+    implementation(platform(libs.tdlight.bom))
+    implementation(libs.tdlight)
     val hostOs = System.getProperty("os.name")
     val isWin = hostOs.startsWith("Windows")
     val classifier = when {
@@ -56,15 +43,13 @@ dependencies {
     implementation(group = "it.tdlight", name = "tdlight-natives", classifier = classifier)
     implementation(group = "it.tdlight", name = "tdlight-natives", classifier = "linux_amd64_gnu_ssl1")
     //qrcode
-    implementation("com.google.zxing:core:3.5.2")
-    implementation("com.google.zxing:javase:3.5.2")
+    implementation(libs.bundles.zxing)
 
     //logging
-    implementation("org.slf4j:slf4j-api:2.0.6")
-    implementation("org.apache.logging.log4j:log4j-core:${Versions.log4j}")
-    implementation("org.apache.logging.log4j:log4j-api:${Versions.log4j}")
-    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:${Versions.log4j}")
-    implementation("com.lmax:disruptor:3.4.4")
+    implementation(libs.bundles.log)
+
+    // queue
+    implementation(libs.diruptor)
 
     testImplementation(kotlin("test"))
 }

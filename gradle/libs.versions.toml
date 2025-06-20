@@ -1,0 +1,37 @@
+[versions]
+ktolin = "2.1.10"
+serialization = "1.8.1"
+coroutines = "1.10.2"
+ktor = "3.2.0"
+log4j = "2.20.0"
+
+[libraries]
+kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "ktolin" }
+kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin" }
+kotlinx-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
+ktor-server-netty = { group = "io.ktor", name = "ktor-server-netty", version.ref = "ktor" }
+ktor-tls = { group = "io.ktor", name = "ktor-network-tls-certificates", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+serialization-yaml = { group = "net.mamoe.yamlkt", name = "yamlkt-jvm", version = "0.13.0" }
+caffeine = { group = "com.sksamuel.aedile", name = "aedile-core", version = "2.1.2" }
+jsoup = { group = "org.jsoup", name = "jsoup", version = "1.20.1" }
+apache-commons-pool2 = { group = "org.apache.commons", name = "commons-pool2", version = "2.11.1" }
+apache-log4j-core = { group = "org.apache.logging.log4j", name = "log4j-core", version.ref = "log4j" }
+apache-log4j-api = { group = "org.apache.logging.log4j", name = "log4j-api", version.ref = "log4j" }
+apache-log4j-slf4j2 = { group = "org.apache.logging.log4j", name = "log4j-slf4j2-impl", version.ref = "log4j" }
+zxing-core = { group = "com.google.zxing", name = "core", version = "3.5.2" }
+zxing-javase = { group = "com.google.zxing", name = "javase", version = "3.5.2" }
+slf4j-api = { group = "org.slf4j", name = "slf4j-api", version = "2.0.6" }
+diruptor = { group = "com.lmax", name = "disruptor", version = "3.4.4" }
+tdlight-bom = { module = "it.tdlight:tdlight-java-bom", version = "3.4.0+td.1.8.26" }
+tdlight = { module = "it.tdlight:tdlight-java" }
+
+[bundles]
+ktorClient = ["ktor-client-core", "ktor-client-okhttp", "ktor-serialization-kotlinx-json", "ktor-client-negotiation", "ktor-client-logging"]
+zxing = ["zxing-core", "zxing-javase"]
+log = ["apache-log4j-api", "apache-log4j-core", "apache-log4j-slf4j2", "slf4j-api"]

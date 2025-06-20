@@ -9,9 +9,9 @@ plugins {
 
 dependencies {
 
-    implementation("io.ktor:ktor-client-okhttp:3.1.3")
-    implementation("io.ktor:ktor-client-content-negotiation:3.1.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.negotiation)
+    implementation(libs.kotlinx.json)
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
 
     testImplementation(kotlin("test"))
