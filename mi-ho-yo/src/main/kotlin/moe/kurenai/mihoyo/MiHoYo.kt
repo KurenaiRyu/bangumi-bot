@@ -36,11 +36,11 @@ object MiHoYo {
         }.body<BaseResponse<CreateQRCodeLogin>>().unwrap()
     }
 
-    suspend fun queryQRCodeStatus(): QueryQRCodeStatus {
+    suspend fun queryQRCodeStatus(ticket: String): QueryQRCodeStatus {
         val response = client.post("https://passport-api.miyoushe.com/account/ma-cn-passport/web/queryQRLoginStatus") {
             header("x-rpc-app_id", "bll8iq97cem8")
             contentType(ContentType.Application.Json)
-            setBody(Json.encodeToString(mapOf("ticket" to "createQALogin.ticket")))
+            setBody(Json.encodeToString(mapOf("ticket" to ticket)))
         }
         val ret = response.body<BaseResponse<QueryQRCodeStatus>>().unwrap()
         if (ret.status == QRCodeStatus.CONFIRMED) {
@@ -62,6 +62,13 @@ object MiHoYo {
 
     @Suppress("NOTHING_TO_INLINE")
     inline fun CreateQRCodeLogin.createQRCodeImage(width: Int = 200, height: Int = 200) = createQRCodeImage(this.url, width, height)
+
+    suspend fun CreateQRCodeLogin.waitForLogin(): QueryQRCodeStatus {
+        while (true) {
+            val ret = queryQRCodeStatus(this.ticket)
+            if (ret.status == QRCodeStatus.CONFIRMED) return ret
+        }
+    }
 
     private fun <T> BaseResponse<T>.unwrap(): T {
         if (this.retcode != 0 || this.data == null) throw MiHoYoException(this.retcode, this.message)
