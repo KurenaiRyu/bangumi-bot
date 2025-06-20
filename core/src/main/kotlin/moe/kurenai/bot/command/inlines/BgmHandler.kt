@@ -12,7 +12,7 @@ import moe.kurenai.bot.service.bangumi.PersonService
 import moe.kurenai.bot.service.bangumi.SubjectService
 import moe.kurenai.bot.service.bangumi.TokenService
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
-import moe.kurenai.bot.util.getLogger
+import moe.kurenai.common.util.getLogger
 import java.net.URI
 
 object BgmHandler : InlineHandler {

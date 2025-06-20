@@ -8,10 +8,10 @@ import moe.kurenai.bot.command.*
 import moe.kurenai.bot.command.InlineDispatcher.PUB_DATE_PATTERN
 import moe.kurenai.bot.command.InlineDispatcher.fallback
 import moe.kurenai.bot.service.BiliBiliService
-import moe.kurenai.bot.util.*
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
 import moe.kurenai.bot.util.TelegramUtil.fmt
 import moe.kurenai.bot.util.TelegramUtil.markdown
+import moe.kurenai.common.util.*
 import java.net.URI
 import java.time.LocalDateTime
 import java.time.ZoneOffset

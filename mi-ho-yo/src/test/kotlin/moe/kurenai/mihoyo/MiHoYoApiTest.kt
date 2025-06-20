@@ -16,13 +16,12 @@ import io.ktor.util.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
-import moe.kurenai.bot.moe.kurenai.mihoyo.module.util.getLogger
-import moe.kurenai.bot.moe.kurenai.mihoyo.module.util.md5
+import moe.kurenai.common.util.getLogger
+import moe.kurenai.common.util.md5
 import moe.kurenai.mihoyo.module.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import java.util.*
-import kotlin.io.path.writeBytes
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
@@ -57,8 +56,8 @@ class MiHoYoApiTest {
 
             val t = System.currentTimeMillis()
             val r = lettersAndNumbers.asSequence().shuffled().take(6).toString()
-            val main = "salt=$K2&t=$t&r=$r".toByteArray(StandardCharsets.UTF_8)
-            val ds = main.md5().toHexString()
+            val main = "salt=$K2&t=$t&r=$r"
+            val ds = main.toByteArray(StandardCharsets.UTF_8).md5().toHexString()
             req.header("DS", ds)
 
         }

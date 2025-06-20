@@ -11,7 +11,7 @@ import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.command.commands.*
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQueryEmpty
 import moe.kurenai.bot.util.TelegramUtil.text
-import moe.kurenai.bot.util.getLogger
+import moe.kurenai.common.util.getLogger
 import java.net.URI
 import java.time.Instant
 import it.tdlight.client.Result as TdResult

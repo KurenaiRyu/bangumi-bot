@@ -17,6 +17,8 @@ object Versions {
     const val tdlight = "3.4.0+td.1.8.26"
 }
 dependencies {
+    implementation(project(":common"))
+
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation("io.ktor:ktor-client-core:${Versions.ktor}")

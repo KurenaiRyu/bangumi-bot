@@ -6,7 +6,7 @@ import moe.kurenai.bot.command.*
 import moe.kurenai.bot.command.InlineDispatcher.fallback
 import moe.kurenai.bot.service.SakugabooruService
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
-import moe.kurenai.bot.util.getLogger
+import moe.kurenai.common.util.getLogger
 import java.net.URI
 
 object SakugabooruHandler : InlineHandler {

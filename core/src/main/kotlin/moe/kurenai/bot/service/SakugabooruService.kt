@@ -9,7 +9,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
-import moe.kurenai.bot.util.MimeTypes
+import moe.kurenai.common.util.MimeTypes
 import moe.kurenai.bot.util.TelegramUtil.fmt
 import moe.kurenai.bot.util.TelegramUtil.markdown
 import org.jsoup.Jsoup

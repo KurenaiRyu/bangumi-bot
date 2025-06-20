@@ -1,4 +1,4 @@
-package moe.kurenai.bot.util
+package moe.kurenai.common.util
 
 /**
  * Copy to jodd.util

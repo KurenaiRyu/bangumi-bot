@@ -13,8 +13,8 @@ import moe.kurenai.bot.service.bangumi.UserService
 import moe.kurenai.bot.util.TelegramUtil.asText
 import moe.kurenai.bot.util.TelegramUtil.messageDocument
 import moe.kurenai.bot.util.TelegramUtil.messageText
-import moe.kurenai.bot.util.getLogger
-import moe.kurenai.bot.util.json
+import moe.kurenai.common.util.getLogger
+import moe.kurenai.common.util.json
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

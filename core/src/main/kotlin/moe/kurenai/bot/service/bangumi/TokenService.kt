@@ -8,7 +8,7 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import moe.kurenai.bangumi.models.UserAccessToken
-import moe.kurenai.bot.util.json
+import moe.kurenai.common.util.json
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption

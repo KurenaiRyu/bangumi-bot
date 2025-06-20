@@ -20,8 +20,8 @@ import moe.kurenai.bot.model.bilibili.DynamicInfo
 import moe.kurenai.bot.model.bilibili.VideoInfo
 import moe.kurenai.bot.model.bilibili.VideoStreamUrl
 import moe.kurenai.bot.util.HttpUtil.DYNAMIC_USER_AGENT
-import moe.kurenai.bot.util.getLogger
-import moe.kurenai.bot.util.json
+import moe.kurenai.common.util.getLogger
+import moe.kurenai.common.util.json
 import org.jsoup.Jsoup
 import java.net.URI
 import kotlin.time.Duration.Companion.days

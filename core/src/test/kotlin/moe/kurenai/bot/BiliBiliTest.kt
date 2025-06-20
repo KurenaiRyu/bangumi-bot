@@ -8,7 +8,7 @@ import io.ktor.util.*
 import kotlinx.coroutines.runBlocking
 import moe.kurenai.bot.model.bilibili.DynamicInfo
 import moe.kurenai.bot.model.bilibili.VideoInfo
-import moe.kurenai.bot.util.json
+import moe.kurenai.common.util.json
 import org.jsoup.Jsoup
 import org.junit.Test
 

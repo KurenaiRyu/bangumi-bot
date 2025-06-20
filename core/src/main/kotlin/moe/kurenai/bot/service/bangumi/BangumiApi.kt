@@ -20,8 +20,8 @@ import moe.kurenai.bangumi.models.Character
 import moe.kurenai.bangumi.models.CharacterPerson
 import moe.kurenai.bangumi.models.PersonDetail
 import moe.kurenai.bangumi.models.Subject
-import moe.kurenai.bot.util.getLogger
-import moe.kurenai.bot.util.json
+import moe.kurenai.common.util.getLogger
+import moe.kurenai.common.util.json
 import org.apache.commons.pool2.PooledObject
 import org.apache.commons.pool2.PooledObjectFactory
 import org.apache.commons.pool2.impl.DefaultPooledObject

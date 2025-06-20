@@ -1,6 +1,6 @@
 @file:Suppress("Unused")
 
-package moe.kurenai.bot.moe.kurenai.mihoyo.module.util
+package moe.kurenai.common.util
 
 import kotlinx.serialization.json.Json
 import org.slf4j.Logger

@@ -11,8 +11,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import moe.kurenai.bot.util.TelegramUtil.asText
-import moe.kurenai.bot.util.getLogger
-import moe.kurenai.bot.util.json
+import moe.kurenai.common.util.getLogger
+import moe.kurenai.common.util.json
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption

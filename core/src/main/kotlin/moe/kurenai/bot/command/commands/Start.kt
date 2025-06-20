@@ -14,7 +14,7 @@ import moe.kurenai.bot.util.TelegramUtil.asText
 import moe.kurenai.bot.util.TelegramUtil.fmt
 import moe.kurenai.bot.util.TelegramUtil.markdown
 import moe.kurenai.bot.util.TelegramUtil.messageText
-import moe.kurenai.bot.util.getLogger
+import moe.kurenai.common.util.getLogger
 
 class Start : CommandHandler {
     override val command: String = "start"

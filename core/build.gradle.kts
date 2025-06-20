@@ -17,6 +17,7 @@ object Versions {
 }
 dependencies {
     implementation(project(":bangumi-api"))
+    implementation(project(":common"))
 
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.10"))
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
