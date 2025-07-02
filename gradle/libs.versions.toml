@@ -1,9 +1,12 @@
 [versions]
-ktolin = "2.1.10"
+ktolin = "2.2.0"
+ksp = "2.2.0-2.0.2"
+lombok = "5.3.0"
 serialization = "1.8.1"
 coroutines = "1.10.2"
 ktor = "3.2.0"
 log4j = "2.20.0"
+jimmer = "0.9.96"
 
 [libraries]
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "ktolin" }
@@ -30,8 +33,20 @@ slf4j-api = { group = "org.slf4j", name = "slf4j-api", version = "2.0.6" }
 diruptor = { group = "com.lmax", name = "disruptor", version = "3.4.4" }
 tdlight-bom = { module = "it.tdlight:tdlight-java-bom", version = "3.4.0+td.1.8.26" }
 tdlight = { module = "it.tdlight:tdlight-java" }
+jimmer-kotlin = { module = "org.babyfish.jimmer:jimmer-sql-kotlin", version.ref = "jimmer" }
+jimmer-ksp = { module = "org.babyfish.jimmer:jimmer-ksp", version.ref = "jimmer" }
+hikaricp = { module = "com.zaxxer:HikariCP", version = "6.3.0" }
+sqlite = { module = "org.xerial:sqlite-jdbc", version = "3.47.0.0" }
 
 [bundles]
 ktorClient = ["ktor-client-core", "ktor-client-okhttp", "ktor-serialization-kotlinx-json", "ktor-client-negotiation", "ktor-client-logging"]
 zxing = ["zxing-core", "zxing-javase"]
 log = ["apache-log4j-api", "apache-log4j-core", "apache-log4j-slf4j2", "slf4j-api"]
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "ktolin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "ktolin" }
+kotlin-lombok = { id = "org.jetbrains.kotlin.plugin.lombok", version.ref = "ktolin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
+openapi-generator = {id = "org.openapi.generator", version = "7.13.0"}

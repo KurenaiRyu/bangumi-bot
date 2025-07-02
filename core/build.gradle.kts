@@ -1,9 +1,10 @@
 plugins {
     application
-    kotlin("jvm") version "2.1.10"
-    kotlin("plugin.serialization") version "2.1.10"
-    kotlin("plugin.lombok") version "2.1.10"
-    id("io.freefair.lombok") version "5.3.0"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.lombok)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.lombok)
 }
 
 group = "moe.kurenai.bot"
@@ -44,6 +45,10 @@ dependencies {
     implementation(group = "it.tdlight", name = "tdlight-natives", classifier = "linux_amd64_gnu_ssl1")
     //qrcode
     implementation(libs.bundles.zxing)
+
+    implementation(libs.jimmer.kotlin)
+    ksp(libs.jimmer.ksp)
+    runtimeOnly(libs.sqlite)
 
     //logging
     implementation(libs.bundles.log)

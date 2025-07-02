@@ -2,9 +2,12 @@ import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
 plugins {
     idea
-    id("org.openapi.generator") version "7.13.0"
-    kotlin("jvm") version "2.1.10"
-    kotlin("plugin.serialization") version "2.1.10"
+    alias(libs.plugins.openapi.generator)
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.lombok)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.lombok)
 }
 
 dependencies {
