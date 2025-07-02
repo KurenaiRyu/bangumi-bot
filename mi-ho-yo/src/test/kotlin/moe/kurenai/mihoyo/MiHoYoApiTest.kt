@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import java.util.*
 import kotlin.test.Test
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration
 
 class MiHoYoApiTest {
 
