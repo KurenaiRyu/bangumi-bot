@@ -207,8 +207,8 @@ object BilibiliHandler : InlineHandler {
         results.add(InputInlineQueryResultPhoto().apply {
             this.id = "P_${videoInfo.data.bvid}_$p"
             this.title = inlineTitle
-            photoUrl = videoInfo.data.pic
-            thumbnailUrl = videoInfo.data.pic
+            photoUrl = videoInfo.data.pic + "@1920w_!web-dynamic.webp"
+            thumbnailUrl = videoInfo.data.pic + "@240w_!web-dynamic.webp"
             inputMessageContent = InputMessagePhoto().apply {
                 this.caption = content
             }
