@@ -212,6 +212,16 @@ object BilibiliHandler : InlineHandler {
             inputMessageContent = InputMessagePhoto().apply {
                 this.caption = content
             }
+            replyMarkup = ReplyMarkupInlineKeyboard().apply {
+                this.rows = arrayOf(arrayOf(
+                    InlineKeyboardButton().apply {
+                        this.text = "Get Video"
+                        this.type = InlineKeyboardButtonTypeCallback().apply {
+                            this.data = "video:${streamInfo.data!!.durl!!.first().url}".toByteArray()
+                        }
+                    }
+                ))
+            }
         })
         streamInfo.data?.run {
             results.add(InputInlineQueryResultVideo().apply {
