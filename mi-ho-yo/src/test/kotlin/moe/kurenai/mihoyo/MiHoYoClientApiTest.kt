@@ -18,13 +18,14 @@ import kotlinx.serialization.json.*
 import moe.kurenai.common.util.getLogger
 import moe.kurenai.common.util.md5
 import moe.kurenai.mihoyo.module.*
+import moe.kurenai.mihoyo.util.MiHoYoHeaders
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import java.util.*
 import kotlin.test.Test
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
-class MiHoYoApiTest {
+class MiHoYoClientApiTest {
 
     val log = getLogger()
     companion object {
@@ -84,7 +85,7 @@ class MiHoYoApiTest {
     @Test
     fun testCreateLogin() = runBlocking {
         val ret = client.post("https://passport-api.miyoushe.com/account/ma-cn-passport/web/createQRLogin"){
-            header("x-rpc-app_id", "bll8iq97cem8")
+            header("x-rpc-app_id", MiHoYoClient.APP_ID)
         }.body<BaseResponse<CreateQRCodeLogin>>()
         if (ret.retcode != 0) return@runBlocking
         val createQALogin = ret.data?:throw IllegalStateException("No data.")
@@ -94,7 +95,7 @@ class MiHoYoApiTest {
         while (true) {
             val qrStatusResponse = kotlin.runCatching {
                 client.post("https://passport-api.miyoushe.com/account/ma-cn-passport/web/queryQRLoginStatus") {
-                    header("x-rpc-app_id", "bll8iq97cem8")
+                    header(MiHoYoHeaders.X_RPC_APP_ID, MiHoYoClient.APP_ID)
                     contentType(ContentType.Application.Json)
                     setBody(Json.encodeToString(mapOf("ticket" to "createQALogin.ticket")))
                 }

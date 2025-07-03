@@ -2,13 +2,14 @@ package moe.kurenai.mihoyo.util
 
 object MiHoYoHeaders {
 
-    const val x_rpc_client_type = "x-rpc-client_type"
-    const val x_rpc_sys_version = "x-rpc-sys_version"
-    const val x_rpc_channel = "x-rpc-channel"
-    const val x_rpc_device_name = "x-rpc-device_name"
-    const val x_rpc_device_model = "x-rpc-device_model"
-    const val x_rpc_device_id = "x-rpc-device_id"
-    const val X_Requested_With = "X-Requested-With"
+    const val X_RPC_APP_ID = "x-rpc-app_id"
+    const val X_RPC_CLIENT_TYPE = "x-rpc-client_type"
+    const val X_RPC_SYS_VERSION = "x-rpc-sys_version"
+    const val X_RPC_CHANNEL = "x-rpc-channel"
+    const val X_RPC_DEVICE_NAME = "x-rpc-device_name"
+    const val X_RPC_DEVICE_MODEL = "x-rpc-device_model"
+    const val X_RPC_DEVICE_ID = "x-rpc-device_id"
+    const val X_REQUESTED_WITH = "X-Requested-With"
     const val DS = "DS"
 
 }
