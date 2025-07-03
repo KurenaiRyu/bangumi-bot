@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.lombok)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.lombok)
 }
 
@@ -45,10 +44,6 @@ dependencies {
     implementation(group = "it.tdlight", name = "tdlight-natives", classifier = "linux_amd64_gnu_ssl1")
     //qrcode
     implementation(libs.bundles.zxing)
-
-    implementation(libs.jimmer.kotlin)
-    ksp(libs.jimmer.ksp)
-    runtimeOnly(libs.sqlite)
 
     //logging
     implementation(libs.bundles.log)
