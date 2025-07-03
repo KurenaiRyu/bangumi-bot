@@ -7,15 +7,18 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+import moe.kurenai.common.util.getLogger
 import moe.kurenai.common.util.json
 import moe.kurenai.mihoyo.exception.MiHoYoException
 import moe.kurenai.mihoyo.module.*
 import moe.kurenai.mihoyo.util.EncryptUtil.APP_ID
 import moe.kurenai.mihoyo.util.EncryptUtil.DEVICE_ID
+import moe.kurenai.mihoyo.util.EncryptUtil.UA
 import moe.kurenai.mihoyo.util.MiHoYoHeaders
 import java.io.ByteArrayOutputStream
 import java.time.LocalDateTime
@@ -25,12 +28,26 @@ import kotlin.random.Random
 
 object MiHoYoClient {
 
+    internal var deviceFp: String = ""
+        private set
+
+    private val log = getLogger()
+    private val httpLogger = object : Logger {
+        override fun log(message: String) {
+            log.info(message)
+        }
+    }
     private val client = HttpClient {
         install(HttpTimeout) {
             requestTimeoutMillis = 5000
         }
         install(ContentNegotiation) {
             json(json)
+        }
+        install(Logging) {
+            logger = httpLogger
+            level = LogLevel.ALL
+            sanitizeHeader { header -> header == HttpHeaders.Cookie }
         }
     }
 
@@ -84,16 +101,19 @@ object MiHoYoClient {
                 "seed_id": "${UUID.randomUUID()}",
                 "seed_time": "${LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)}",
                 "platform": "2",
-                "device_fp": "{{DeviceFp}}",
+                "device_fp": "$deviceFp",
                 "app_name": "bbs_cn",
                 "ext_fields": "{\"proxyStatus\":0,\"isRoot\":0,\"romCapacity\":\"512\",\"deviceName\":\"Pixel5\",\"productName\":\"$productName\",\"romRemain\":\"512\",\"hostname\":\"db1ba5f7c000000\",\"screenSize\":\"1080x2400\",\"isTablet\":0,\"aaid\":\"\",\"model\":\"Pixel5\",\"brand\":\"google\",\"hardware\":\"windows_x86_64\",\"deviceType\":\"redfin\",\"devId\":\"REL\",\"serialNumber\":\"unknown\",\"sdCapacity\":125943,\"buildTime\":\"1704316741000\",\"buildUser\":\"cloudtest\",\"simState\":0,\"ramRemain\":\"124603\",\"appUpdateTimeDiff\":1716369357492,\"deviceInfo\":\"google\\\/{{productName}}\\\/redfin:13\\\/TQ3A.230901.001\\\/2311.40000.5.0:user\\\/release-keys\",\"vaid\":\"\",\"buildType\":\"user\",\"sdkVersion\":\"33\",\"ui_mode\":\"UI_MODE_TYPE_NORMAL\",\"isMockLocation\":0,\"cpuType\":\"arm64-v8a\",\"isAirMode\":0,\"ringMode\":2,\"chargeStatus\":3,\"manufacturer\":\"Google\",\"emulatorStatus\":0,\"appMemory\":\"512\",\"osVersion\":\"13\",\"vendor\":\"unknown\",\"accelerometer\":\"\",\"sdRemain\":123276,\"buildTags\":\"release-keys\",\"packageName\":\"com.mihoyo.hyperion\",\"networkType\":\"WiFi\",\"oaid\":\"\",\"debugStatus\":1,\"ramCapacity\":\"125943\",\"magnetometer\":\"\",\"display\":\"TQ3A.230901.001\",\"appInstallTimeDiff\":1706444666737,\"packageVersion\":\"2.20.2\",\"gyroscope\":\"\",\"batteryStatus\":85,\"hasKeyboard\":10,\"board\":\"windows\"}",
                 "bbs_device_id": "$DEVICE_ID"
             }
-            """
+            """.trimIndent()
         val ret = client.post(url) {
             setBody(postContent)
-        }.body<DeviceFp>()
+            contentType(ContentType.Application.Json)
+            header(HttpHeaders.UserAgent, UA)
+        }.body<BaseResponse<DeviceFp>>().unwrap()
         if (ret.code != 200) throw MiHoYoException(ret.code, ret.msg)
+        deviceFp = ret.deviceFp
         return ret.deviceFp
     }
 

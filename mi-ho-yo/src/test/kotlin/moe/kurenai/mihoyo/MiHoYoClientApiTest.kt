@@ -18,6 +18,7 @@ import kotlinx.serialization.json.*
 import moe.kurenai.common.util.getLogger
 import moe.kurenai.common.util.md5
 import moe.kurenai.mihoyo.module.*
+import moe.kurenai.mihoyo.util.EncryptUtil.APP_ID
 import moe.kurenai.mihoyo.util.MiHoYoHeaders
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
@@ -85,7 +86,7 @@ class MiHoYoClientApiTest {
     @Test
     fun testCreateLogin() = runBlocking {
         val ret = client.post("https://passport-api.miyoushe.com/account/ma-cn-passport/web/createQRLogin"){
-            header("x-rpc-app_id", MiHoYoClient.APP_ID)
+            header("x-rpc-app_id", APP_ID)
         }.body<BaseResponse<CreateQRCodeLogin>>()
         if (ret.retcode != 0) return@runBlocking
         val createQALogin = ret.data?:throw IllegalStateException("No data.")
@@ -95,7 +96,7 @@ class MiHoYoClientApiTest {
         while (true) {
             val qrStatusResponse = kotlin.runCatching {
                 client.post("https://passport-api.miyoushe.com/account/ma-cn-passport/web/queryQRLoginStatus") {
-                    header(MiHoYoHeaders.X_RPC_APP_ID, MiHoYoClient.APP_ID)
+                    header(MiHoYoHeaders.X_RPC_APP_ID, APP_ID)
                     contentType(ContentType.Application.Json)
                     setBody(Json.encodeToString(mapOf("ticket" to "createQALogin.ticket")))
                 }
@@ -167,6 +168,11 @@ class MiHoYoClientApiTest {
                 put("game_token", "zz")
             })
         }.body<BaseResponse<SToken>>()
+    }
+
+    @Test
+    fun getDeviceFp(): Unit = runBlocking {
+        println(MiHoYoClient.getDeviceFp())
     }
 
     @Test

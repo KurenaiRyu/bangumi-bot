@@ -2,6 +2,7 @@ package moe.kurenai.mihoyo.util
 
 import io.ktor.http.*
 import moe.kurenai.common.util.md5
+import moe.kurenai.mihoyo.MiHoYoClient
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 
