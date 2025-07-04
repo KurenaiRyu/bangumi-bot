@@ -26,7 +26,7 @@ import java.util.*
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
-class MiHoYoClientApiTest {
+class MiHoYoApiTest {
 
     val log = getLogger()
     companion object {
@@ -172,7 +172,7 @@ class MiHoYoClientApiTest {
 
     @Test
     fun getDeviceFp(): Unit = runBlocking {
-        println(MiHoYoClient.getDeviceFp())
+        println(MiHoYo.getDeviceFp())
     }
 
     @Test
