@@ -35,6 +35,7 @@ object MiHoYo {
     internal const val API_SALT_PROD = "JwYDpKvLj6MrMqqYU6jTKF17KNO2PXoS"
     internal val DEVICE_ID = UUID.nameUUIDFromBytes("Pixel 5".toByteArray()).toString()
     internal const val UA = "Mozilla/5.0 (Linux; Android 13; Pixel 5 Build/TKQ1.220829.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/108.0.5359.128 Mobile Safari/537.36 miHoYoBBS/$APP_VERSION"
+    internal val cookieMap = HashMap<String, String>()
 
     internal var deviceFp: String = ""
         private set
@@ -64,6 +65,7 @@ object MiHoYo {
             level = LogLevel.ALL
             sanitizeHeader { header -> header == HttpHeaders.Cookie }
         }
+        install(miHoYoPlugin)
     }
 
     suspend fun createQRCodeLogin(): CreateQRCodeLogin {
@@ -133,12 +135,13 @@ object MiHoYo {
         return ret.deviceFp
     }
 
-    suspend fun getAvatarList(bind: BindInfoList.BindInfo): List<AvatarList.Avatar> {
+    context(AccountContext)
+    suspend fun getAvatarList(): List<AvatarList.Avatar> {
         val url = "https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/avatar/basic"
         val ret = client.get(url) {
-            parameter("role_id", bind.gameUid)
-            parameter("server", bind.region)
-            header(HttpHeaders.UserAgent, UA)
+            parameter("role_id", zzzInfo.gameUid)
+            parameter("server", zzzInfo.region)
+            header(HttpHeaders.Cookie, cookie)
         }.body<BaseResponse<AvatarList>>().unwrap()
         return ret.avatarList
     }
