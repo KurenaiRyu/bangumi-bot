@@ -17,6 +17,7 @@ import moe.kurenai.common.util.getLogger
 import moe.kurenai.common.util.json
 import moe.kurenai.mihoyo.exception.MiHoYoException
 import moe.kurenai.mihoyo.module.*
+import moe.kurenai.mihoyo.module.zzz.AvatarList
 import moe.kurenai.mihoyo.util.MiHoYoHeaders
 import java.io.ByteArrayOutputStream
 import java.time.Instant
@@ -130,6 +131,16 @@ object MiHoYo {
         if (ret.code != 200) throw MiHoYoException(ret.code, ret.msg)
         this.deviceFp = ret.deviceFp
         return ret.deviceFp
+    }
+
+    suspend fun getAvatarList(bind: BindInfoList.BindInfo): List<AvatarList.Avatar> {
+        val url = "https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/avatar/basic"
+        val ret = client.get(url) {
+            parameter("role_id", bind.gameUid)
+            parameter("server", bind.region)
+            header(HttpHeaders.UserAgent, UA)
+        }.body<BaseResponse<AvatarList>>().unwrap()
+        return ret.avatarList
     }
 
     @OptIn(ExperimentalStdlibApi::class)

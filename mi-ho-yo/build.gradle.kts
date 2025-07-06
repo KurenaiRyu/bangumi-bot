@@ -25,6 +25,12 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-parameters")
+    }
+}
+
 tasks.test {
     useJUnitPlatform()
 }

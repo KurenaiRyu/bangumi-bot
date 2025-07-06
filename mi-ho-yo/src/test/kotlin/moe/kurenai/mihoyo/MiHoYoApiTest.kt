@@ -19,6 +19,8 @@ import moe.kurenai.common.util.getLogger
 import moe.kurenai.common.util.md5
 import moe.kurenai.mihoyo.MiHoYo.APP_ID
 import moe.kurenai.mihoyo.module.*
+import moe.kurenai.mihoyo.module.zzz.AvatarDetail
+import moe.kurenai.mihoyo.module.zzz.AvatarList
 import moe.kurenai.mihoyo.module.zzz.Challenge
 import moe.kurenai.mihoyo.module.zzz.MemDetail
 import moe.kurenai.mihoyo.util.MiHoYoHeaders
@@ -47,6 +49,7 @@ class MiHoYoApiTest {
 
 
     val uuid = UUID.nameUUIDFromBytes("Kurenai".toByteArray())
+    val deviceFp = "38d80d0f5e742"
     val androidVersion = 13
     val deviceModel = "redmi k50 ultra"
     val miHoYoBBSVersion = "2.71.1"
@@ -62,6 +65,7 @@ class MiHoYoApiTest {
             req.header("x-rpc-device_name", "xiaomi $deviceModel")
             req.header("x-rpc-device_model", deviceModel)
             req.header("x-rpc-device_id", uuid)
+            req.header("x-rpc-device_fp", deviceFp)
             req.header("x-rpc-app_version", miHoYoBBSVersion)
             req.header("X-Requested-With", "com.mihoyo.hyperion")
 
@@ -139,7 +143,9 @@ class MiHoYoApiTest {
         val cookie = dataPath.resolve("MiHoYoBBSLogin.cookie").readLines().joinToString("; ") {
             it.substringBefore(";")
         }
-        val challengeRes = client.get("https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/challenge?schedule_type=1") {
+        val challengeRes = client.get("https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/challenge") {
+            parameter("schedule_type", 1)
+            parameter("need_all", true)
             parameter("server", info.region)
             parameter("role_id", info.gameUid)
 
@@ -160,7 +166,45 @@ class MiHoYoApiTest {
             header(HttpHeaders.Cookie, cookie)
         }.body<BaseResponse<Challenge>>()
 
-        zzzPath.resolve("Challenge.json").writeText(Json.encodeToString(challengeRes.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+        zzzPath.resolve("Challenge_${challengeRes.data!!.scheduleId}.json").writeText(Json.encodeToString(challengeRes.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+    }
+
+    @Test
+    fun testZZZAvatarList(): Unit = runBlocking {
+        val bindInfoList = Json.decodeFromString(BindInfoList.serializer(), dataPath.resolve("BindInfo.json").readText()).list
+        val bind = bindInfoList.find { "nap_cn" == it.gameBiz }!!
+        val cookie = dataPath.resolve("MiHoYoBBSLogin.cookie").readLines().joinToString("; ") {
+            it.substringBefore(";")
+        }
+        val url = "https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/avatar/basic"
+        val ret = client.get(url) {
+            parameter("role_id", bind.gameUid)
+            parameter("server", bind.region)
+
+            header("x-rpc-client_type", 5)
+            header(HttpHeaders.Cookie, cookie)
+        }.body<BaseResponse<AvatarList>>()
+
+        zzzPath.resolve("AvatarList.json").writeText(Json.encodeToString(ret.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+    }
+
+    @Test
+    fun testZZZAvatarDetail(): Unit = runBlocking {
+        val bindInfoList = Json.decodeFromString(BindInfoList.serializer(), dataPath.resolve("BindInfo.json").readText()).list
+        val bind = bindInfoList.find { "nap_cn" == it.gameBiz }!!
+        val cookie = dataPath.resolve("MiHoYoBBSLogin.cookie").readLines().joinToString("; ") {
+            it.substringBefore(";")
+        }
+        val url = "https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/avatar/info?id_list[]=1091&need_wiki=true"
+        val ret = client.get(url) {
+            parameter("role_id", bind.gameUid)
+            parameter("server", bind.region)
+
+            header("x-rpc-client_type", 5)
+            header(HttpHeaders.Cookie, cookie)
+        }.body<BaseResponse<AvatarDetail>>()
+
+        zzzPath.resolve("AvatarDetail_1091.json").writeText(Json.encodeToString(ret.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
     }
 
     @Test
@@ -178,7 +222,7 @@ class MiHoYoApiTest {
         }.body<BaseResponse<MemDetail>>()
         val zzzPath = dataPath.resolve("ZZZ")
         zzzPath.createDirectories()
-        zzzPath.resolve("MemDetail.json").writeText(Json.encodeToString(memDetailRes.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+        zzzPath.resolve("MemDetail_${memDetailRes.data!!.zoneId}.json").writeText(Json.encodeToString(memDetailRes.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
     }
 
     @Test

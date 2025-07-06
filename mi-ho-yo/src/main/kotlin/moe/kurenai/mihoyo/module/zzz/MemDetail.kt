@@ -3,13 +3,14 @@ package moe.kurenai.mihoyo.module.zzz
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import moe.kurenai.mihoyo.module.common.DateTime
 
 @Serializable
 data class MemDetail(
     @SerialName("avatar_icon")
     val avatarIcon: String = "",
     @SerialName("end_time")
-    val endTime: EndTime = EndTime(),
+    val endTime: DateTime = DateTime(),
     @SerialName("has_data")
     val hasData: Boolean = false,
     val list: List<Record> = listOf(),
@@ -18,7 +19,7 @@ data class MemDetail(
     @SerialName("rank_percent")
     val rankPercent: Int = 0,
     @SerialName("start_time")
-    val startTime: StartTime = StartTime(),
+    val startTime: DateTime = DateTime(),
     @SerialName("total_score")
     val totalScore: Int = 0,
     @SerialName("total_star")
@@ -26,15 +27,6 @@ data class MemDetail(
     @SerialName("zone_id")
     val zoneId: Int = 0
 ) {
-    @Serializable
-    data class EndTime(
-        val day: Int = 0,
-        val hour: Int = 0,
-        val minute: Int = 0,
-        val month: Int = 0,
-        val second: Int = 0,
-        val year: Int = 0
-    )
 
     @Serializable
     data class Record(
@@ -44,7 +36,7 @@ data class MemDetail(
         val buddy: Buddy = Buddy(),
         val buffer: List<Buffer> = listOf(),
         @SerialName("challenge_time")
-        val challengeTime: ChallengeTime = ChallengeTime(),
+        val challengeTime: DateTime = DateTime(),
         val score: Int = 0,
         val star: Int = 0,
         @SerialName("total_star")
@@ -91,25 +83,5 @@ data class MemDetail(
             val icon: String = "",
             val name: String = ""
         )
-
-        @Serializable
-        data class ChallengeTime(
-            val day: Int = 0,
-            val hour: Int = 0,
-            val minute: Int = 0,
-            val month: Int = 0,
-            val second: Int = 0,
-            val year: Int = 0
-        )
     }
-
-    @Serializable
-    data class StartTime(
-        val day: Int = 0,
-        val hour: Int = 0,
-        val minute: Int = 0,
-        val month: Int = 0,
-        val second: Int = 0,
-        val year: Int = 0
-    )
 }

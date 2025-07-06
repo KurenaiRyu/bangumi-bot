@@ -3,6 +3,7 @@ package moe.kurenai.mihoyo.module.zzz
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import moe.kurenai.mihoyo.module.common.DateTime
 
 @Serializable
 data class Challenge(
@@ -17,9 +18,9 @@ data class Challenge(
     @SerialName("fast_layer_time")
     val fastLayerTime: Int = 0,
     @SerialName("hadal_begin_time")
-    val hadalBeginTime: HadalBeginTime = HadalBeginTime(),
+    val hadalBeginTime: DateTime = DateTime(),
     @SerialName("hadal_end_time")
-    val hadalEndTime: HadalEndTime = HadalEndTime(),
+    val hadalEndTime: DateTime = DateTime(),
     @SerialName("has_data")
     val hasData: Boolean = false,
     @SerialName("max_layer")
@@ -35,15 +36,15 @@ data class Challenge(
         @SerialName("challenge_time")
         val challengeTime: String = "",
         @SerialName("floor_challenge_time")
-        val floorChallengeTime: FloorChallengeTime = FloorChallengeTime(),
+        val floorChallengeTime: DateTime = DateTime(),
         @SerialName("layer_id")
         val layerId: Int = 0,
         @SerialName("layer_index")
         val layerIndex: Int = 0,
         @SerialName("node_1")
-        val node1: Node1 = Node1(),
+        val node1: Node = Node(),
         @SerialName("node_2")
-        val node2: Node2 = Node2(),
+        val node2: Node = Node(),
         val rating: String = "",
         @SerialName("zone_name")
         val zoneName: String = ""
@@ -55,17 +56,7 @@ data class Challenge(
         )
 
         @Serializable
-        data class FloorChallengeTime(
-            val day: Int = 0,
-            val hour: Int = 0,
-            val minute: Int = 0,
-            val month: Int = 0,
-            val second: Int = 0,
-            val year: Int = 0
-        )
-
-        @Serializable
-        data class Node1(
+        data class Node(
             val avatars: List<Avatar> = listOf(),
             @SerialName("battle_time")
             val battleTime: Int = 0,
@@ -130,94 +121,7 @@ data class Challenge(
                 )
             }
         }
-
-        @Serializable
-        data class Node2(
-            val avatars: List<Avatar> = listOf(),
-            @SerialName("battle_time")
-            val battleTime: Int = 0,
-            val buddy: Buddy = Buddy(),
-            @SerialName("element_type_list")
-            val elementTypeList: List<Int> = listOf(),
-            @SerialName("monster_info")
-            val monsterInfo: MonsterInfo = MonsterInfo()
-        ) {
-            @Serializable
-            data class Avatar(
-                @SerialName("avatar_profession")
-                val avatarProfession: Int = 0,
-                @SerialName("element_type")
-                val elementType: Int = 0,
-                val id: Int = 0,
-                val level: Int = 0,
-                val rank: Int = 0,
-                val rarity: String = "",
-                @SerialName("role_square_url")
-                val roleSquareUrl: String = "",
-                @SerialName("sub_element_type")
-                val subElementType: Int = 0
-            )
-
-            @Serializable
-            data class Buddy(
-                @SerialName("bangboo_rectangle_url")
-                val bangbooRectangleUrl: String = "",
-                val id: Int = 0,
-                val level: Int = 0,
-                val rarity: String = ""
-            )
-
-            @Serializable
-            data class MonsterInfo(
-                val level: Int = 0,
-                val list: List<Item5> = listOf()
-            ) {
-                @Serializable
-                data class Item5(
-                    @SerialName("bg_icon")
-                    val bgIcon: String = "",
-                    @SerialName("elec_weakness")
-                    val elecWeakness: Int = 0,
-                    @SerialName("ether_weakness")
-                    val etherWeakness: Int = 0,
-                    @SerialName("fire_weakness")
-                    val fireWeakness: Int = 0,
-                    @SerialName("ice_weakness")
-                    val iceWeakness: Int = 0,
-                    @SerialName("icon_url")
-                    val iconUrl: String = "",
-                    val id: Int = 0,
-                    val name: String = "",
-                    @SerialName("physics_weakness")
-                    val physicsWeakness: Int = 0,
-                    @SerialName("race_icon")
-                    val raceIcon: String = "",
-                    @SerialName("weak_element_type")
-                    val weakElementType: Int = 0
-                )
-            }
-        }
     }
-
-    @Serializable
-    data class HadalBeginTime(
-        val day: Int = 0,
-        val hour: Int = 0,
-        val minute: Int = 0,
-        val month: Int = 0,
-        val second: Int = 0,
-        val year: Int = 0
-    )
-
-    @Serializable
-    data class HadalEndTime(
-        val day: Int = 0,
-        val hour: Int = 0,
-        val minute: Int = 0,
-        val month: Int = 0,
-        val second: Int = 0,
-        val year: Int = 0
-    )
 
     @Serializable
     data class Rating(
