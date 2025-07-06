@@ -18,6 +18,7 @@ import moe.kurenai.common.util.json
 import moe.kurenai.mihoyo.exception.MiHoYoException
 import moe.kurenai.mihoyo.module.*
 import moe.kurenai.mihoyo.module.zzz.AvatarList
+import moe.kurenai.mihoyo.util.EncryptUtil
 import moe.kurenai.mihoyo.util.MiHoYoHeaders
 import java.io.ByteArrayOutputStream
 import java.time.Instant
@@ -46,10 +47,34 @@ object MiHoYo {
             log.info(message)
         }
     }
+    @OptIn(ExperimentalStdlibApi::class)
     private val miHoYoPlugin = createClientPlugin("MiHoYo Plugin") {
-        onRequest { request, _ ->
-            val headers = request.headers
+        onRequest { req, _ ->
+            val headers = req.headers
             headers.setIfAbsent(HttpHeaders.UserAgent, UA)
+
+            val host = req.url.host
+            req.header(HttpHeaders.Origin, "https://$host")
+            req.header(HttpHeaders.Host, host)
+            req.header(HttpHeaders.Referrer, "https://app.mihoyo.com")
+
+            headers.setIfAbsent(MiHoYoHeaders.X_RPC_DEVICE_ID, DEVICE_ID)
+            headers.setIfAbsent(MiHoYoHeaders.X_RPC_DEVICE_FP, deviceFp)
+            headers.setIfAbsent(MiHoYoHeaders.X_RPC_APP_VERSION, APP_VERSION)
+
+
+            val clientType = req.headers["x-rpc-client_type"]
+            val ds = when (clientType) {
+                "2" -> {
+                    EncryptUtil.createSecret1(req.url.toString())
+                }
+                "5" -> {
+                    EncryptUtil.createSecret2(req.url.toString())
+                }
+
+                else -> {""}
+            }
+            if (ds.isNotBlank()) req.header("DS", ds)
         }
     }
 

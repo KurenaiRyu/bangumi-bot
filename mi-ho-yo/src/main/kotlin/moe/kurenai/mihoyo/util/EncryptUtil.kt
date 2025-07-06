@@ -9,16 +9,12 @@ object EncryptUtil {
     @Suppress("NOTHING_TO_INLINE")
     inline fun createSecret1(url: String) = createSecret1(Url(url))
 
-    fun createSecret1(url: Url) {
-        doCreateSecret(url, SecretType.DS1)
-    }
+    fun createSecret1(url: Url) = doCreateSecret(url, SecretType.DS1)
 
     @Suppress("NOTHING_TO_INLINE")
     inline fun createSecret2(url: String) = createSecret2(Url(url))
 
-    fun createSecret2(url: Url) {
-        doCreateSecret(url, SecretType.DS2)
-    }
+    fun createSecret2(url: Url) = doCreateSecret(url, SecretType.DS2)
 
     @OptIn(ExperimentalStdlibApi::class)
     private fun doCreateSecret(url: Url, type: SecretType): String {
@@ -38,7 +34,7 @@ object EncryptUtil {
                     "$it=${url.parameters[it]}"
                 }
                 val main = "salt=${MiHoYo.API_SALT2}&t=$t&b=$b&q=$q"
-                main.toByteArray(StandardCharsets.UTF_8).md5().toHexString()
+                "$t,$r,${main.toByteArray(StandardCharsets.UTF_8).md5().toHexString()}"
             }
         }
 
