@@ -1,6 +1,6 @@
 # Bangumi-Bot
 
-Telegram bot which include multi-function:
+Telegram bot features are as follows:
 - Preview [BiliBili](https://www.bilibili.com) video information / user dynamics
 - Preview [Sakugabooru](https://www.sakugabooru.com/) video information
 - Preview [Bangumi](https://bgm.tv/) items
