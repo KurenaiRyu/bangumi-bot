@@ -1,0 +1,10 @@
+telegram:
+  apiId: 123456789
+  apiHash: 'your api hash'
+  token: 'your bot token'
+bilibili:
+#  cookie: "your bilibili cookie"
+  shortLinkHost:  # don't edit it if you don't understand
+    - "b23.wtf"
+    - "b23.tv"
+    - "bili2233.cn"
