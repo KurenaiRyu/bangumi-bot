@@ -1,3 +1,7 @@
 # Bangumi-Bot
 
-自用telegram机器人，包含简单的命令以及inline解析链接功能。
+Telegram bot which include multi-function:
+- Preview [BiliBili](https://www.bilibili.com) video information / user dynamics
+- Preview [Sakugabooru](https://www.sakugabooru.com/) video information
+- Preview [Bangumi](https://bgm.tv/) items
+- MiHoYo daily sign in (WIP)
