@@ -20,7 +20,6 @@ import moe.kurenai.common.util.md5
 import moe.kurenai.mihoyo.MiHoYo.APP_ID
 import moe.kurenai.mihoyo.module.*
 import moe.kurenai.mihoyo.module.zzz.AvatarDetail
-import moe.kurenai.mihoyo.module.zzz.AvatarList
 import moe.kurenai.mihoyo.module.zzz.Challenge
 import moe.kurenai.mihoyo.module.zzz.MemDetail
 import moe.kurenai.mihoyo.util.MiHoYoHeaders
@@ -56,6 +55,15 @@ class MiHoYoApiTest {
     val K2 = "rtvTthKxEyreVXQCnhluFgLXPOFKPHlA"
     val salt_4X = "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs"
     val UA = "Mozilla/5.0 (Linux; Android $androidVersion; $deviceModel Build/TKQ1.220829.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/108.0.5359.128 Mobile Safari/537.36 miHoYoBBS/$miHoYoBBSVersion"
+
+    val accountContext by lazy {
+        val bindInfoList = Json.decodeFromString(BindInfoList.serializer(), dataPath.resolve("BindInfo.json").readText()).list
+        val cookie = dataPath.resolve("MiHoYoBBSLogin.cookie").readLines().joinToString("; ") {
+            it.substringBefore(";")
+        }
+        AccountContext(bindInfoList, cookie)
+    }
+
     @OptIn(ExperimentalStdlibApi::class)
     private val miHoYoPlugin = createClientPlugin("MihoyoPlugin") {
         onRequest {req, content ->
@@ -171,40 +179,40 @@ class MiHoYoApiTest {
 
     @Test
     fun testZZZAvatarList(): Unit = runBlocking {
-        val bindInfoList = Json.decodeFromString(BindInfoList.serializer(), dataPath.resolve("BindInfo.json").readText()).list
-        val bind = bindInfoList.find { "nap_cn" == it.gameBiz }!!
-        val cookie = dataPath.resolve("MiHoYoBBSLogin.cookie").readLines().joinToString("; ") {
-            it.substringBefore(";")
+        with(accountContext) {
+            val list = MiHoYo.getZZZAvatarList()
+            zzzPath.resolve("AvatarList.json").writeText(Json.encodeToString(list), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
         }
-        val url = "https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/avatar/basic"
-        val ret = client.get(url) {
-            parameter("role_id", bind.gameUid)
-            parameter("server", bind.region)
 
-            header("x-rpc-client_type", 5)
-            header(HttpHeaders.Cookie, cookie)
-        }.body<BaseResponse<AvatarList>>()
+//        val url = "https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/avatar/basic"
+//        val ret = client.get(url) {
+//            parameter("role_id", bind.gameUid)
+//            parameter("server", bind.region)
+//
+//            header("x-rpc-client_type", 5)
+//            header(HttpHeaders.Cookie, cookie)
+//        }.body<BaseResponse<AvatarList>>()
 
-        zzzPath.resolve("AvatarList.json").writeText(Json.encodeToString(ret.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+//        zzzPath.resolve("AvatarList.json").writeText(Json.encodeToString(ret.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
     }
 
     @Test
     fun testZZZAvatarDetail(): Unit = runBlocking {
-        val bindInfoList = Json.decodeFromString(BindInfoList.serializer(), dataPath.resolve("BindInfo.json").readText()).list
-        val bind = bindInfoList.find { "nap_cn" == it.gameBiz }!!
-        val cookie = dataPath.resolve("MiHoYoBBSLogin.cookie").readLines().joinToString("; ") {
-            it.substringBefore(";")
+        with(accountContext) {
+            val ret = MiHoYo.getZZZAvatarDetail(emptyList())
+            zzzPath.resolve("AvatarDetail.json").writeText(Json.encodeToString(ret), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
         }
-        val url = "https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/avatar/info?id_list[]=1091&need_wiki=true"
-        val ret = client.get(url) {
-            parameter("role_id", bind.gameUid)
-            parameter("server", bind.region)
 
-            header("x-rpc-client_type", 5)
-            header(HttpHeaders.Cookie, cookie)
-        }.body<BaseResponse<AvatarDetail>>()
-
-        zzzPath.resolve("AvatarDetail_1091.json").writeText(Json.encodeToString(ret.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+//        val url = "https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/avatar/info?id_list[]=1091&need_wiki=true"
+//        val ret = client.get(url) {
+//            parameter("role_id", bind.gameUid)
+//            parameter("server", bind.region)
+//
+//            header("x-rpc-client_type", 5)
+//            header(HttpHeaders.Cookie, cookie)
+//        }.body<BaseResponse<AvatarDetail>>()
+//
+//        zzzPath.resolve("AvatarDetail_1091.json").writeText(Json.encodeToString(ret.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
     }
 
     @Test

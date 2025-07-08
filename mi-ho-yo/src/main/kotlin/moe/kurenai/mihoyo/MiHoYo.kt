@@ -17,6 +17,7 @@ import moe.kurenai.common.util.getLogger
 import moe.kurenai.common.util.json
 import moe.kurenai.mihoyo.exception.MiHoYoException
 import moe.kurenai.mihoyo.module.*
+import moe.kurenai.mihoyo.module.zzz.AvatarDetail
 import moe.kurenai.mihoyo.module.zzz.AvatarList
 import moe.kurenai.mihoyo.util.EncryptUtil
 import moe.kurenai.mihoyo.util.MiHoYoHeaders
@@ -36,10 +37,10 @@ object MiHoYo {
     internal const val API_SALT_PROD = "JwYDpKvLj6MrMqqYU6jTKF17KNO2PXoS"
     internal val DEVICE_ID = UUID.nameUUIDFromBytes("Pixel 5".toByteArray()).toString()
     internal const val UA = "Mozilla/5.0 (Linux; Android 13; Pixel 5 Build/TKQ1.220829.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/108.0.5359.128 Mobile Safari/537.36 miHoYoBBS/$APP_VERSION"
+    internal const val COM_MIHOYO_HYPERION = "com.mihoyo.hyperion"
     internal val cookieMap = HashMap<String, String>()
 
-    internal var deviceFp: String = ""
-        private set
+    private var deviceFp: String = "38d80d285681c"
 
     private val log = getLogger()
     private val httpLogger = object : Logger {
@@ -47,21 +48,17 @@ object MiHoYo {
             log.info(message)
         }
     }
-    @OptIn(ExperimentalStdlibApi::class)
+
     private val miHoYoPlugin = createClientPlugin("MiHoYo Plugin") {
         onRequest { req, _ ->
             val headers = req.headers
             headers.setIfAbsent(HttpHeaders.UserAgent, UA)
+            headers.setIfAbsent(HttpHeaders.Referrer, "https://webstatic.mihoyo.com/")
 
-            val host = req.url.host
-            req.header(HttpHeaders.Origin, "https://$host")
-            req.header(HttpHeaders.Host, host)
-            req.header(HttpHeaders.Referrer, "https://app.mihoyo.com")
-
-            headers.setIfAbsent(MiHoYoHeaders.X_RPC_DEVICE_ID, DEVICE_ID)
-            headers.setIfAbsent(MiHoYoHeaders.X_RPC_DEVICE_FP, deviceFp)
-            headers.setIfAbsent(MiHoYoHeaders.X_RPC_APP_VERSION, APP_VERSION)
-
+            headers.get(MiHoYoHeaders.X_RPC_DEVICE_FP)?.ifBlank {
+                headers.remove(MiHoYoHeaders.X_RPC_DEVICE_FP)
+                headers[MiHoYoHeaders.X_RPC_DEVICE_FP] = getDeviceFp()
+            }
 
             val clientType = req.headers["x-rpc-client_type"]
             val ds = when (clientType) {
@@ -95,12 +92,14 @@ object MiHoYo {
 
     suspend fun createQRCodeLogin(): CreateQRCodeLogin {
         return client.post("https://passport-api.miyoushe.com/account/ma-cn-passport/web/createQRLogin"){
+            header(MiHoYoHeaders.X_RPC_DEVICE_ID, DEVICE_ID)
             header(MiHoYoHeaders.X_RPC_APP_ID, APP_ID)
         }.body<BaseResponse<CreateQRCodeLogin>>().unwrap()
     }
 
     suspend fun queryQRCodeStatus(ticket: String): QueryQRCodeStatus {
         val response = client.post("https://passport-api.miyoushe.com/account/ma-cn-passport/web/queryQRLoginStatus") {
+            header(MiHoYoHeaders.X_RPC_DEVICE_ID, DEVICE_ID)
             header(MiHoYoHeaders.X_RPC_APP_ID, APP_ID)
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(mapOf("ticket" to ticket)))
@@ -161,14 +160,41 @@ object MiHoYo {
     }
 
     context(AccountContext)
-    suspend fun getAvatarList(): List<AvatarList.Avatar> {
+    suspend fun getZZZAvatarList(): List<AvatarList.Avatar> {
         val url = "https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/avatar/basic"
         val ret = client.get(url) {
             parameter("role_id", zzzInfo.gameUid)
             parameter("server", zzzInfo.region)
+
             header(HttpHeaders.Cookie, cookie)
+            header(MiHoYoHeaders.X_RPC_APP_ID, APP_ID)
+            header(MiHoYoHeaders.X_RPC_APP_VERSION, APP_VERSION)
+            header(MiHoYoHeaders.X_RPC_DEVICE_ID, DEVICE_ID)
+            header(MiHoYoHeaders.X_RPC_DEVICE_FP, deviceFp)
+            header(MiHoYoHeaders.X_REQUESTED_WITH, COM_MIHOYO_HYPERION)
+            header(MiHoYoHeaders.X_RPC_CLIENT_TYPE, 5)
         }.body<BaseResponse<AvatarList>>().unwrap()
         return ret.avatarList
+    }
+
+    context(AccountContext)
+    suspend fun getZZZAvatarDetail(ids: List<Int>, needWiki: Boolean = false): AvatarDetail {
+        val url = "https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/avatar/info"
+        val ret = client.get(url) {
+            parameter("role_id", zzzInfo.gameUid)
+            parameter("server", zzzInfo.region)
+            if (needWiki) parameter("need_wiki", true)
+            if (ids.isNotEmpty()) parameter("id_list", ids.joinToString(","))
+
+            header(HttpHeaders.Cookie, cookie)
+            header(MiHoYoHeaders.X_RPC_APP_ID, APP_ID)
+            header(MiHoYoHeaders.X_RPC_APP_VERSION, APP_VERSION)
+            header(MiHoYoHeaders.X_RPC_DEVICE_ID, DEVICE_ID)
+            header(MiHoYoHeaders.X_RPC_DEVICE_FP, deviceFp)
+            header(MiHoYoHeaders.X_REQUESTED_WITH, COM_MIHOYO_HYPERION)
+            header(MiHoYoHeaders.X_RPC_CLIENT_TYPE, 5)
+        }.body<BaseResponse<AvatarDetail>>().unwrap()
+        return ret
     }
 
     @OptIn(ExperimentalStdlibApi::class)
