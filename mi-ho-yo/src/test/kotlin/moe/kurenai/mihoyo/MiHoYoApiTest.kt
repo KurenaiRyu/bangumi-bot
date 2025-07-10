@@ -19,7 +19,6 @@ import moe.kurenai.common.util.getLogger
 import moe.kurenai.common.util.md5
 import moe.kurenai.mihoyo.MiHoYo.APP_ID
 import moe.kurenai.mihoyo.module.*
-import moe.kurenai.mihoyo.module.zzz.AvatarDetail
 import moe.kurenai.mihoyo.module.zzz.Challenge
 import moe.kurenai.mihoyo.module.zzz.MemDetail
 import moe.kurenai.mihoyo.util.MiHoYoHeaders
@@ -198,18 +197,19 @@ class MiHoYoApiTest {
 
     @Test
     fun testZZZAvatarDetail(): Unit = runBlocking {
+        val agentId = 1221
         with(accountContext) {
-            val ret = MiHoYo.getZZZAvatarDetail(emptyList())
-            zzzPath.resolve("AvatarDetail.json").writeText(Json.encodeToString(ret), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+            val ret = MiHoYo.getZZZAvatarDetail(agentId)
+            zzzPath.resolve("AvatarDetail_$agentId.json").writeText(Json.encodeToString(ret.avatarList.first()), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
         }
 
 //        val url = "https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/avatar/info?id_list[]=1091&need_wiki=true"
 //        val ret = client.get(url) {
-//            parameter("role_id", bind.gameUid)
-//            parameter("server", bind.region)
+//            parameter("role_id", accountContext.zzzInfo.gameUid)
+//            parameter("server", accountContext.zzzInfo.region)
 //
 //            header("x-rpc-client_type", 5)
-//            header(HttpHeaders.Cookie, cookie)
+//            header(HttpHeaders.Cookie, accountContext.cookie)
 //        }.body<BaseResponse<AvatarDetail>>()
 //
 //        zzzPath.resolve("AvatarDetail_1091.json").writeText(Json.encodeToString(ret.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
@@ -217,20 +217,19 @@ class MiHoYoApiTest {
 
     @Test
     fun testZZZMemDetail(): Unit = runBlocking {
-        val bindInfoList = Json.decodeFromString(BindInfoList.serializer(), dataPath.resolve("BindInfo.json").readText()).list
-        val info = bindInfoList.find { "nap_cn" == it.gameBiz }!!
-        val cookie = dataPath.resolve("MiHoYoBBSLogin.cookie").readLines().joinToString("; ") {
-            it.substringBefore(";")
+        with(accountContext) {
+            val ret = MiHoYo.getZZZMemDetail()
+            zzzPath.resolve("MemDetail_${ret.zoneId}.json").writeText(Json.encodeToString(ret), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
         }
-        val memDetailRes = client.get("https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/mem_detail?schedule_type=1") {
-            parameter("uid", info.gameUid)
-            parameter("region", info.region)
-
-            header(HttpHeaders.Cookie, cookie)
-        }.body<BaseResponse<MemDetail>>()
-        val zzzPath = dataPath.resolve("ZZZ")
-        zzzPath.createDirectories()
-        zzzPath.resolve("MemDetail_${memDetailRes.data!!.zoneId}.json").writeText(Json.encodeToString(memDetailRes.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+//        val memDetailRes = client.get("https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/mem_detail?schedule_type=1") {
+//            parameter("uid", info.gameUid)
+//            parameter("region", info.region)
+//
+//            header(HttpHeaders.Cookie, cookie)
+//        }.body<BaseResponse<MemDetail>>()
+//        val zzzPath = dataPath.resolve("ZZZ")
+//        zzzPath.createDirectories()
+//        zzzPath.resolve("MemDetail_${memDetailRes.data!!.zoneId}.json").writeText(Json.encodeToString(memDetailRes.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
     }
 
     @Test

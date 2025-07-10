@@ -11,9 +11,9 @@ class AccountContext(
 
     init {
         for (bindInfo in bindList) {
-            val gameBiz = bindInfo.gameBiz
-            if (gameBiz.startsWith("nap")) {
-                zzzInfo = bindInfo
+            val gameBiz = when (bindInfo.gameBiz) {
+                "nap_cn" -> {zzzInfo = bindInfo}
+                else -> {}
             }
         }
     }

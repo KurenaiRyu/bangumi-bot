@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AvatarList(
+data class AvatarListResult(
     @SerialName("avatar_list")
     val avatarList: List<Avatar> = listOf()
 ) {

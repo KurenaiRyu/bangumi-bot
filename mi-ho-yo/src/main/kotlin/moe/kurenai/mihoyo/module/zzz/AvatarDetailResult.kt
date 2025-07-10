@@ -5,9 +5,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AvatarDetail(
+data class AvatarDetailResult(
     @SerialName("avatar_list")
-    val avatarList: List<Avatar> = listOf(),
+    val avatarList: List<AvatarDetail> = listOf(),
     @SerialName("avatar_wiki")
     val avatarWiki: Map<String, String> = mapOf(),
     @SerialName("cultivate_equip")
@@ -22,7 +22,7 @@ data class AvatarDetail(
     val weaponWiki: Map<String, String> = mapOf(),
 ) {
     @Serializable
-    data class Avatar(
+    data class AvatarDetail(
         @SerialName("avatar_profession")
         val avatarProfession: Int = 0,
         @SerialName("awaken_state")
