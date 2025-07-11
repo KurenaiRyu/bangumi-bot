@@ -13,6 +13,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import moe.kurenai.common.util.getLogger
 import moe.kurenai.common.util.json
 import moe.kurenai.mihoyo.exception.MiHoYoException
@@ -21,6 +22,7 @@ import moe.kurenai.mihoyo.module.zzz.AvatarDetailResult
 import moe.kurenai.mihoyo.module.zzz.AvatarListResult
 import moe.kurenai.mihoyo.module.zzz.MemDetail
 import moe.kurenai.mihoyo.util.EncryptUtil
+import moe.kurenai.mihoyo.util.GameInfo
 import moe.kurenai.mihoyo.util.MiHoYoHeaders
 import java.io.ByteArrayOutputStream
 import java.time.Instant
@@ -29,13 +31,12 @@ import kotlin.random.Random
 
 object MiHoYo {
 
-    internal const val APP_ID = "bll8iq97cem8"
-    internal const val APP_VERSION = "2.85.1"
-    internal const val API_SALT = "t0qEgfub6cvueAPgR5m9aQWWVciEer7v"
-    internal const val API_SALT2 = "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs"
-    internal const val API_SALT_X4 = "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs"
-    internal const val API_SALT_X6 = "t0qEgfub6cvueAPgR5m9aQWWVciEer7v"
-    internal const val API_SALT_PROD = "JwYDpKvLj6MrMqqYU6jTKF17KNO2PXoS"
+    const val APP_ID = "bll8iq97cem8"
+    const val APP_VERSION = "2.85.1"
+    const val API_SALT = "t0qEgfub6cvueAPgR5m9aQWWVciEer7v"
+    const val API_SALT_X4 = "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs"
+    const val API_SALT_X6 = "t0qEgfub6cvueAPgR5m9aQWWVciEer7v"
+    const val API_SALT_PROD = "JwYDpKvLj6MrMqqYU6jTKF17KNO2PXoS"
     internal val DEVICE_ID = UUID.nameUUIDFromBytes("Pixel 5".toByteArray()).toString()
     internal const val UA = "Mozilla/5.0 (Linux; Android 13; Pixel 5 Build/TKQ1.220829.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/108.0.5359.128 Mobile Safari/537.36 miHoYoBBS/$APP_VERSION"
     internal const val COM_MIHOYO_HYPERION = "com.mihoyo.hyperion"
@@ -61,19 +62,24 @@ object MiHoYo {
                 headers[MiHoYoHeaders.X_RPC_DEVICE_FP] = getDeviceFp()
             }
 
-            val clientType = req.headers["x-rpc-client_type"]
-            val url = req.url
-            val ds = when (clientType) {
-                "2" -> {
-                    EncryptUtil.createSecret1(url.toString())
-                }
-                "5" -> {
-                    EncryptUtil.createSecret2(url.toString())
-                }
+            if (headers.contains(MiHoYoHeaders.DS).not()) {
+                val clientType = req.headers[MiHoYoHeaders.X_RPC_CLIENT_TYPE]
+                val url = req.url
+                val ds = when (clientType) {
+                    "2" -> {
+                        EncryptUtil.createSecret1(url.toString())
+                    }
 
-                else -> {""}
+                    "5" -> {
+                        EncryptUtil.createSecret2(url.toString())
+                    }
+
+                    else -> {
+                        ""
+                    }
+                }
+                if (ds.isNotBlank()) req.header("DS", ds)
             }
-            if (ds.isNotBlank()) req.header("DS", ds)
         }
     }
 
@@ -242,6 +248,46 @@ object MiHoYo {
         }.body<BaseResponse<MemDetail>>().unwrap()
         return ret
     }
+
+    context(AccountContext)
+    suspend fun getSignList(): SignList {
+        val url = "https://api-takumi.mihoyo.com/event/luna/home"
+        return client.get(url) {
+            parameter("act_id", GameInfo.ZZZ.actId)
+            parameter("lang", "zh-cn")
+
+            header(HttpHeaders.Cookie, cookie)
+            header(MiHoYoHeaders.X_RPC_SIGNGAME, GameInfo.ZZZ.gameName)
+        }.body<BaseResponse<SignList>>().unwrap()
+    }
+
+    context(AccountContext)
+    suspend fun getZZZSignInfo(): JsonElement {
+        val url = "https://api-takumi.mihoyo.com/event/luna/zzz/info"
+        return client.get(url) {
+            parameter("act_id", GameInfo.ZZZ.actId)
+            parameter("uid", zzzInfo.gameUid)
+            parameter("region", zzzInfo.region)
+            parameter("lang", "zh-cn")
+
+            header(HttpHeaders.Cookie, cookie)
+            header(MiHoYoHeaders.X_RPC_APP_ID, APP_ID)
+            header(MiHoYoHeaders.X_RPC_APP_VERSION, APP_VERSION)
+            header(MiHoYoHeaders.X_RPC_DEVICE_ID, DEVICE_ID)
+            header(MiHoYoHeaders.X_RPC_DEVICE_FP, deviceFp)
+            header(MiHoYoHeaders.X_REQUESTED_WITH, COM_MIHOYO_HYPERION)
+            header(MiHoYoHeaders.X_RPC_CLIENT_TYPE, 5)
+            header(HttpHeaders.Referrer, "https://app.mihoyo.com/")
+            header(MiHoYoHeaders.DS, EncryptUtil.createSecret2(url, API_SALT_X6))
+        }.body<BaseResponse<JsonElement>>().unwrap()
+    }
+
+    context(AccountContext)
+    suspend fun zzzSign() {
+        val url = "https://api-takumi.mihoyo.com/event/luna/sign"
+    }
+
+
 
     @OptIn(ExperimentalStdlibApi::class)
     private fun generateSeedId(): String {

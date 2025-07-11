@@ -12,12 +12,12 @@ object EncryptUtil {
     fun createSecret1(url: Url) = doCreateSecret(url, SecretType.DS1)
 
     @Suppress("NOTHING_TO_INLINE")
-    inline fun createSecret2(url: String) = createSecret2(Url(url))
+    inline fun createSecret2(url: String, salt: String = MiHoYo.API_SALT_X4) = createSecret2(Url(url), salt)
 
-    fun createSecret2(url: Url) = doCreateSecret(url, SecretType.DS2)
+    fun createSecret2(url: Url, salt: String = MiHoYo.API_SALT_X4) = doCreateSecret(url, SecretType.DS2, salt)
 
     @OptIn(ExperimentalStdlibApi::class)
-    private fun doCreateSecret(url: Url, type: SecretType): String {
+    private fun doCreateSecret(url: Url, type: SecretType, salt: String = MiHoYo.API_SALT_X4): String {
 
         val t = System.currentTimeMillis()
         return when (type) {
@@ -33,7 +33,7 @@ object EncryptUtil {
                 val q = url.parameters.names().asSequence().sorted().joinToString("&") {
                     "$it=${url.parameters[it]}"
                 }
-                val main = "salt=${MiHoYo.API_SALT2}&t=$t&b=$b&q=$q"
+                val main = "salt=$salt&t=$t&b=$b&q=$q"
                 "$t,$r,${main.toByteArray(StandardCharsets.UTF_8).md5().toHexString()}"
             }
         }

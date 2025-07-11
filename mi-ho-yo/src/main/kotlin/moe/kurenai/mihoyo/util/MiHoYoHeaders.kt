@@ -12,6 +12,7 @@ object MiHoYoHeaders {
     const val X_RPC_DEVICE_ID = "x-rpc-device_id"
     const val X_RPC_DEVICE_FP = "x-rpc-device_fp"
     const val X_REQUESTED_WITH = "X-Requested-With"
+    const val X_RPC_SIGNGAME = "x-rpc-signgame"
     const val DS = "DS"
 
 }

@@ -47,7 +47,7 @@ class MiHoYoApiTest {
 
 
     val uuid = UUID.nameUUIDFromBytes("Kurenai".toByteArray())
-    val deviceFp = "38d80d0f5e742"
+    val deviceFp = "38d80d535f7af"
     val androidVersion = 13
     val deviceModel = "redmi k50 ultra"
     val miHoYoBBSVersion = "2.71.1"
@@ -174,6 +174,22 @@ class MiHoYoApiTest {
         }.body<BaseResponse<Challenge>>()
 
         zzzPath.resolve("Challenge_${challengeRes.data!!.scheduleId}.json").writeText(Json.encodeToString(challengeRes.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+    }
+
+    @Test
+    fun testSignList(): Unit = runBlocking {
+        with(accountContext) {
+            val ret = MiHoYo.getSignList()
+            zzzPath.resolve("SignList.json").writeText(Json.encodeToString(ret), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+        }
+    }
+
+    @Test
+    fun testZZZSignInfo(): Unit = runBlocking {
+        with(accountContext) {
+            val ret = MiHoYo.getZZZSignInfo()
+            zzzPath.resolve("SignList.json").writeText(Json.encodeToString(ret), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+        }
     }
 
     @Test
