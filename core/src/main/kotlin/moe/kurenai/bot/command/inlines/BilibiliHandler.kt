@@ -203,29 +203,32 @@ object BilibiliHandler : InlineHandler {
             "\n发布时间: $createDate" +
             "\n\n${desc.markdown()}").fmt()
 
-        val results = mutableListOf<InputInlineQueryResult>()
-        results.add(InputInlineQueryResultPhoto().apply {
-            this.id = "P_${videoInfo.data.bvid}_$p"
-            this.title = inlineTitle
-            photoUrl = videoInfo.data.pic + "@1920w_!web-dynamic.webp"
-            thumbnailUrl = videoInfo.data.pic + "@240w_!web-dynamic.webp"
-            inputMessageContent = InputMessagePhoto().apply {
-                this.caption = content
+        val results = ArrayList<InputInlineQueryResult>(1)
+        if (streamInfo.data != null) {
+            val shouldBeVideo = BiliBiliService.fetchStreamLength(streamInfo.data.durl.first().url) in 1..12*1024
+            if (shouldBeVideo) {
+                results.add(InputInlineQueryResultVideo().apply {
+                    this.id = "V_${videoInfo.data.bvid}_$p"
+                    this.title = inlineTitle
+                    videoUrl = streamInfo.data.durl.first().url
+                    thumbnailUrl = videoInfo.data.pic
+                    mimeType = MimeTypes.Video.MP4
+                    inputMessageContent = InputMessageVideo().apply {
+                        this.caption = content
+                    }
+                })
+            } else {
+                results.add(InputInlineQueryResultPhoto().apply {
+                    this.id = "P_${videoInfo.data.bvid}_$p"
+                    this.title = inlineTitle
+                    photoUrl = videoInfo.data.pic + "@1920w_!web-dynamic.webp"
+                    thumbnailUrl = videoInfo.data.pic + "@240w_!web-dynamic.webp"
+                    inputMessageContent = InputMessagePhoto().apply {
+                        this.caption = content
+                    }
+                })
             }
-        })
-        streamInfo.data?.run {
-            results.add(InputInlineQueryResultVideo().apply {
-                this.id = "V_${videoInfo.data.bvid}_$p"
-                this.title = inlineTitle
-                videoUrl = streamInfo.data.durl!!.first().url
-                thumbnailUrl = videoInfo.data.pic
-                mimeType = MimeTypes.Video.MP4
-                inputMessageContent = InputMessageVideo().apply {
-                    this.caption = content
-                }
-            })
         }
-
         return results
     }
 

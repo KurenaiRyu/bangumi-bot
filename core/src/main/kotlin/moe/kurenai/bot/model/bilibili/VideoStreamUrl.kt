@@ -31,7 +31,7 @@ data class VideoStreamUrl(
         val seekParam: String,
         @SerialName("seek_type")
         val seekType: String,
-        val durl: List<Durl>? = null,
+        val durl: List<Durl> = emptyList(),
         @SerialName("support_formats")
         val supportFormats: List<SupportFormat>,
         @SerialName("last_play_time")

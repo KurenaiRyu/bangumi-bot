@@ -123,4 +123,8 @@ internal object BiliBiliService {
         }
     }
 
+    suspend fun fetchStreamLength(url: String): Long {
+        return client.head(url).headers[HttpHeaders.ContentLength]?.toLongOrNull()?:-1
+    }
+
 }
