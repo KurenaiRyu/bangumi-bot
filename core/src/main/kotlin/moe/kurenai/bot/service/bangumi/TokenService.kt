@@ -60,19 +60,25 @@ internal object TokenService {
 
     suspend fun findById(userId: Long): UserAccessToken? {
         return tokens[userId]?.let { entity ->
-            lock.withLock {
-                withTimeout(30.seconds) {
-                    if (entity.expires > LocalDateTime.now().atOffset(ZoneOffset.ofHours(8)).toEpochSecond()) {
-                        entity.accessToken
-                    } else {
-                        kotlin.runCatching {
-                            OauthService.refreshToken(entity.accessToken)
-                        }.onFailure {
-                            tokens.remove(userId)
-                        }.onSuccess {
-                            tokens[userId] = entity.copy(accessToken = it, expires = it.expiresIn + getNowSeconds())
-                        }.getOrNull().also {
-                            save()
+            val now = LocalDateTime.now().atOffset(ZoneOffset.ofHours(8)).minusHours(2).toEpochSecond()
+            if (entity.expires < now) {
+                entity.accessToken
+            } else {
+                lock.withLock {
+                    val entity = tokens[userId]?: return@withLock null
+                    withTimeout(30.seconds) {
+                        if (entity.expires > now) {
+                            entity.accessToken
+                        } else {
+                            kotlin.runCatching {
+                                OauthService.refreshToken(entity.accessToken)
+                            }.onFailure {
+                                tokens.remove(userId)
+                            }.onSuccess {
+                                tokens[userId] = entity.copy(accessToken = it, expires = it.expiresIn + getNowSeconds())
+                            }.getOrNull().also {
+                                save()
+                            }
                         }
                     }
                 }
