@@ -38,7 +38,7 @@ internal object BiliBiliService {
 
     private val httpLogger = object : Logger {
         override fun log(message: String) {
-            log.info(message)
+            log.debug(message)
         }
     }
 
