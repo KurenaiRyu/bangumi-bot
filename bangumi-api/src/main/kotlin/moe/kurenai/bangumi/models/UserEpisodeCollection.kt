@@ -24,18 +24,23 @@ import kotlinx.serialization.Serializable
  *
  * @param episode
  * @param type
+ * @param updatedAt A int64 unix timestamp, `0` as unknown or un-recorded.
  */
 @Serializable
 
-data class UserEpisodeCollection(
+data class UserEpisodeCollection (
 
     @SerialName(value = "episode")
     val episode: Episode,
 
     @Contextual @SerialName(value = "type")
-    val type: EpisodeCollectionType
+    val type: EpisodeCollectionType,
 
-) {
+    /* A int64 unix timestamp, `0` as unknown or un-recorded. */
+    @SerialName(value = "updated_at")
+    val updatedAt: kotlin.Int
+
+) : kotlin.collections.HashMap<String, kotlin.Any>() {
 
 
 }

@@ -32,7 +32,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class SearchSubjectsRequestFilter(
+data class SearchSubjectsRequestFilter (
 
     /* 条目类型，参照 `SubjectType` enum，多值之间为 `或` 的关系。 */
     @SerialName(value = "type")

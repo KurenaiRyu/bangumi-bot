@@ -35,7 +35,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class SubjectRevisionData(
+data class SubjectRevisionData (
 
     @SerialName(value = "field_eps")
     val fieldEps: kotlin.Int,

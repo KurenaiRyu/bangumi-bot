@@ -34,7 +34,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class LegacySubjectMediumAllOfStaff(
+data class LegacySubjectMediumAllOfStaff (
 
     /* 人物 ID */
     @SerialName(value = "id")

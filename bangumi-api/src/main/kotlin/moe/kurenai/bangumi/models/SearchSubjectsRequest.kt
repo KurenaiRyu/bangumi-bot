@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class SearchSubjectsRequest(
+data class SearchSubjectsRequest (
 
     @SerialName(value = "keyword")
     val keyword: kotlin.String,
@@ -48,17 +48,10 @@ data class SearchSubjectsRequest(
      */
     @Serializable
     enum class Sort(val value: kotlin.String) {
-        @SerialName(value = "match")
-        MATCH("match"),
-
-        @SerialName(value = "heat")
-        HEAT("heat"),
-
-        @SerialName(value = "rank")
-        RANK("rank"),
-
-        @SerialName(value = "score")
-        SCORE("score");
+        @SerialName(value = "match") MATCH("match"),
+        @SerialName(value = "heat") HEAT("heat"),
+        @SerialName(value = "rank") RANK("rank"),
+        @SerialName(value = "score") SCORE("score");
     }
 
 }

@@ -33,7 +33,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class LegacyCharacter(
+data class LegacyCharacter (
 
     /* 人物 ID */
     @SerialName(value = "id")

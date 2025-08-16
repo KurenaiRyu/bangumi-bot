@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class IndexSubjectAddInfo(
+data class IndexSubjectAddInfo (
 
     @SerialName(value = "subject_id")
     val subjectId: kotlin.Int? = null,

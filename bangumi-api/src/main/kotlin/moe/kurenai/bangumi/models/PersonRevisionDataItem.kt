@@ -29,7 +29,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class PersonRevisionDataItem(
+data class PersonRevisionDataItem (
 
     @SerialName(value = "prsn_infobox")
     val prsnInfobox: kotlin.String,

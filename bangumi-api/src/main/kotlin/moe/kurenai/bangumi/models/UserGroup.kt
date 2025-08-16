@@ -73,10 +73,10 @@ enum class UserGroup(val value: kotlin.Int) {
          * Returns a valid [UserGroup] for [data], null otherwise.
          */
         fun decode(data: kotlin.Any?): UserGroup? = data?.let {
-            val normalizedData = "$it".lowercase()
-            values().firstOrNull { value ->
-                it == value || normalizedData == "$value".lowercase()
-            }
+          val normalizedData = "$it".lowercase()
+          values().firstOrNull { value ->
+            it == value || normalizedData == "$value".lowercase()
+          }
         }
     }
 }

@@ -15,13 +15,8 @@
 
 package moe.kurenai.bangumi.models
 
-import moe.kurenai.bangumi.models.LegacyMonoBase
-import moe.kurenai.bangumi.models.LegacyMonoBaseImages
-import moe.kurenai.bangumi.models.LegacyMonoInfo
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
  *
@@ -39,7 +34,7 @@ import kotlinx.serialization.Contextual
  */
 @Serializable
 
-data class LegacySubjectMediumAllOfCrt(
+data class LegacySubjectMediumAllOfCrt (
 
     /* 人物 ID */
     @SerialName(value = "id")

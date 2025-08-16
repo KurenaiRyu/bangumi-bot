@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class ErrorDetail(
+data class ErrorDetail (
 
     @SerialName(value = "title")
     val title: kotlin.String,

@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class Rating(
+data class Rating (
 
     @SerialName(value = "rank")
     val rank: kotlin.Int,

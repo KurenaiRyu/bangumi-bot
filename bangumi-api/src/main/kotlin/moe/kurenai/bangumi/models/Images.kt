@@ -30,7 +30,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class Images(
+data class Images (
 
     @SerialName(value = "large")
     val large: kotlin.String,

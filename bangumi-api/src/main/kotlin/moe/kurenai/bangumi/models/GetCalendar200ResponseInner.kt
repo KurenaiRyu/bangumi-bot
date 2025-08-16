@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class GetCalendar200ResponseInner(
+data class GetCalendar200ResponseInner (
 
     @SerialName(value = "weekday")
     val weekday: GetCalendar200ResponseInnerWeekday? = null,

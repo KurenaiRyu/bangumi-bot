@@ -32,7 +32,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class PersonRevisionProfession(
+data class PersonRevisionProfession (
 
     @SerialName(value = "producer")
     val producer: kotlin.String? = null,

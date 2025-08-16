@@ -32,7 +32,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class LegacyTopic(
+data class LegacyTopic (
 
     /* ID */
     @SerialName(value = "id")

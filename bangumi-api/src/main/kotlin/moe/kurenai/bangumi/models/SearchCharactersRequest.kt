@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class SearchCharactersRequest(
+data class SearchCharactersRequest (
 
     @SerialName(value = "keyword")
     val keyword: kotlin.String,

@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class PagedSubject(
+data class PagedSubject (
 
     @SerialName(value = "total")
     val total: kotlin.Int? = 0,

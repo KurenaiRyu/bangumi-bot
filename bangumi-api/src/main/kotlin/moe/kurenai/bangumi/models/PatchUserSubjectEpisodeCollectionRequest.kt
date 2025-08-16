@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class PatchUserSubjectEpisodeCollectionRequest(
+data class PatchUserSubjectEpisodeCollectionRequest (
 
     @SerialName(value = "episode_id")
     val episodeId: kotlin.collections.List<kotlin.Int>,

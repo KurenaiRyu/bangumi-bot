@@ -30,7 +30,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class Collection(
+data class Collection (
 
     @SerialName(value = "wish")
     val wish: kotlin.Int,

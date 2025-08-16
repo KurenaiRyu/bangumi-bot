@@ -34,7 +34,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class GetMyself200Response(
+data class GetMyself200Response (
 
     @SerialName(value = "id")
     val id: kotlin.Int,

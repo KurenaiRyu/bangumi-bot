@@ -31,7 +31,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class UserPersonCollection(
+data class UserPersonCollection (
 
     @SerialName(value = "id")
     val id: kotlin.Int,

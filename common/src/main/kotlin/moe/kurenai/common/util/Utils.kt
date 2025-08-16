@@ -3,6 +3,9 @@
 package moe.kurenai.common.util
 
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.contextual
+import kotlinx.serialization.modules.plus
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
@@ -27,6 +30,11 @@ val json = Json {
     ignoreUnknownKeys = true
     isLenient = true
     prettyPrint = true
+    serializersModule += SerializersModule {
+        contextual(LocalDateTimeSerializer())
+        contextual(LocalDateSerializer())
+        contextual(OffsetDateTimeSerializer())
+    }
 }
 
 val localProperties by lazy {

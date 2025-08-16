@@ -36,7 +36,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class UserSubjectCollection(
+data class UserSubjectCollection (
 
     @SerialName(value = "subject_id")
     val subjectId: kotlin.Int,

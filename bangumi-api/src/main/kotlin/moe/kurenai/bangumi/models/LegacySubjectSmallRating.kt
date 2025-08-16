@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class LegacySubjectSmallRating(
+data class LegacySubjectSmallRating (
 
     /* 总评分人数 */
     @SerialName(value = "total")

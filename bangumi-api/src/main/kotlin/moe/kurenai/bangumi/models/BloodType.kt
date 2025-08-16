@@ -58,10 +58,10 @@ enum class BloodType(val value: kotlin.Int) {
          * Returns a valid [BloodType] for [data], null otherwise.
          */
         fun decode(data: kotlin.Any?): BloodType? = data?.let {
-            val normalizedData = "$it".lowercase()
-            values().firstOrNull { value ->
-                it == value || normalizedData == "$value".lowercase()
-            }
+          val normalizedData = "$it".lowercase()
+          values().firstOrNull { value ->
+            it == value || normalizedData == "$value".lowercase()
+          }
         }
     }
 }

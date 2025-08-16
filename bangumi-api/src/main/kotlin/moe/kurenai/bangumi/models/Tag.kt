@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class Tag(
+data class Tag (
 
     @SerialName(value = "name")
     val name: kotlin.String,

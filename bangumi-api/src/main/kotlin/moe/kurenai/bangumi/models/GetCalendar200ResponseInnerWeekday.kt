@@ -29,7 +29,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class GetCalendar200ResponseInnerWeekday(
+data class GetCalendar200ResponseInnerWeekday (
 
     @SerialName(value = "en")
     val en: kotlin.String? = null,

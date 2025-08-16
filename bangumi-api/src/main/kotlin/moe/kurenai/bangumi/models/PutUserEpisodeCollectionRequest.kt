@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class PutUserEpisodeCollectionRequest(
+data class PutUserEpisodeCollectionRequest (
 
     @Contextual @SerialName(value = "type")
     val type: EpisodeCollectionType

@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class Creator(
+data class Creator (
 
     @SerialName(value = "username")
     val username: kotlin.String,

@@ -44,7 +44,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class Subject(
+data class Subject (
 
     @SerialName(value = "id")
     val id: kotlin.Int,

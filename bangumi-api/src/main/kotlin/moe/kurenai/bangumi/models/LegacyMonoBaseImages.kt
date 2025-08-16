@@ -29,7 +29,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class LegacyMonoBaseImages(
+data class LegacyMonoBaseImages (
 
     @SerialName(value = "large")
     val large: kotlin.String? = null,

@@ -55,10 +55,10 @@ enum class EpisodeCollectionType(val value: kotlin.Int) {
          * Returns a valid [EpisodeCollectionType] for [data], null otherwise.
          */
         fun decode(data: kotlin.Any?): EpisodeCollectionType? = data?.let {
-            val normalizedData = "$it".lowercase()
-            values().firstOrNull { value ->
-                it == value || normalizedData == "$value".lowercase()
-            }
+          val normalizedData = "$it".lowercase()
+          values().firstOrNull { value ->
+            it == value || normalizedData == "$value".lowercase()
+          }
         }
     }
 }

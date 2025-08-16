@@ -30,7 +30,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class LegacySubjectSmallImages(
+data class LegacySubjectSmallImages (
 
     @SerialName(value = "large")
     val large: kotlin.String? = null,

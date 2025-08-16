@@ -36,7 +36,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class LegacyEpisode(
+data class LegacyEpisode (
 
     /* 章节 ID */
     @SerialName(value = "id")
@@ -90,14 +90,9 @@ data class LegacyEpisode(
      */
     @Serializable
     enum class Status(val value: kotlin.String) {
-        @SerialName(value = "Air")
-        AIR("Air"),
-
-        @SerialName(value = "Today")
-        TODAY("Today"),
-
-        @SerialName(value = "NA")
-        NA("NA");
+        @SerialName(value = "Air") AIR("Air"),
+        @SerialName(value = "Today") TODAY("Today"),
+        @SerialName(value = "NA") NA("NA");
     }
 
 }

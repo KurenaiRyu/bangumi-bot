@@ -33,7 +33,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class IndexSubject(
+data class IndexSubject (
 
     @SerialName(value = "id")
     val id: kotlin.Int,

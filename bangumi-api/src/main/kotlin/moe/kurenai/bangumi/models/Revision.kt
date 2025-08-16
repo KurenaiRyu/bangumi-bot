@@ -30,7 +30,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class Revision(
+data class Revision (
 
     @SerialName(value = "id")
     val id: kotlin.Int,

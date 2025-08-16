@@ -35,7 +35,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class Index(
+data class Index (
 
     @SerialName(value = "id")
     val id: kotlin.Int,

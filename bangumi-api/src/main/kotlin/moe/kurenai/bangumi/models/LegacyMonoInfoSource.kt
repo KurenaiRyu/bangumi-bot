@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-class LegacyMonoInfoSource(
+class LegacyMonoInfoSource (
 
 ) {
 

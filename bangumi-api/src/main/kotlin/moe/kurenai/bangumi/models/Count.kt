@@ -35,7 +35,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class Count(
+data class Count (
 
     @SerialName(value = "1")
     val _1: kotlin.Int? = null,

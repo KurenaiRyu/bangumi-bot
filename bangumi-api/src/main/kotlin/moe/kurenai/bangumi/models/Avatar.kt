@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class Avatar(
+data class Avatar (
 
     @SerialName(value = "large")
     val large: kotlin.String,

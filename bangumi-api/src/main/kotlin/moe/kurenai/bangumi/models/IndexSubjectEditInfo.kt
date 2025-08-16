@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class IndexSubjectEditInfo(
+data class IndexSubjectEditInfo (
 
     /* 排序条件，越小越靠前 */
     @SerialName(value = "sort")

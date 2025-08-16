@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class V(
+data class V (
 
     @SerialName(value = "v")
     val v: kotlin.String

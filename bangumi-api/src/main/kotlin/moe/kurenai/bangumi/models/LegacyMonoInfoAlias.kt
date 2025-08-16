@@ -30,7 +30,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class LegacyMonoInfoAlias(
+data class LegacyMonoInfoAlias (
 
     /* 日文名 */
     @SerialName(value = "jp")

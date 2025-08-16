@@ -61,10 +61,10 @@ enum class LegacySubjectType(val value: kotlin.Int) {
          * Returns a valid [LegacySubjectType] for [data], null otherwise.
          */
         fun decode(data: kotlin.Any?): LegacySubjectType? = data?.let {
-            val normalizedData = "$it".lowercase()
-            values().firstOrNull { value ->
-                it == value || normalizedData == "$value".lowercase()
-            }
+          val normalizedData = "$it".lowercase()
+          values().firstOrNull { value ->
+            it == value || normalizedData == "$value".lowercase()
+          }
         }
     }
 }

@@ -29,7 +29,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class UserAccessToken(
+data class UserAccessToken (
 
     @SerialName(value = "access_token")
     val accessToken: kotlin.String,

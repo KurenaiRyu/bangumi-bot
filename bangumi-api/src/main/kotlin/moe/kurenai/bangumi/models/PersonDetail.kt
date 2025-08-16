@@ -31,7 +31,7 @@ import kotlinx.serialization.Serializable
  * @param lastModified currently it's latest user comment time, it will be replaced by wiki modified date in the future
  * @param stat
  * @param images object with some size of images, this object maybe `null`
- * @param infobox
+ * @param infobox server parsed infobox, a map from key to string or tuple null if server infobox is not valid
  * @param gender parsed from wiki, maybe null
  * @param bloodType parsed from wiki, maybe null, `1, 2, 3, 4` for `A, B, AB, O`
  * @param birthYear parsed from wiki, maybe `null`
@@ -40,7 +40,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class PersonDetail(
+data class PersonDetail (
 
     @SerialName(value = "id")
     val id: kotlin.Int,
@@ -72,8 +72,9 @@ data class PersonDetail(
     @SerialName(value = "images")
     val images: PersonImages? = null,
 
+    /* server parsed infobox, a map from key to string or tuple null if server infobox is not valid */
     @SerialName(value = "infobox")
-    val infobox: kotlin.collections.List<InfoBox>? = null,
+    val infobox: kotlin.collections.List<@Contextual kotlin.Any>? = null,
 
     /* parsed from wiki, maybe null */
     @SerialName(value = "gender")

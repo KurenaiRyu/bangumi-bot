@@ -15,6 +15,7 @@
 
 package moe.kurenai.bangumi.models
 
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -28,7 +29,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class GetUserSubjectEpisodeCollection200Response(
+data class GetUserSubjectEpisodeCollection200Response (
 
     @SerialName(value = "total")
     val total: kotlin.Int,
@@ -40,7 +41,7 @@ data class GetUserSubjectEpisodeCollection200Response(
     val offset: kotlin.Int,
 
     @SerialName(value = "data")
-    val `data`: kotlin.collections.List<UserEpisodeCollection>? = null
+    val `data`: kotlin.collections.List<@Contextual UserEpisodeCollection>? = null
 
 ) {
 

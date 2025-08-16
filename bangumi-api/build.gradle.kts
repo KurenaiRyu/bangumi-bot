@@ -15,7 +15,6 @@ dependencies {
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.negotiation)
     implementation(libs.kotlinx.json)
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
 
     testImplementation(kotlin("test"))
 }
@@ -64,12 +63,12 @@ fun generateAction(
     }
 }
 
-val generateApi0 = tasks.register("generateApi0", GenerateTask::class, generateAction("$projectDir/openapi.json"))
-val generateApiOauth = tasks.register("generateApiOauth", GenerateTask::class, generateAction("$projectDir/oauth.yaml"))
+val generateNormalApi = tasks.register("generateNormalApi", GenerateTask::class, generateAction("$projectDir/openapi.json"))
+val generateOauthApi = tasks.register("generateOauthApi", GenerateTask::class, generateAction("$projectDir/oauth.yaml"))
 
 val copyGenerateApiToSrc = tasks.register("copyGenerateApiToSrc", Copy::class) {
-    dependsOn(generateApi0)
-    dependsOn(generateApiOauth)
+    dependsOn(generateNormalApi)
+    dependsOn(generateOauthApi)
     from(layout.buildDirectory.dir("$generatedRoot/src"))
     into("${projectDir}/src")
 }
@@ -82,5 +81,7 @@ tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(21)
+    compilerOptions {
+        optIn.add("kotlin.time.ExperimentalTime")
+    }
 }

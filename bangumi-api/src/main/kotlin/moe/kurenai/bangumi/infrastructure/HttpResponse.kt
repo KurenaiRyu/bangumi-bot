@@ -1,9 +1,7 @@
 package moe.kurenai.bangumi.infrastructure
 
-import io.ktor.http.Headers
-import io.ktor.http.isSuccess
-import io.ktor.util.reflect.TypeInfo
-import io.ktor.util.reflect.typeInfo
+import io.ktor.http.*
+import io.ktor.util.reflect.*
 
 open class HttpResponse<T : Any>(val response: io.ktor.client.statement.HttpResponse, val provider: BodyProvider<T>) {
     val status: Int = response.status.value

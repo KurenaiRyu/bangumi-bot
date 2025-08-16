@@ -30,7 +30,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class LegacySubjectSmallCollection(
+data class LegacySubjectSmallCollection (
 
     /* 想做 */
     @SerialName(value = "wish")

@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class IndexBasicInfo(
+data class IndexBasicInfo (
 
     @SerialName(value = "title")
     val title: kotlin.String? = null,

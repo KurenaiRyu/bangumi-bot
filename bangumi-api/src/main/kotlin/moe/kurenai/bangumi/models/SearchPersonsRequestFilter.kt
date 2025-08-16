@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class SearchPersonsRequestFilter(
+data class SearchPersonsRequestFilter (
 
     /* 职业，可以多次出现。多值之间为 `且` 关系。 */
     @SerialName(value = "career")

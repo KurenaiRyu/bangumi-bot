@@ -35,7 +35,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class LegacySubjectSmallRatingCount(
+data class LegacySubjectSmallRatingCount (
 
     @SerialName(value = "1")
     val _1: kotlin.Int? = null,

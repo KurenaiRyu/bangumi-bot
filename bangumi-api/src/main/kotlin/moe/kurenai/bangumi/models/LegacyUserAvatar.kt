@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class LegacyUserAvatar(
+data class LegacyUserAvatar (
 
     @SerialName(value = "large")
     val large: kotlin.String? = null,

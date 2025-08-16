@@ -30,7 +30,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class UserCharacterCollection(
+data class UserCharacterCollection (
 
     @SerialName(value = "id")
     val id: kotlin.Int,

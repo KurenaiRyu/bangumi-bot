@@ -34,7 +34,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class CharacterPerson(
+data class CharacterPerson (
 
     @SerialName(value = "id")
     val id: kotlin.Int,

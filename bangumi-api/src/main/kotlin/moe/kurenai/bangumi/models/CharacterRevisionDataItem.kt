@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class CharacterRevisionDataItem(
+data class CharacterRevisionDataItem (
 
     @SerialName(value = "infobox")
     val infobox: kotlin.String,

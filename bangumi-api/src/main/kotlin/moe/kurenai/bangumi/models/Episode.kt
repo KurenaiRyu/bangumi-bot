@@ -37,7 +37,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class Episode(
+data class Episode (
 
     @SerialName(value = "id")
     val id: kotlin.Int,

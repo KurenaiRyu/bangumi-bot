@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class Stat(
+data class Stat (
 
     @SerialName(value = "comments")
     val comments: kotlin.Int,

@@ -32,7 +32,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class UserSubjectCollectionModifyPayload(
+data class UserSubjectCollectionModifyPayload (
 
     /* 修改条目收藏类型 */
     @Contextual @SerialName(value = "type")

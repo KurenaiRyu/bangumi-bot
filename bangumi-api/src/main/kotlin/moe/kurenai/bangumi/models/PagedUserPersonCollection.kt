@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class PagedUserPersonCollection(
+data class PagedUserPersonCollection (
 
     @SerialName(value = "total")
     val total: kotlin.Int? = 0,

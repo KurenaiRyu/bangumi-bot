@@ -32,7 +32,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class AccessTokenRequest(
+data class AccessTokenRequest (
 
     /* 授权方式，`authorization_code` 需要用到code，refresh_token需要用到 */
     @SerialName(value = "grant_type")
@@ -71,11 +71,8 @@ data class AccessTokenRequest(
      */
     @Serializable
     enum class GrantType(val value: kotlin.String) {
-        @SerialName(value = "authorization_code")
-        AUTHORIZATION_CODE("authorization_code"),
-
-        @SerialName(value = "refresh_token")
-        REFRESH_TOKEN("refresh_token");
+        @SerialName(value = "authorization_code") AUTHORIZATION_CODE("authorization_code"),
+        @SerialName(value = "refresh_token") REFRESH_TOKEN("refresh_token");
     }
 
 }

@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-class SubjectCategory(
+class SubjectCategory (
 
 ) {
 

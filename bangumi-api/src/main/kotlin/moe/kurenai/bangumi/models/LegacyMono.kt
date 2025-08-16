@@ -31,7 +31,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class LegacyMono(
+data class LegacyMono (
 
     /* 人物 ID */
     @SerialName(value = "id")

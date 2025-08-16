@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class DetailOneOf(
+data class DetailOneOf (
 
     /* error message */
     @SerialName(value = "error")

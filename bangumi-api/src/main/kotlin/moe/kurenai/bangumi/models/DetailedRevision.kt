@@ -31,7 +31,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class DetailedRevision(
+data class DetailedRevision (
 
     @SerialName(value = "id")
     val id: kotlin.Int,

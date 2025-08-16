@@ -31,7 +31,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class V0RelatedSubject(
+data class V0RelatedSubject (
 
     @SerialName(value = "id")
     val id: kotlin.Int,

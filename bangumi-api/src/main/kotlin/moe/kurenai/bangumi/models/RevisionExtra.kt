@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class RevisionExtra(
+data class RevisionExtra (
 
     @SerialName(value = "img")
     val img: kotlin.String? = null
