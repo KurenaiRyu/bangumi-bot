@@ -61,7 +61,7 @@ internal object TokenService {
     suspend fun findById(userId: Long): UserAccessToken? {
         return tokens[userId]?.let { entity ->
             val now = LocalDateTime.now().atOffset(ZoneOffset.ofHours(8)).minusHours(2).toEpochSecond()
-            if (entity.expires < now) {
+            if (entity.expires > now) {
                 entity.accessToken
             } else {
                 lock.withLock {
