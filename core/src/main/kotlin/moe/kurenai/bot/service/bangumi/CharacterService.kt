@@ -43,9 +43,9 @@ internal object CharacterService {
         val infoBox = character.infobox?.formatToList() ?: emptyList()
         var content = infoBox.format()
         persons?.let {
-            val personStr = persons.joinToString("\n") {
-                "${it.subjectName}:\t\t ${it.name}"
-            }
+            val personStr = persons.groupBy { it.name }.map { (name, list) -> "- $name: ${list.joinToString("、") { "「${it.subjectName}」" }}"  }
+                .joinToString("\n\n")
+
             content = "$content\n\n$personStr"
         }
 
