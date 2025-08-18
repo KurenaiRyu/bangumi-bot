@@ -1,5 +1,7 @@
 package moe.kurenai.bot
 
+import com.github.benmanes.caffeine.cache.Caffeine
+import com.sksamuel.aedile.core.asCache
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -37,11 +39,9 @@ object BgmAuthServer {
     private val serverPort: Int = Config.CONFIG.bgm.server.port
     private val keyStorePw: String = Config.CONFIG.bgm.server.keyStorePw
 
-    internal val authCache = caffeineBuilder<String, Long> {
-        expireAfterWrite = 10.minutes
-    }.build()
-
-    internal val timer = Timer("DDOS-Task", true)
+    internal val authCache = Caffeine.newBuilder()
+        .expireAfterWrite(1, TimeUnit.MINUTES)
+        .asCache<String, Long>()
 
     private lateinit var server: EmbeddedServer<ApplicationEngine, out ApplicationEngine.Configuration>
 
@@ -88,31 +88,6 @@ object BgmAuthServer {
         log.info("Generate random code: $randomCode")
         authCache.put(randomCode, userId)
         return randomCode
-    }
-
-    //TODO: Avoid hard code
-    @Deprecated("There is no public ip now")
-    private fun runDdosTask() {
-        timer.scheduleAtFixedRate(timerTask {
-            runBlocking {
-                val ipResult = HttpClient().get {
-                    url("https://api-ipv4.ip.sb/ip ")
-                    userAgent("Mozilla")
-                }
-                val json = """
-                {
-                  "content": "${ipResult.bodyAsText().trim()}"
-                }
-            """.trimIndent()
-                HttpClient().patch {
-                    url("https://api.cloudflare.com/client/v4/zones/3317d4133b44b844384f76f48f5d804e/dns_records/e69c33d3136591b0adae05d8bbd6ef83")
-                    setBody(json)
-                    contentType(ContentType.Application.Json)
-                    header("X-Auth-Email", "kurenai233@yahoo.com")
-                    header("X-Auth-Key", "41bf28cdc2ae64002bc38c0efaf0e489fc0c6")
-                }
-            }
-        }, 5000L, TimeUnit.HOURS.toMillis(1))
     }
 
 }

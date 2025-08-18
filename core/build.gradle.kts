@@ -27,6 +27,7 @@ dependencies {
     //cache
     implementation(libs.caffeine)
 
+    implementation(libs.directory.watcher)
     implementation(libs.jsoup)
     implementation(libs.apache.commons.pool2)
 

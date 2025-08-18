@@ -1,6 +1,9 @@
 package moe.kurenai.bot
 
+import com.github.benmanes.caffeine.cache.Caffeine
+import com.sksamuel.aedile.core.asCache
 import com.sksamuel.aedile.core.caffeineBuilder
+import com.sksamuel.aedile.core.expireAfterWrite
 import it.tdlight.Init
 import it.tdlight.client.*
 import it.tdlight.jni.TdApi
@@ -10,6 +13,7 @@ import moe.kurenai.bot.command.CommandDispatcher
 import moe.kurenai.bot.command.HandlerInitializer
 import moe.kurenai.common.util.getLogger
 import java.nio.file.Paths
+import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -33,10 +37,10 @@ object TelegramBot {
 
     fun isClientInitialized(): Boolean = ::client.isInitialized
 
-    val pendingMessage = caffeineBuilder<Long, CancellableContinuation<TdResult<Object>>> {
-        maximumSize = 200
-        expireAfterWrite = 5.minutes
-    }.build()
+    val pendingMessage = Caffeine.newBuilder()
+        .maximumSize(200)
+        .expireAfterWrite(5, TimeUnit.MINUTES)
+        .asCache<Long, CancellableContinuation<TdResult<Object>>>()
 
     init {
         Init.init()
@@ -82,8 +86,6 @@ object TelegramBot {
     }
 
     suspend fun sendPhoto(chatId: Long, photoUrl: String, msg: FormattedText): Message {
-//        val remoteFileId = fetchRemoteFileIdByUrl(photoUrl) ?: error("Fetch photo url ($photoUrl) fail!")
-
         return send {
             SendMessage().apply {
                 this.chatId = chatId
@@ -102,10 +104,6 @@ object TelegramBot {
         }
 
         val contents = pairs.map { (url, msg) ->
-//            val remoteFileId = fetchRemoteFileIdByUrl(url) ?: run {
-//                log.warn("Fetch photo url ({}) fail!", url)
-//                return@mapNotNull null
-//            }
             InputMessagePhoto().apply {
                 this.caption = msg
                 this.photo = InputFileRemote(url)

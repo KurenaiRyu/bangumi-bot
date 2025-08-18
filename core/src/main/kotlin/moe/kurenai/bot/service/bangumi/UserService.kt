@@ -6,36 +6,21 @@ import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
 
 internal object UserService {
 
-    suspend fun getMe(userId: Long): User {
-        val token = TokenService.findById(userId)?.accessToken ?: throw IllegalStateException("Token is null")
-        return getMe(token)
-    }
-
-    suspend fun getMe(token: String): User {
-        return useApi(token) {
+    context(token: UserAccessToken)
+    suspend fun getMe(): User {
+        return useApi {
             it.getMyself().result()
         }
     }
 
+    context(token: UserAccessToken)
     suspend fun getCollections(
-        userId: Long,
         subjectType: SubjectType? = null,
         type: SubjectCollectionType? = null,
         limit: Int? = null,
         offset: Int? = null
     ): PagedUserCollection {
-        val token = TokenService.findById(userId)?.accessToken ?: throw IllegalStateException("Token is null")
-        return getCollections(token, subjectType, type, limit, offset)
-    }
-
-    suspend fun getCollections(
-        token: String,
-        subjectType: SubjectType? = null,
-        type: SubjectCollectionType? = null,
-        limit: Int? = null,
-        offset: Int? = null
-    ): PagedUserCollection {
-        return useApi(token) {
+        return useApi {
             val me = it.getMyself().result<GetMyself200Response>()
             it.getUserCollectionsByUsername(me.username, subjectType, type, limit, offset).result()
         }

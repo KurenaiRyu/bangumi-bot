@@ -102,9 +102,9 @@ object TelegramUtil {
         }
     }
 
-    fun TdApi.Message.userSender(): TdApi.MessageSenderUser? = this.senderId as? TdApi.MessageSenderUser
+    val TdApi.Message.userSender: TdApi.MessageSenderUser? get() = this.senderId as? TdApi.MessageSenderUser
 
-    fun TdApi.MessageContent.file() = when (this) {
+    val TdApi.MessageContent.file: TdApi.File? get() = when (this) {
         is TdApi.MessageAnimation -> this.animation.animation
         is TdApi.MessageAudio -> this.audio.audio
         is TdApi.MessageDocument -> this.document.document
@@ -114,7 +114,7 @@ object TelegramUtil {
         else -> null
     }
 
-    fun TdApi.MessageContent.textOrCaption() = when (this) {
+    val TdApi.MessageContent.text: TdApi.FormattedText? get() = when (this) {
         is TdApi.MessageAnimation -> this.caption
         is TdApi.MessageAudio -> this.caption
         is TdApi.MessageDocument -> this.caption
@@ -124,7 +124,7 @@ object TelegramUtil {
         else -> null
     }
 
-    fun TdApi.User.username() = this.usernames.activeUsernames.firstOrNull() ?: this.id.toString()
+    val TdApi.User.username: String get() = this.usernames.activeUsernames.firstOrNull() ?: this.id.toString()
 
 }
 

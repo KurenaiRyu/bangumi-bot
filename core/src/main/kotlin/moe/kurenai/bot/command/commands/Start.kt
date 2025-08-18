@@ -37,15 +37,15 @@ class Start : CommandHandler {
 
         val userId = sender.userId
         kotlin.runCatching {
-            TokenService.findById(userId)?.also { token ->
-                val me = UserService.getMe(token.accessToken)
+            val token = TokenService.findById(userId)
+            if (token == null) doBind(userId, message)
+            else { with(token) {
+                val me = UserService.getMe()
                 sendPhoto(
                     message.chatId,
                     me.avatar.large,
                     "已绑定`${me.nickname.markdown()}`\\(`${me.username.takeIf { it.isNotBlank() } ?: me.id}`\\)".fmt())
-            } ?: kotlin.run {
-                doBind(userId, message)
-            }
+            }}
         }.recover {
             log.error(it.message, it)
             send { messageText(message.chatId, "Bot内部异常".asText()) }

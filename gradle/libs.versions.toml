@@ -23,6 +23,7 @@ ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serializatio
 serialization-yaml = { group = "net.mamoe.yamlkt", name = "yamlkt-jvm", version = "0.13.0" }
 caffeine = { group = "com.sksamuel.aedile", name = "aedile-core", version = "2.1.2" }
 jsoup = { group = "org.jsoup", name = "jsoup", version = "1.20.1" }
+directory-watcher = { group = "io.methvin", name = "directory-watcher", version = "0.19.1"}
 apache-commons-pool2 = { group = "org.apache.commons", name = "commons-pool2", version = "2.11.1" }
 apache-log4j-core = { group = "org.apache.logging.log4j", name = "log4j-core", version.ref = "log4j" }
 apache-log4j-api = { group = "org.apache.logging.log4j", name = "log4j-api", version.ref = "log4j" }
