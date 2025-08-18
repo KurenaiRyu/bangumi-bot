@@ -3,7 +3,7 @@ package moe.kurenai.bot.service.bangumi
 import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
 import moe.kurenai.bangumi.models.PersonDetail
-import moe.kurenai.bot.service.bangumi.BangumiApi.personCache
+import moe.kurenai.bangumi.models.UserAccessToken
 import moe.kurenai.bot.service.bangumi.BangumiApi.result
 import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
 import moe.kurenai.bot.util.BgmUtil.format
@@ -19,26 +19,12 @@ import moe.kurenai.bot.util.HttpUtil
  */
 internal object PersonService {
 
-    suspend fun findById(id: Int, token: String? = null): PersonDetail {
-        return personCache.get(id) { _ ->
-            useApi(token) {
-                it.getPersonById(id).result()
-            }
+    context(token: UserAccessToken?)
+    suspend fun findById(id: Int): PersonDetail {
+        return useApi {
+            it.getPersonById(id).result()
         }
     }
-
-//    suspend fun findByIds(ids: Collection<Int>, token: String? = null): Collection<PersonDetail> {
-//        return personCache.getAll(ids) { keys ->
-//            keys.map { k ->
-//                CoroutineScope(Dispatchers.IO).async {
-//                    BangumiBot.bgmClient.send(GetPersonDetail(k).apply { this.token = token })
-//                }
-//            }.associate {
-//                val subject = it.await()
-//                subject.id to subject
-//            }
-//        }.values
-//    }
 
     suspend fun getContent(person: PersonDetail, link: String): Array<InputInlineQueryResult> {
         val title = person.name
@@ -49,9 +35,7 @@ internal object PersonService {
         val formattedText = FormattedText(caption, entities)
         val default = InputInlineQueryResultPhoto().apply {
             this.id = "P${person.id} - img"
-            photoUrl = person.images.getLarge().also {
-//                TelegramUserBot.fetchRemoteFileIdByUrl(it)
-            }
+            photoUrl = person.images.getLarge()
             thumbnailUrl = person.images.getSmall()
             this.title = person.name
             this.inputMessageContent = InputMessagePhoto().apply {
@@ -82,7 +66,6 @@ internal object PersonService {
                 HttpUtil.getOgImageUrl(Url(it.second))
             }.getOrDefault(emptyList())
         }?.forEachIndexed { i, url ->
-//            TelegramUserBot.fetchRemoteFileIdByUrl(url)
             resultList.add(InputInlineQueryResultPhoto().apply {
                 this.id = "P${person.id} - ${i + 1}"
                 photoUrl = url

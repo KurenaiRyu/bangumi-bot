@@ -1,6 +1,7 @@
 package moe.kurenai.bot.service
 
-import com.sksamuel.aedile.core.caffeineBuilder
+import com.github.benmanes.caffeine.cache.Caffeine
+import com.sksamuel.aedile.core.asCache
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
@@ -24,8 +25,7 @@ import moe.kurenai.common.util.getLogger
 import moe.kurenai.common.util.json
 import org.jsoup.Jsoup
 import java.net.URI
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.minutes
+import java.time.Duration
 
 
 /**
@@ -61,17 +61,10 @@ internal object BiliBiliService {
         install(DYNAMIC_USER_AGENT)
     }
 
-    private val cache = caffeineBuilder<String, VideoInfo> {
-        maximumSize = 200
-        expireAfterWrite = 7.days
-        expireAfterAccess = 7.days
-    }.build()
-
-    private val urlCache = caffeineBuilder<String, VideoStreamUrl> {
-        maximumSize = 200
-        expireAfterWrite = 100.minutes
-        expireAfterAccess
-    }.build()
+    private val cache = Caffeine.newBuilder()
+        .maximumSize(200)
+        .expireAfterWrite(Duration.ofMinutes(5))
+        .asCache<String, VideoInfo>()
 
     suspend fun getRedirectUrl(uri: URI): Url {
         val response = dontRedirectClient.get(Url(uri))
@@ -92,8 +85,8 @@ internal object BiliBiliService {
         return Triple(id, p, t)
     }
 
-    suspend fun getPlayUrl(bvid: String, cid: Long): VideoStreamUrl = urlCache.get(bvid) { _ ->
-        client.get("https://api.bilibili.com/x/player/playurl") {
+    suspend fun getPlayUrl(bvid: String, cid: Long): VideoStreamUrl {
+        return client.get("https://api.bilibili.com/x/player/playurl") {
             parameter("bvid", bvid)
             parameter("cid", cid)
             parameter("platform", "html5")

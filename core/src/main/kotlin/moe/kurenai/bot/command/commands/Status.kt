@@ -28,9 +28,6 @@ class Status : CommandHandler {
             总可用内存: ${arr[0]}/${arr[1]}
             剩余可用分配内存: ${arr[2]}/${arr[3]}
             --------------------------------------
-            SubjectCache: ${BangumiApi.counter.snapshot().hitCount()} / ${
-            BangumiApi.counter.snapshot().loadCount()
-        } (${BangumiApi.counter.snapshot().hitRate()})
             SakugabooruCache: ${
             SakugabooruService.cacheStats.snapshot().hitCount()
         } / ${SakugabooruService.cacheStats.snapshot().loadCount()} (${

@@ -30,39 +30,40 @@ object BgmHandler : InlineHandler {
         log.info("Handle Bangumi")
         val id = params[2].toInt()
         val userId = inlineQuery.senderUserId
-        val token = TokenService.findById(userId)?.accessToken
-        when (params[1]) {
-            "subject" -> {
-                send {
-                    answerInlineQuery(
-                        inlineQuery.id,
-                        SubjectService.getContent(SubjectService.findById(id, token), uri.toString())
-                    )
+        with(TokenService.findById(userId)) {
+            when (params[1]) {
+                "subject" -> {
+                    send {
+                        answerInlineQuery(
+                            inlineQuery.id,
+                            SubjectService.getContent(SubjectService.findById(id), uri.toString())
+                        )
+                    }
                 }
-            }
 
-            "person" -> {
-                send {
-                    answerInlineQuery(
-                        inlineQuery.id,
-                        PersonService.getContent(PersonService.findById(id, token), uri.toString())
-                    )
+                "person" -> {
+                    send {
+                        answerInlineQuery(
+                            inlineQuery.id,
+                            PersonService.getContent(PersonService.findById(id), uri.toString())
+                        )
+                    }
                 }
-            }
 
-            "character" -> {
-                val character = CharacterService.findById(id, token)
-                val persons = CharacterService.findPersons(id, token)
-                send {
-                    answerInlineQuery(
-                        inlineQuery.id,
-                        CharacterService.getContent(character, uri.toString(), persons)
-                    )
+                "character" -> {
+                    val character = CharacterService.findById(id)
+                    val persons = CharacterService.findPersons(id)
+                    send {
+                        answerInlineQuery(
+                            inlineQuery.id,
+                            CharacterService.getContent(character, uri.toString(), persons)
+                        )
+                    }
                 }
-            }
 
-            else -> {
-                fallback(inlineQuery)
+                else -> {
+                    fallback(inlineQuery)
+                }
             }
         }
     }

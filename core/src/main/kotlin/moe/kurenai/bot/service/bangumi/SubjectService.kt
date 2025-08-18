@@ -5,10 +5,11 @@ import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import moe.kurenai.bangumi.models.Subject
 import moe.kurenai.bangumi.models.SubjectType
+import moe.kurenai.bangumi.models.UserAccessToken
 import moe.kurenai.bot.service.bangumi.BangumiApi.result
-import moe.kurenai.bot.service.bangumi.BangumiApi.subjectCache
 import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
 import moe.kurenai.bot.util.BgmUtil.category
 import moe.kurenai.bot.util.BgmUtil.formatToList
@@ -23,29 +24,40 @@ import moe.kurenai.bot.util.HttpUtil
 internal object SubjectService {
 
     private val mainInfoProperties =
-        listOf("中文名", "话数", "放送开始", "原作", "导演", "音乐", "人物设定", "系列构成", "总作画监督", "製作", "动画制作", "别名", "官方网站", "Copyright")
+        listOf(
+            "中文名",
+            "话数",
+            "放送开始",
+            "原作",
+            "导演",
+            "音乐",
+            "人物设定",
+            "系列构成",
+            "总作画监督",
+            "製作",
+            "动画制作",
+            "别名",
+            "官方网站",
+            "Copyright"
+        )
 
-    suspend fun findById(id: Int, token: String? = null): Subject {
-        return subjectCache.get(id) { _ ->
-            useApi(token) {
-                it.getSubjectById(id).result()
-            }
+
+    context(token: UserAccessToken?)
+    suspend fun findById(id: Int): Subject {
+        return useApi {
+            it.getSubjectById(id).result()
         }
     }
 
-    suspend fun findByIds(ids: Collection<Int>, token: String? = null): Collection<Subject> {
-        return subjectCache.getAll(ids) { keys ->
-            keys.map { k ->
-                CoroutineScope(Dispatchers.IO).async {
-                    useApi(token) {
-                        it.getSubjectById(k).result<Subject>()
-                    }
+    context(token: UserAccessToken?)
+    suspend fun findByIds(ids: Collection<Int>): Collection<Subject> {
+        return ids.map { id ->
+            CoroutineScope(Dispatchers.Default).async {
+                useApi {
+                    it.getSubjectById(id).result<Subject>()
                 }
-            }.associate {
-                val subject = it.await()
-                subject.id to subject
             }
-        }.values
+        }.awaitAll()
     }
 
     suspend fun getContent(sub: Subject, link: String): Array<InputInlineQueryResult> {
@@ -80,9 +92,7 @@ internal object SubjectService {
             InputInlineQueryResultPhoto().apply {
                 this.id = "S${sub.id} - img"
                 this.title = sub.name
-                this.photoUrl = sub.images.getLarge().also {
-//                    TelegramUserBot.fetchRemoteFileIdByUrl(it)
-                }
+                this.photoUrl = sub.images.getLarge()
                 this.thumbnailUrl = sub.images.getLarge()
                 this.inputMessageContent = InputMessagePhoto().apply {
                     this.caption = formattedText
@@ -95,7 +105,6 @@ internal object SubjectService {
                 HttpUtil.getOgImageUrl(Url(it.second))
             }.getOrDefault(emptyList())
         }.forEachIndexed { i, url ->
-//            TelegramUserBot.fetchRemoteFileIdByUrl(url)
             resultList.add(
                 InputInlineQueryResultPhoto().apply {
                     this.id = "S${sub.id} - ${i + 1}"

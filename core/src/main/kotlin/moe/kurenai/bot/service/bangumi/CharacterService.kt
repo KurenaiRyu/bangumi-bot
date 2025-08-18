@@ -4,8 +4,7 @@ import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
 import moe.kurenai.bangumi.models.Character
 import moe.kurenai.bangumi.models.CharacterPerson
-import moe.kurenai.bot.service.bangumi.BangumiApi.characterCache
-import moe.kurenai.bot.service.bangumi.BangumiApi.characterPersonCache
+import moe.kurenai.bangumi.models.UserAccessToken
 import moe.kurenai.bot.service.bangumi.BangumiApi.result
 import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
 import moe.kurenai.bot.util.BgmUtil.format
@@ -21,34 +20,19 @@ import moe.kurenai.bot.util.HttpUtil
  */
 internal object CharacterService {
 
-    suspend fun findById(id: Int, token: String? = null): Character {
-        return characterCache.get(id) { k ->
-            useApi(token) {
-                it.getCharacterById(k).result()
-            }
+    context(token: UserAccessToken?)
+    suspend fun findById(id: Int): Character {
+        return useApi {
+            it.getCharacterById(id).result()
         }
     }
 
-    suspend fun findPersons(id: Int, token: String? = null): List<CharacterPerson> {
-        return characterPersonCache.get(id) { k ->
-            useApi(token) {
-                it.getRelatedPersonsByCharacterId(k).result()
-            }
+    context(token: UserAccessToken?)
+    suspend fun findPersons(id: Int): List<CharacterPerson> {
+        return useApi {
+            it.getRelatedPersonsByCharacterId(id).result()
         }
     }
-
-//    suspend fun findByIds(ids: Collection<Int>, token: String? = null): Collection<CharacterDetail> {
-//        return cache.getAll(ids) { keys ->
-//            keys.map { k ->
-//                CoroutineScope(Dispatchers.IO).async {
-//                    BangumiBot.bgmClient.send(GetCharacterDetail(k).apply { this.token = token })
-//                }
-//            }.associate {
-//                val subject = it.await()
-//                subject.id to subject
-//            }
-//        }.values
-//    }
 
     suspend fun getContent(
         character: Character,
@@ -71,7 +55,7 @@ internal object CharacterService {
 
         val resultList = mutableListOf(
             InputInlineQueryResultArticle().apply {
-                id = "C${character.id} - txt"
+                id = "TC${character.id}"
                 thumbnailUrl = character.images?.grid?.toGrid()
                 this.title = character.name
                 this.inputMessageContent = InputMessageText().apply {
@@ -84,10 +68,8 @@ internal object CharacterService {
                 }
             },
             InputInlineQueryResultPhoto().apply {
-                id = "C${character.id} - img"
-                photoUrl = character.images.getLarge().also {
-//                    TelegramUserBot.fetchRemoteFileIdByUrl(it)
-                }
+                id = "PC${character.id}"
+                photoUrl = character.images.getLarge()
                 thumbnailUrl = character.images.getSmall()
                 this.title = character.name
                 this.inputMessageContent = InputMessagePhoto().apply {
@@ -100,7 +82,6 @@ internal object CharacterService {
                 HttpUtil.getOgImageUrl(Url(it.second))
             }.getOrDefault(emptyList())
         }.forEachIndexed { i, url ->
-//            TelegramUserBot.fetchRemoteFileIdByUrl(url)
             resultList.add(InputInlineQueryResultPhoto().apply {
                 id = "C${character.id} - ${i + 1}"
                 photoUrl = url

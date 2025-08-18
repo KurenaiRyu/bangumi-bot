@@ -1,6 +1,8 @@
 package moe.kurenai.bot.service
 
+import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.stats.ConcurrentStatsCounter
+import com.sksamuel.aedile.core.asCache
 import com.sksamuel.aedile.core.caffeineBuilder
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -14,6 +16,7 @@ import moe.kurenai.bot.util.TelegramUtil.fmt
 import moe.kurenai.bot.util.TelegramUtil.markdown
 import org.jsoup.Jsoup
 import java.net.URI
+import java.time.Duration
 import kotlin.time.Duration.Companion.days
 
 /**
@@ -37,12 +40,12 @@ internal object SakugabooruService {
     }
 
     val cacheStats = ConcurrentStatsCounter()
-    private val cache = caffeineBuilder<URI, InputInlineQueryResult> {
-        maximumSize = 200
-        expireAfterWrite = 7.days
-        expireAfterAccess = 1.days
-        statsCounter = cacheStats
-    }.build()
+    private val cache = Caffeine.newBuilder()
+        .maximumSize(50)
+        .expireAfterWrite(Duration.ofDays(7))
+        .expireAfterAccess(Duration.ofDays(1))
+        .recordStats { cacheStats }
+        .asCache<URI, InputInlineQueryResult>()
 
     suspend fun findOne(id: String, uri: URI): InputInlineQueryResult {
         return cache.get(uri) { k ->

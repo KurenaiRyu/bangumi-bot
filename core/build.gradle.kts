@@ -85,6 +85,7 @@ kotlin {
     compilerOptions {
         freeCompilerArgs = listOf(
             "-Xjsr305=strict",
+            "-Xcontext-parameters"
         )
         javaParameters = true
     }

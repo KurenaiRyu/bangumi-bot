@@ -20,6 +20,7 @@ import moe.kurenai.bangumi.models.Character
 import moe.kurenai.bangumi.models.CharacterPerson
 import moe.kurenai.bangumi.models.PersonDetail
 import moe.kurenai.bangumi.models.Subject
+import moe.kurenai.bangumi.models.UserAccessToken
 import moe.kurenai.common.util.getLogger
 import moe.kurenai.common.util.json
 import org.apache.commons.pool2.PooledObject
@@ -46,36 +47,6 @@ internal object BangumiApi {
         it.configHttpClient()
     }
 
-    val counter = ConcurrentStatsCounter()
-
-    val characterCache = caffeineBuilder<Int, Character> {
-        maximumSize = 200
-        expireAfterWrite = 7.days
-        expireAfterAccess = 1.days
-        statsCounter = counter
-    }.build()
-
-    val characterPersonCache = caffeineBuilder<Int, List<CharacterPerson>> {
-        maximumSize = 200
-        expireAfterWrite = 7.days
-        expireAfterAccess = 1.days
-        statsCounter = counter
-    }.build()
-
-    val personCache = caffeineBuilder<Int, PersonDetail> {
-        maximumSize = 200
-        expireAfterWrite = 7.days
-        expireAfterAccess = 1.days
-        statsCounter = counter
-    }.build()
-
-    val subjectCache = caffeineBuilder<Int, Subject> {
-        maximumSize = 200
-        expireAfterWrite = 7.days
-        expireAfterAccess = 1.days
-        statsCounter = counter
-    }.build()
-
     private fun HttpClientConfig<*>.configHttpClient() {
         install(Logging) {
             logger = httpLogger
@@ -91,9 +62,10 @@ internal object BangumiApi {
     }
 
 
-    internal suspend fun <T> useApi(token: String? = null, block: suspend (DefaultApi) -> T): T {
+    context(token: UserAccessToken?)
+    internal inline fun <T> useApi(block: (DefaultApi) -> T): T {
         val api = defaultApiPool.borrowObject()
-        api.setBearerToken(token ?: "")
+        api.setBearerToken(token?.accessToken ?: "")
         try {
             return block(api)
         } finally {
