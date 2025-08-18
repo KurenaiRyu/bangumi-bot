@@ -44,13 +44,13 @@ internal object CharacterService {
         var content = infoBox.format()
         persons?.let {
             val personStr = persons.joinToString("\n") {
-                "${it.subjectName}: ${it.name}"
+                "${it.subjectName}:\t\t ${it.name}"
             }
             content = "$content\n\n$personStr"
         }
 
         val entities = arrayOf(TextEntity(0, character.name.length, TextEntityTypeTextUrl(link)))
-        val message = listOfNotNull(title, infoBox.format()).joinToString("\n\n")
+        val message = listOfNotNull(title, content).joinToString("\n\n")
         val formattedText = FormattedText(message, entities)
 
         val resultList = mutableListOf(

@@ -65,7 +65,9 @@ internal object BangumiApi {
     context(token: UserAccessToken?)
     internal inline fun <T> useApi(block: (DefaultApi) -> T): T {
         val api = defaultApiPool.borrowObject()
-        api.setBearerToken(token?.accessToken ?: "")
+        token?.let {
+            api.setBearerToken(it.accessToken)
+        }
         try {
             return block(api)
         } finally {
