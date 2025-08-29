@@ -13,8 +13,8 @@
                                  filePattern="${path}/$${date:yyyy-MM}/bangumi-bot-%d{yyyy-MM-dd}-%i.log.zip"
                                  immediateFlush="false" append="true">
             <Policies>
-                <TimeBasedTriggeringPolicy interval="14" modulate="true"/>
-                <SizeBasedTriggeringPolicy size="250MB"/>
+                <TimeBasedTriggeringPolicy interval="7" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="5MB"/>
             </Policies>
             <DefaultRolloverStrategy max="7"/>
             <PatternLayout

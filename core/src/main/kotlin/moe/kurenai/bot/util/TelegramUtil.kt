@@ -8,6 +8,8 @@ import moe.kurenai.bot.TelegramBot
  */
 object TelegramUtil {
 
+    const val MAX_MESSAGE_LENGTH = 4096
+    const val MAX_CAPTION_LENGTH = 1024
     private val formatChar = "_*[]()~`>#+-=|{}.!".toCharArray()
 
     fun String.markdown(): String {
@@ -100,6 +102,20 @@ object TelegramUtil {
         inputMessageContent = TdApi.InputMessageText().apply {
             this.text = msg
         }
+    }
+
+    fun TdApi.FormattedText.trimMessage(): TdApi.FormattedText {
+        if (text.length > MAX_MESSAGE_LENGTH) {
+            text = text.substring(0, MAX_MESSAGE_LENGTH)
+        }
+        return this
+    }
+
+    fun TdApi.FormattedText.trimCaption(): TdApi.FormattedText {
+        if (text.length > MAX_CAPTION_LENGTH) {
+            text = text.substring(0, MAX_CAPTION_LENGTH)
+        }
+        return this
     }
 
     val TdApi.Message.userSender: TdApi.MessageSenderUser? get() = this.senderId as? TdApi.MessageSenderUser

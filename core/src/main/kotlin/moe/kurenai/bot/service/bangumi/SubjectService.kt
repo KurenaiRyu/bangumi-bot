@@ -71,26 +71,32 @@ internal object SubjectService {
         }
 
         val titleIndex = sub.type.category().length + 3
-        val entities = arrayOf(TextEntity(titleIndex, sub.name.length, TextEntityTypeTextUrl(link)))
-        val caption = listOfNotNull(title, content).joinToString("\n\n")
-        val formattedText = FormattedText(caption, entities)
+        var caption = listOfNotNull(title, content).joinToString("\n\n") + "\n\n"
+        val summaryIndex = caption.length
+        caption += sub.summary
+
+        val formattedText = FormattedText(caption, arrayOf(
+            TextEntity(titleIndex, sub.name.length, TextEntityTypeTextUrl(link)),
+            TextEntity(summaryIndex + 1, sub.summary.length, TextEntityTypeBlockQuote()),
+        ))
 
         val resultList = mutableListOf(
             InputInlineQueryResultArticle().apply {
-                this.id = "S${sub.id} - txt"
+                this.id = "S${sub.id}_txt"
                 this.thumbnailUrl = sub.images.getLarge().toGrid()
                 this.title = sub.name + "(${sub.nameCn})"
                 inputMessageContent = InputMessageText().apply {
                     this.text = FormattedText(
                         " $caption", arrayOf(
                             TextEntity(0, 1, TextEntityTypeTextUrl(sub.images.getLarge())),
-                            TextEntity(titleIndex + 1, sub.name.length, TextEntityTypeTextUrl(link))
+                            TextEntity(titleIndex + 1, sub.name.length, TextEntityTypeTextUrl(link)),
+                            TextEntity(summaryIndex + 1, sub.summary.length, TextEntityTypeBlockQuote()),
                         )
                     )
                 }
             },
             InputInlineQueryResultPhoto().apply {
-                this.id = "S${sub.id} - img"
+                this.id = "S${sub.id}_img"
                 this.title = sub.name
                 this.photoUrl = sub.images.getLarge()
                 this.thumbnailUrl = sub.images.getLarge()

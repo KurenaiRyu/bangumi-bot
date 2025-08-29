@@ -12,6 +12,7 @@ import moe.kurenai.bot.util.BgmUtil.getLarge
 import moe.kurenai.bot.util.BgmUtil.getSmall
 import moe.kurenai.bot.util.BgmUtil.toGrid
 import moe.kurenai.bot.util.HttpUtil
+import moe.kurenai.bot.util.TelegramUtil.markdown
 
 /**
  * @author Kurenai
@@ -31,7 +32,8 @@ internal object PersonService {
         val infoBox = person.infobox?.formatToList()
 
         val entities = arrayOf(TextEntity(0, person.name.length, TextEntityTypeTextUrl(link)))
-        val caption = listOfNotNull(title, infoBox?.format()).joinToString("\n\n")
+        val summary = ">" + person.summary.markdown().replace("\n", "\n>")
+        val caption = listOfNotNull(title, infoBox?.format()).joinToString("\n\n") + "\n\n" + summary
         val formattedText = FormattedText(caption, entities)
         val default = InputInlineQueryResultPhoto().apply {
             this.id = "P${person.id} - img"
