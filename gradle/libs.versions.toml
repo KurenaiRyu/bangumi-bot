@@ -33,7 +33,7 @@ zxing-core = { group = "com.google.zxing", name = "core", version = "3.5.2" }
 zxing-javase = { group = "com.google.zxing", name = "javase", version = "3.5.2" }
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version = "2.0.6" }
 diruptor = { group = "com.lmax", name = "disruptor", version = "3.4.4" }
-tdlight-bom = { module = "it.tdlight:tdlight-java-bom", version = "3.4.0+td.1.8.26" }
+tdlight-bom = { module = "it.tdlight:tdlight-java-bom", version = "3.4.2+td.1.8.35" }
 tdlight = { module = "it.tdlight:tdlight-java" }
 jimmer-kotlin = { module = "org.babyfish.jimmer:jimmer-sql-kotlin", version.ref = "jimmer" }
 jimmer-ksp = { module = "org.babyfish.jimmer:jimmer-ksp", version.ref = "jimmer" }

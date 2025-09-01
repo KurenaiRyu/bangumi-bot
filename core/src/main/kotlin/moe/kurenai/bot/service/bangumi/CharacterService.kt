@@ -56,7 +56,10 @@ internal object CharacterService {
             builder.wrapQuote {
                 for ((name, list) in persons.groupBy { it.name }) {
                     builder.appendBold(name)
-                    builder.appendText(": " + list.joinToString("、") { "「${it.subjectName}」" })
+                    builder.appendText(": ")
+                    builder.joinList(list, { builder.appendText("、") }) {
+                        builder.appendLink(it.subjectName, "https://bgm.tv/subject/${it.id}")
+                    }
                     builder.appendLine()
                 }
             }

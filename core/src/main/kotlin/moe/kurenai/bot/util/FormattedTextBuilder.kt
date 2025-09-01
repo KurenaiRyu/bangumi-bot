@@ -24,21 +24,23 @@ class FormattedTextBuilder {
         return this
     }
 
-    fun appendQuote(text: String): FormattedTextBuilder {
+    fun appendQuote(text: String, expendable: Boolean = true): FormattedTextBuilder {
         val start = sb.length
         sb.append(text)
         if (!sb.endsWith('\n')) sb.appendLine()
         val end = sb.length
-        entities.add(TdApi.TextEntity(start, end - start, TdApi.TextEntityTypeBlockQuote()))
+        entities.add(TdApi.TextEntity(start, end - start,
+            if (expendable) TdApi.TextEntityTypeExpandableBlockQuote() else TdApi.TextEntityTypeBlockQuote()))
         return this
     }
 
-    fun wrapQuote(block: FormattedTextBuilder.() -> Unit) {
+    fun wrapQuote(expendable: Boolean = true, block: FormattedTextBuilder.() -> Unit) {
         val start = sb.length
         block()
         if (!sb.endsWith('\n')) sb.appendLine()
         val end = sb.length
-        entities.add(TdApi.TextEntity(start, end - start, TdApi.TextEntityTypeBlockQuote()))
+        entities.add(TdApi.TextEntity(start, end - start,
+            if (expendable) TdApi.TextEntityTypeExpandableBlockQuote() else TdApi.TextEntityTypeBlockQuote()))
     }
 
     fun appendCode(text: String): FormattedTextBuilder {
@@ -62,6 +64,19 @@ class FormattedTextBuilder {
     fun appendLine(): FormattedTextBuilder {
         sb.appendLine()
         return this
+    }
+
+    fun <T> joinList(list: List<T>, separator: FormattedTextBuilder.() -> Unit = {}, block: FormattedTextBuilder.(item: T) -> Unit) {
+        var first = true
+        for (item in list) {
+            if (first) {
+                block(item)
+                first = false
+            } else {
+                separator()
+                block(item)
+            }
+        }
     }
 
     fun build(): TdApi.FormattedText {
