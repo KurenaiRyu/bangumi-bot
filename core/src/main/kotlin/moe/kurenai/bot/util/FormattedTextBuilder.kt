@@ -37,7 +37,7 @@ class FormattedTextBuilder {
     fun wrapQuote(expendable: Boolean = true, block: FormattedTextBuilder.() -> Unit): FormattedTextBuilder {
         val start = sb.length
         block()
-        if (!sb.endsWith('\n')) sb.appendLine()
+        if (sb.endsWith("\n\n")) sb.deleteAt(sb.lastIndex)
         val end = sb.length
         entities.add(TdApi.TextEntity(start, end - start,
             if (expendable) TdApi.TextEntityTypeExpandableBlockQuote() else TdApi.TextEntityTypeBlockQuote()))

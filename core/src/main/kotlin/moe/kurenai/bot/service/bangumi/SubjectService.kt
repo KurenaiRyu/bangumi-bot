@@ -7,11 +7,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import moe.kurenai.bangumi.models.Subject
-import moe.kurenai.bangumi.models.SubjectType
 import moe.kurenai.bangumi.models.UserAccessToken
 import moe.kurenai.bot.service.bangumi.BangumiApi.result
 import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
-import moe.kurenai.bot.util.BgmUtil.appendInfoBox
+import moe.kurenai.bot.util.BgmUtil.appendFormattedInfoBox
 import moe.kurenai.bot.util.BgmUtil.category
 import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.getLarge
@@ -70,7 +69,7 @@ internal object SubjectService {
             .appendLink(sub.name, link)
             .appendLine().appendLine()
             .wrapQuote {
-                appendInfoBox(infoBox)
+                appendFormattedInfoBox(infoBox)
             }.wrapQuote {
                 appendText(sub.summary)
             }.build()

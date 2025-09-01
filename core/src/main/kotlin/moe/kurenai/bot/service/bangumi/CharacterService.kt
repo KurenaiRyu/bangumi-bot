@@ -7,14 +7,12 @@ import moe.kurenai.bangumi.models.CharacterPerson
 import moe.kurenai.bangumi.models.UserAccessToken
 import moe.kurenai.bot.service.bangumi.BangumiApi.result
 import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
-import moe.kurenai.bot.util.BgmUtil.appendInfoBox
+import moe.kurenai.bot.util.BgmUtil.appendFormattedInfoBox
 import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.getLarge
-import moe.kurenai.bot.util.BgmUtil.getSmall
 import moe.kurenai.bot.util.BgmUtil.toGrid
 import moe.kurenai.bot.util.FormattedTextBuilder
 import moe.kurenai.bot.util.HttpUtil
-import moe.kurenai.bot.util.TelegramUtil.trimCaption
 import moe.kurenai.bot.util.TelegramUtil.trimMessage
 
 /**
@@ -48,7 +46,7 @@ internal object CharacterService {
         val infoBox = character.infobox?.formatToList() ?: emptyList()
         builder.appendLink(character.name, link)
             .appendLine().appendLine()
-            .appendInfoBox(infoBox)
+            .appendFormattedInfoBox(infoBox)
 
         persons?.let {
             builder.wrapQuote {

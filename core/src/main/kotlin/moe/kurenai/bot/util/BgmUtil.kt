@@ -19,10 +19,10 @@ object BgmUtil {
     fun FormattedTextBuilder.appendInfoBox(infoBox: List<InfoBox>?): FormattedTextBuilder {
         if (infoBox?.isEmpty()?:true) return this
 
-        return this.appendInfoBox(infoBox.formatToList())
+        return this.appendFormattedInfoBox(infoBox.formatToList())
     }
 
-    fun FormattedTextBuilder.appendInfoBox(infoBox: List<Pair<String, String>>?): FormattedTextBuilder {
+    fun FormattedTextBuilder.appendFormattedInfoBox(infoBox: List<Pair<String, String>>?): FormattedTextBuilder {
         if (infoBox?.isEmpty()?:true) return this
 
         for ((k, v) in infoBox) {
