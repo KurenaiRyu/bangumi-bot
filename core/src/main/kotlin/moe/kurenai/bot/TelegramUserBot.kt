@@ -11,6 +11,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import moe.kurenai.bot.util.TelegramUtil.asText
+import moe.kurenai.bot.util.TelegramUtil.file
 import moe.kurenai.common.util.getLogger
 import moe.kurenai.common.util.json
 import java.nio.file.Path
@@ -264,17 +265,17 @@ object TelegramUserBot {
         }
     }
 
-    private fun getFile(messageContent: MessageContent, type: RemoteFileType): File? {
-        val content = messageContent as? MessageText ?: return null
-        val webpage = content.webPage ?: return null
-        return when (type) {
-            RemoteFileType.PHOTO -> webpage.photo?.sizes?.firstOrNull()?.photo
-            RemoteFileType.AUDIO -> webpage.audio?.audio
-            RemoteFileType.VIDEO -> webpage.video?.video
-            RemoteFileType.ANIMATION -> webpage.animation?.animation
-            RemoteFileType.DOCUMENT -> webpage.document?.document
-        }
-    }
+//    private fun getFile(messageContent: MessageContent, type: RemoteFileType): File? {
+//        val content = messageContent as? MessageText ?: return null
+//        val webpage = content.webpage ?: return null
+//        return when (type) {
+//            RemoteFileType.PHOTO -> webpage.photo?.sizes?.firstOrNull()?.photo
+//            RemoteFileType.AUDIO -> webpage.audio?.audio
+//            RemoteFileType.VIDEO -> webpage.video?.video
+//            RemoteFileType.ANIMATION -> webpage.animation?.animation
+//            RemoteFileType.DOCUMENT -> webpage.document?.document
+//        }
+//    }
 
     fun getMe(): User = client.me
 
