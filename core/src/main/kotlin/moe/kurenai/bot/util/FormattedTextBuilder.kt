@@ -34,13 +34,14 @@ class FormattedTextBuilder {
         return this
     }
 
-    fun wrapQuote(expendable: Boolean = true, block: FormattedTextBuilder.() -> Unit) {
+    fun wrapQuote(expendable: Boolean = true, block: FormattedTextBuilder.() -> Unit): FormattedTextBuilder {
         val start = sb.length
         block()
         if (!sb.endsWith('\n')) sb.appendLine()
         val end = sb.length
         entities.add(TdApi.TextEntity(start, end - start,
             if (expendable) TdApi.TextEntityTypeExpandableBlockQuote() else TdApi.TextEntityTypeBlockQuote()))
+        return this
     }
 
     fun appendCode(text: String): FormattedTextBuilder {

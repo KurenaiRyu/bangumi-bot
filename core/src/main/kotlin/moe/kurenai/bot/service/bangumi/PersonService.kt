@@ -6,13 +6,16 @@ import moe.kurenai.bangumi.models.PersonDetail
 import moe.kurenai.bangumi.models.UserAccessToken
 import moe.kurenai.bot.service.bangumi.BangumiApi.result
 import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
+import moe.kurenai.bot.util.BgmUtil.appendInfoBox
 import moe.kurenai.bot.util.BgmUtil.format
 import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.getLarge
 import moe.kurenai.bot.util.BgmUtil.getSmall
 import moe.kurenai.bot.util.BgmUtil.toGrid
+import moe.kurenai.bot.util.FormattedTextBuilder
 import moe.kurenai.bot.util.HttpUtil
 import moe.kurenai.bot.util.TelegramUtil.markdown
+import moe.kurenai.bot.util.TelegramUtil.trimMessage
 
 /**
  * @author Kurenai
@@ -28,53 +31,46 @@ internal object PersonService {
     }
 
     suspend fun getContent(person: PersonDetail, link: String): Array<InputInlineQueryResult> {
-        val title = person.name
         val infoBox = person.infobox?.formatToList()
-
-        val entities = arrayOf(TextEntity(0, person.name.length, TextEntityTypeTextUrl(link)))
-        val summary = ">" + person.summary.markdown().replace("\n", "\n>")
-        val caption = listOfNotNull(title, infoBox?.format()).joinToString("\n\n") + "\n\n" + summary
-        val formattedText = FormattedText(caption, entities)
-        val default = InputInlineQueryResultPhoto().apply {
-            this.id = "P${person.id} - img"
-            photoUrl = person.images.getLarge()
-            thumbnailUrl = person.images.getSmall()
-            this.title = person.name
-            this.inputMessageContent = InputMessagePhoto().apply {
-                this.caption = formattedText
-            }
-        }
+        val formattedText = FormattedTextBuilder()
+            .appendLink(person.name, link)
+            .appendLine().appendLine()
+            .appendInfoBox(infoBox)
+            .wrapQuote {
+                appendText(person.summary)
+            }.build()
+            .trimMessage()
 
         val resultList = mutableListOf(
             InputInlineQueryResultArticle().apply {
-                val url = person.images.getLarge().toGrid()
-                this.id = "P${person.id} - text"
-                this.url = url
-                thumbnailUrl = url
+                this.id = "P${person.id}"
+                this.url = person.images.getLarge().toGrid()
                 this.title = person.name
                 this.inputMessageContent = InputMessageText().apply {
-                    text = FormattedText(
-                        " $caption", arrayOf(
-                            TextEntity(0, 1, TextEntityTypeTextUrl(person.images.getLarge())),
-                            TextEntity(1, person.name.length, TextEntityTypeTextUrl(link))
-                        )
-                    )
+                    this.text = formattedText
+                    this.linkPreviewOptions = LinkPreviewOptions().apply {
+                        this.url = person.images.getLarge()
+                        this.forceLargeMedia = true
+                        this.showAboveText = true
+                    }
                 }
             },
-            default
         )
         infoBox?.filter { it.second.startsWith("http") }?.flatMap {
             kotlin.runCatching {
                 HttpUtil.getOgImageUrl(Url(it.second))
             }.getOrDefault(emptyList())
         }?.forEachIndexed { i, url ->
-            resultList.add(InputInlineQueryResultPhoto().apply {
-                this.id = "P${person.id} - ${i + 1}"
-                photoUrl = url
-                thumbnailUrl = url
+            resultList.add(InputInlineQueryResultArticle().apply {
+                this.id = "P${person.id}_${i + 1}"
                 this.title = person.name
-                this.inputMessageContent = InputMessagePhoto().apply {
-                    this.caption = formattedText
+                this.inputMessageContent = InputMessageText().apply {
+                    this.text = formattedText
+                    this.linkPreviewOptions = LinkPreviewOptions().apply {
+                        this.url = url
+                        this.forceLargeMedia = true
+                        this.showAboveText = true
+                    }
                 }
             })
         }

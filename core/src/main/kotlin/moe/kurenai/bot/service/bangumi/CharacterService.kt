@@ -42,15 +42,13 @@ internal object CharacterService {
         link: String,
         persons: List<CharacterPerson>? = null
     ): Array<InputInlineQueryResult> {
+        val host = Url(link).hostWithPortIfSpecified
         val builder = FormattedTextBuilder()
 
+        val infoBox = character.infobox?.formatToList() ?: emptyList()
         builder.appendLink(character.name, link)
-        builder.appendLine().appendLine()
-
-        if (character.infobox?.isNotEmpty()?:true) {
-            builder.appendInfoBox(character.infobox)
-            builder.appendLine()
-        }
+            .appendLine().appendLine()
+            .appendInfoBox(infoBox)
 
         persons?.let {
             builder.wrapQuote {
@@ -58,7 +56,7 @@ internal object CharacterService {
                     builder.appendBold(name)
                     builder.appendText(": ")
                     builder.joinList(list, { builder.appendText("、") }) {
-                        builder.appendLink(it.subjectName, "https://bgm.tv/subject/${it.id}")
+                        builder.appendLink(it.subjectName, "https://$host/subject/${it.id}")
                     }
                     builder.appendLine()
                 }
@@ -69,15 +67,15 @@ internal object CharacterService {
         builder.appendQuote(character.summary)
         builder.appendText(" ")
 
-        val formattedText = builder.build()
+        val formattedText = builder.build().trimMessage()
 
         val resultList = mutableListOf(
             InputInlineQueryResultArticle().apply {
-                id = "TC${character.id}"
+                id = "C${character.id}"
                 thumbnailUrl = character.images?.grid?.toGrid()
                 this.title = character.name
                 this.inputMessageContent = InputMessageText().apply {
-                    this.text = formattedText.trimMessage()
+                    this.text = formattedText
                     this.linkPreviewOptions = LinkPreviewOptions().apply {
                         this.url = character.images.getLarge()
                         this.forceLargeMedia = true
@@ -85,30 +83,24 @@ internal object CharacterService {
                     }
                 }
             },
-            InputInlineQueryResultPhoto().apply {
-                id = "PC${character.id}"
-                photoUrl = character.images.getLarge()
-                thumbnailUrl = character.images.getSmall()
-                this.title = character.name
-                this.inputMessageContent = InputMessagePhoto().apply {
-                    this.caption = formattedText.trimCaption()
-                }
-            },
         )
 
-        val infoBox = character.infobox?.formatToList() ?: emptyList()
         infoBox.filter { it.second.startsWith("http") }.flatMap {
             kotlin.runCatching {
                 HttpUtil.getOgImageUrl(Url(it.second))
             }.getOrDefault(emptyList())
         }.forEachIndexed { i, url ->
-            resultList.add(InputInlineQueryResultPhoto().apply {
+            resultList.add(InputInlineQueryResultArticle().apply {
                 id = "C${character.id}_P${i + 1}"
-                photoUrl = url
                 thumbnailUrl = url
                 this.title = character.name
-                this.inputMessageContent = InputMessagePhoto().apply {
-                    this.caption = formattedText
+                this.inputMessageContent = InputMessageText().apply {
+                    this.text = formattedText
+                    this.linkPreviewOptions = LinkPreviewOptions().apply {
+                        this.url = url
+                        this.forceLargeMedia = true
+                        this.showAboveText = true
+                    }
                 }
             })
         }

@@ -11,11 +11,14 @@ import moe.kurenai.bangumi.models.SubjectType
 import moe.kurenai.bangumi.models.UserAccessToken
 import moe.kurenai.bot.service.bangumi.BangumiApi.result
 import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
+import moe.kurenai.bot.util.BgmUtil.appendInfoBox
 import moe.kurenai.bot.util.BgmUtil.category
 import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.getLarge
 import moe.kurenai.bot.util.BgmUtil.toGrid
+import moe.kurenai.bot.util.FormattedTextBuilder
 import moe.kurenai.bot.util.HttpUtil
+import moe.kurenai.bot.util.TelegramUtil.trimMessage
 
 /**
  * @author Kurenai
@@ -62,48 +65,31 @@ internal object SubjectService {
 
     suspend fun getContent(sub: Subject, link: String): Array<InputInlineQueryResult> {
 
-        val title = "[${sub.type.category()}]　${sub.name}"
         val infoBox = sub.infobox?.formatToList() ?: emptyList()
-        val simpleInfoBot =
-            if (sub.type == SubjectType.Anime) infoBox.filter { mainInfoProperties.contains(it.first) } else infoBox
-        val content = simpleInfoBot.joinToString("\n") { (k, v) ->
-            "$k: $v"
-        }
-
-        val titleIndex = sub.type.category().length + 3
-        var caption = listOfNotNull(title, content).joinToString("\n\n") + "\n\n"
-        val summaryIndex = caption.length
-        caption += sub.summary
-
-        val formattedText = FormattedText(caption, arrayOf(
-            TextEntity(titleIndex, sub.name.length, TextEntityTypeTextUrl(link)),
-            TextEntity(summaryIndex + 1, sub.summary.length, TextEntityTypeBlockQuote()),
-        ))
+        val formattedText = FormattedTextBuilder().appendText("[${sub.type.category()}]　")
+            .appendLink(sub.name, link)
+            .appendLine().appendLine()
+            .wrapQuote {
+                appendInfoBox(infoBox)
+            }.wrapQuote {
+                appendText(sub.summary)
+            }.build()
+            .trimMessage()
 
         val resultList = mutableListOf(
             InputInlineQueryResultArticle().apply {
-                this.id = "S${sub.id}_txt"
+                this.id = "S${sub.id}"
                 this.thumbnailUrl = sub.images.getLarge().toGrid()
                 this.title = sub.name + "(${sub.nameCn})"
                 inputMessageContent = InputMessageText().apply {
-                    this.text = FormattedText(
-                        " $caption", arrayOf(
-                            TextEntity(0, 1, TextEntityTypeTextUrl(sub.images.getLarge())),
-                            TextEntity(titleIndex + 1, sub.name.length, TextEntityTypeTextUrl(link)),
-                            TextEntity(summaryIndex + 1, sub.summary.length, TextEntityTypeBlockQuote()),
-                        )
-                    )
+                    this.text = formattedText
+                    this.linkPreviewOptions = LinkPreviewOptions().apply {
+                        this.url = sub.images.getLarge()
+                        this.forceLargeMedia = true
+                        this.showAboveText = true
+                    }
                 }
             },
-            InputInlineQueryResultPhoto().apply {
-                this.id = "S${sub.id}_img"
-                this.title = sub.name
-                this.photoUrl = sub.images.getLarge()
-                this.thumbnailUrl = sub.images.getLarge()
-                this.inputMessageContent = InputMessagePhoto().apply {
-                    this.caption = formattedText
-                }
-            }
         )
 
         infoBox.filter { it.second.startsWith("http") }.flatMap {
@@ -112,13 +98,17 @@ internal object SubjectService {
             }.getOrDefault(emptyList())
         }.forEachIndexed { i, url ->
             resultList.add(
-                InputInlineQueryResultPhoto().apply {
-                    this.id = "S${sub.id} - ${i + 1}"
+                InputInlineQueryResultArticle().apply {
+                    this.id = "S${sub.id}_${i + 1}"
                     this.title = sub.name
-                    this.photoUrl = url
                     this.thumbnailUrl = url
-                    this.inputMessageContent = InputMessagePhoto().apply {
-                        this.caption = formattedText
+                    this.inputMessageContent = InputMessageText().apply {
+                        this.text = formattedText
+                        this.linkPreviewOptions = LinkPreviewOptions().apply {
+                            this.url = url
+                            this.forceLargeMedia = true
+                            this.showAboveText = true
+                        }
                     }
                 }
             )

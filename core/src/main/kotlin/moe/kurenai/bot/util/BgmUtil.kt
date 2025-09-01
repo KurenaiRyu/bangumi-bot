@@ -17,12 +17,18 @@ object BgmUtil {
     const val DEFAULT_IMAGE = "https://bgm.tv/img/no_icon_subject.png"
 
     fun FormattedTextBuilder.appendInfoBox(infoBox: List<InfoBox>?): FormattedTextBuilder {
-        if (infoBox == null) return this
+        if (infoBox?.isEmpty()?:true) return this
 
-        val list = infoBox.formatToList()
-        for ((k, v) in list) {
+        return this.appendInfoBox(infoBox.formatToList())
+    }
+
+    fun FormattedTextBuilder.appendInfoBox(infoBox: List<Pair<String, String>>?): FormattedTextBuilder {
+        if (infoBox?.isEmpty()?:true) return this
+
+        for ((k, v) in infoBox) {
             appendBold(k)
             appendText(": $v")
+            appendLine()
             appendLine()
         }
         return this
