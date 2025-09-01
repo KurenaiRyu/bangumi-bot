@@ -1,17 +1,16 @@
 package moe.kurenai.bot.service.bangumi
 
-import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
 import moe.kurenai.bangumi.models.PersonDetail
 import moe.kurenai.bangumi.models.UserAccessToken
 import moe.kurenai.bot.service.bangumi.BangumiApi.result
 import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
+import moe.kurenai.bot.util.BgmUtil
 import moe.kurenai.bot.util.BgmUtil.appendFormattedInfoBox
 import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.getLarge
 import moe.kurenai.bot.util.BgmUtil.toGrid
 import moe.kurenai.bot.util.FormattedTextBuilder
-import moe.kurenai.bot.util.HttpUtil
 import moe.kurenai.bot.util.TelegramUtil.trimMessage
 
 /**
@@ -28,7 +27,7 @@ internal object PersonService {
     }
 
     suspend fun getContent(person: PersonDetail, link: String): Array<InputInlineQueryResult> {
-        val infoBox = person.infobox?.formatToList()
+        val infoBox = person.infobox?.formatToList()?: emptyList()
         val formattedText = FormattedTextBuilder()
             .appendLink(person.name, link)
             .appendLine().appendLine()
@@ -53,14 +52,11 @@ internal object PersonService {
                 }
             },
         )
-        infoBox?.filter { it.second.startsWith("http") }?.flatMap {
-            kotlin.runCatching {
-                HttpUtil.getOgImageUrl(Url(it.second))
-            }.getOrDefault(emptyList())
-        }?.forEachIndexed { i, url ->
+
+        BgmUtil.handleOgImageInfo(infoBox) { title, url, i ->
             resultList.add(InputInlineQueryResultArticle().apply {
-                this.id = "P${person.id}_${i + 1}"
-                this.title = person.name
+                this.id = "P${person.id}_$i"
+                this.title = title
                 this.inputMessageContent = InputMessageText().apply {
                     this.text = formattedText
                     this.linkPreviewOptions = LinkPreviewOptions().apply {
@@ -71,6 +67,7 @@ internal object PersonService {
                 }
             })
         }
+
         return resultList.toTypedArray()
     }
 

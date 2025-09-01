@@ -64,11 +64,16 @@ object HttpUtil {
         ).last { it.contains("Windows NT") && it.contains("Chrome") }
     }
 
-    suspend fun getOgImageUrl(url: Url, client: HttpClient = this.client): List<String> {
+    suspend fun getOgImageInfo(url: Url, client: HttpClient = this.client): Pair<String, List<String>>? {
         val doc = Jsoup.parse(client.get(url).bodyAsText())
-        return doc.select("meta[property='og:image']").mapNotNull {
-            it.attr("content")
+        val title = doc.select("meta[property='og:site:name']").attr("content").takeIf{ it.isNotEmpty() }?: doc.title()
+        val imgList = doc.select("meta[property='og:image']").mapNotNull {
+            it.attr("content").takeIf { it.isNotEmpty() }
         }
+
+        if (imgList.isEmpty()) return null
+
+        return title to imgList
     }
 
 }

@@ -1,6 +1,5 @@
 package moe.kurenai.bot.service.bangumi
 
-import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,13 +9,13 @@ import moe.kurenai.bangumi.models.Subject
 import moe.kurenai.bangumi.models.UserAccessToken
 import moe.kurenai.bot.service.bangumi.BangumiApi.result
 import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
+import moe.kurenai.bot.util.BgmUtil
 import moe.kurenai.bot.util.BgmUtil.appendFormattedInfoBox
 import moe.kurenai.bot.util.BgmUtil.category
 import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.getLarge
 import moe.kurenai.bot.util.BgmUtil.toGrid
 import moe.kurenai.bot.util.FormattedTextBuilder
-import moe.kurenai.bot.util.HttpUtil
 import moe.kurenai.bot.util.TelegramUtil.trimMessage
 
 /**
@@ -68,9 +67,8 @@ internal object SubjectService {
         val formattedText = FormattedTextBuilder().appendText("[${sub.type.category()}]　")
             .appendLink(sub.name, link)
             .appendLine().appendLine()
+            .appendFormattedInfoBox(infoBox)
             .wrapQuote {
-                appendFormattedInfoBox(infoBox)
-            }.wrapQuote {
                 appendText(sub.summary)
             }.build()
             .trimMessage()
@@ -91,15 +89,12 @@ internal object SubjectService {
             },
         )
 
-        infoBox.filter { it.second.startsWith("http") }.flatMap {
-            kotlin.runCatching {
-                HttpUtil.getOgImageUrl(Url(it.second))
-            }.getOrDefault(emptyList())
-        }.forEachIndexed { i, url ->
+
+        BgmUtil.handleOgImageInfo(infoBox) { title, url, i ->
             resultList.add(
                 InputInlineQueryResultArticle().apply {
                     this.id = "S${sub.id}_${i + 1}"
-                    this.title = sub.name
+                    this.title = title
                     this.thumbnailUrl = url
                     this.inputMessageContent = InputMessageText().apply {
                         this.text = formattedText
@@ -112,6 +107,7 @@ internal object SubjectService {
                 }
             )
         }
+
         return resultList.toTypedArray()
     }
 

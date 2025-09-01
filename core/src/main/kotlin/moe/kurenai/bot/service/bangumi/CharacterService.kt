@@ -7,12 +7,12 @@ import moe.kurenai.bangumi.models.CharacterPerson
 import moe.kurenai.bangumi.models.UserAccessToken
 import moe.kurenai.bot.service.bangumi.BangumiApi.result
 import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
+import moe.kurenai.bot.util.BgmUtil
 import moe.kurenai.bot.util.BgmUtil.appendFormattedInfoBox
 import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.getLarge
 import moe.kurenai.bot.util.BgmUtil.toGrid
 import moe.kurenai.bot.util.FormattedTextBuilder
-import moe.kurenai.bot.util.HttpUtil
 import moe.kurenai.bot.util.TelegramUtil.trimMessage
 
 /**
@@ -48,18 +48,22 @@ internal object CharacterService {
             .appendLine().appendLine()
             .appendFormattedInfoBox(infoBox)
 
+
+
         persons?.let {
             builder.wrapQuote {
-                for ((name, list) in persons.groupBy { it.name }) {
-                    builder.appendBold(name)
-                    builder.appendText(": ")
-                    builder.joinList(list, { builder.appendText("、") }) {
-                        builder.appendLink(it.subjectName, "https://$host/subject/${it.id}")
+                appendBold("关联人物")
+                appendLine()
+                appendLine()
+
+                joinList(persons.groupBy { it.name }.entries, "\n\n") { (name, list) ->
+                    appendBold(name)
+                    appendText(": ")
+                    joinList(list, "、") {
+                        appendLink(it.subjectName, "https://$host/subject/${it.subjectId}")
                     }
-                    builder.appendLine()
                 }
             }
-            builder.appendLine()
         }
 
         builder.appendQuote(character.summary)
@@ -83,15 +87,11 @@ internal object CharacterService {
             },
         )
 
-        infoBox.filter { it.second.startsWith("http") }.flatMap {
-            kotlin.runCatching {
-                HttpUtil.getOgImageUrl(Url(it.second))
-            }.getOrDefault(emptyList())
-        }.forEachIndexed { i, url ->
+        BgmUtil.handleOgImageInfo(infoBox) { title, url, i ->
             resultList.add(InputInlineQueryResultArticle().apply {
-                id = "C${character.id}_P${i + 1}"
+                id = "C${character.id}_$i"
                 thumbnailUrl = url
-                this.title = character.name
+                this.title = title
                 this.inputMessageContent = InputMessageText().apply {
                     this.text = formattedText
                     this.linkPreviewOptions = LinkPreviewOptions().apply {

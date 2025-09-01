@@ -67,20 +67,29 @@ class FormattedTextBuilder {
         return this
     }
 
-    fun <T> joinList(list: List<T>, separator: FormattedTextBuilder.() -> Unit = {}, block: FormattedTextBuilder.(item: T) -> Unit) {
+    fun <T> joinList(collection: Collection<T>, separator: String = ", ", block: FormattedTextBuilder.(item: T) -> Unit) {
         var first = true
-        for (item in list) {
+        for (item in collection) {
             if (first) {
                 block(item)
                 first = false
             } else {
-                separator()
+                appendText(separator)
                 block(item)
             }
         }
     }
 
     fun build(): TdApi.FormattedText {
+        if (sb.endsWith("\n\n")) {
+            sb.deleteAt(sb.lastIndex)
+            for (entity in entities) {
+                if (entity.offset + entity.length > sb.length) {
+                    entity.length = sb.length - entity.length
+                }
+            }
+        }
+
         return TdApi.FormattedText(sb.toString(), entities.toTypedArray())
     }
 

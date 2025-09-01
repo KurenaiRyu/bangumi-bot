@@ -1,5 +1,6 @@
 package moe.kurenai.bot.util
 
+import io.ktor.http.*
 import moe.kurenai.bangumi.infrastructure.ApiClient
 import moe.kurenai.bangumi.models.Images
 import moe.kurenai.bangumi.models.InfoBox
@@ -16,21 +17,57 @@ object BgmUtil {
 
     const val DEFAULT_IMAGE = "https://bgm.tv/img/no_icon_subject.png"
 
+    suspend fun fetchOgImageInfo(infoBox: List<Pair<String, String>>): Map<String, MutableList<String>> {
+        val map = HashMap<String, MutableList<String>>()
+        infoBox.filter { it.second.startsWith("http") }.mapNotNull {
+            kotlin.runCatching {
+                HttpUtil.getOgImageInfo(Url(it.second))
+            }.getOrNull()
+        }.forEach { (title, list) ->
+            val value = map.getOrPut(title) { mutableListOf() }
+            value.addAll(list)
+        }
+        return map
+    }
+
+    suspend fun handleOgImageInfo(infoBox: List<Pair<String, String>>, block: (title: String, url: String, i: Int) -> Unit) {
+        val info = fetchOgImageInfo(infoBox)
+        for ((title, list) in info) {
+            var i = 0
+            for (url in list) {
+                block(title, url, i++)
+                i++
+            }
+        }
+    }
+
     fun FormattedTextBuilder.appendInfoBox(infoBox: List<InfoBox>?): FormattedTextBuilder {
         if (infoBox?.isEmpty()?:true) return this
 
         return this.appendFormattedInfoBox(infoBox.formatToList())
     }
 
-    fun FormattedTextBuilder.appendFormattedInfoBox(infoBox: List<Pair<String, String>>?): FormattedTextBuilder {
-        if (infoBox?.isEmpty()?:true) return this
+    fun FormattedTextBuilder.appendFormattedInfoBox(infoBox: List<Pair<String, String>>): FormattedTextBuilder {
+        val info = infoBox.filter { it.second.isNotBlank() }
+        if (info.isEmpty()) return this
 
-        for ((k, v) in infoBox) {
-            appendBold(k)
-            appendText(": $v")
+        val handle = {
+            joinList(info, "\n\n") { (k, v) ->
+                appendBold(k)
+                appendText(": $v")
+            }
+        }
+
+        if (info.size > 8) {
+            wrapQuote {
+                handle()
+            }
+        } else {
+            handle()
             appendLine()
             appendLine()
         }
+
         return this
     }
 
