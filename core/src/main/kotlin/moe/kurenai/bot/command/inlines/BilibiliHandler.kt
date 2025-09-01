@@ -206,18 +206,22 @@ object BilibiliHandler : InlineHandler {
         val content = (contentTitle +
             "\n\n$up / $playCount $rank / $duration" +
             "\n发布时间: $createDate" +
-            "\n\n${desc.markdown()}").fmt()
+            "\n\n**>${desc.markdown()}||").fmt()
 
         val canShowVideo = BiliBiliService.fetchStreamLength(streamInfo.data!!.durl.first().url) in 1..12*1024*1024
         return arrayOf(
-            InputInlineQueryResultPhoto().apply {
-                this.id = "P${videoInfo.data.bvid.substring(2)}${videoInfo.data.cid.toHexString(hexFormat)}"
+            InputInlineQueryResultArticle().apply {
+                this.id = "A${videoInfo.data.bvid.substring(2)}${videoInfo.data.cid.toHexString(hexFormat)}"
                 this.title = inlineTitle
                 this.description = "Preview info with Photo"
-                photoUrl = videoInfo.data.pic + "@1920w_!web-dynamic.jpg"
-                thumbnailUrl = videoInfo.data.pic + "@240w_!web-dynamic.jpg"
-                inputMessageContent = InputMessagePhoto().apply {
-                    this.caption = content
+                thumbnailUrl = (videoInfo.data.pic + "@240w_!web-dynamic.jpg")
+                inputMessageContent = InputMessageText().apply {
+                    this.text = content
+                    this.linkPreviewOptions = LinkPreviewOptions().apply {
+                        this.url = videoInfo.data.pic + "@1920w_!web-dynamic.jpg".encodeUrl()
+                        this.showAboveText = true
+                        this.forceLargeMedia = true
+                    }
                 }
             },
             InputInlineQueryResultVideo().apply {
@@ -225,7 +229,7 @@ object BilibiliHandler : InlineHandler {
                 this.title = inlineTitle
                 this.description = if (canShowVideo) "Preview info with Video" else "May not be able to show video"
                 videoUrl = streamInfo.data.durl.first().url
-                thumbnailUrl = videoInfo.data.pic + "@240w_!web-dynamic.jpg"
+                thumbnailUrl = (videoInfo.data.pic + "@240w_!web-dynamic.jpg")
                 mimeType = MimeTypes.Video.MP4
                 inputMessageContent = InputMessageVideo().apply {
                     this.caption = content

@@ -8,6 +8,7 @@ import kotlinx.serialization.modules.contextual
 import kotlinx.serialization.modules.plus
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.URLEncoder
 import java.nio.file.Path
 import java.security.MessageDigest
 import java.util.*
@@ -54,7 +55,9 @@ fun String.trimString(size: Int = 100) = if (this.length > size + 20) this.subst
 
 fun Boolean.toInt() = if (this) 1 else 0
 
-fun String.urlBase64() = Base64.getUrlEncoder().encodeToString(this.toByteArray())
+fun String.urlBase64(): String = Base64.getUrlEncoder().encodeToString(this.toByteArray())
+
+fun String.encodeUrl(): String = URLEncoder.encode(this, "utf-8")
 
 fun ByteArray.md5() = MessageDigest.getInstance("MD5").digest(this)
 
