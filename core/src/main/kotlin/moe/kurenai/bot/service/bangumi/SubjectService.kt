@@ -68,7 +68,7 @@ internal object SubjectService {
             .appendLink(sub.name, link)
             .appendLine().appendLine()
             .appendFormattedInfoBox(infoBox)
-            .wrapQuote {
+            .wrapQuoteIfNeeded {
                 appendText(sub.summary)
             }.build()
             .trimMessage()

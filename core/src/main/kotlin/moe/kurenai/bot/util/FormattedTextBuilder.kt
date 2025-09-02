@@ -35,12 +35,35 @@ class FormattedTextBuilder {
     }
 
     fun wrapQuote(expendable: Boolean = true, block: FormattedTextBuilder.() -> Unit): FormattedTextBuilder {
+        return wrapQuoteIfNeeded(expendable, determinateLength = Int.MAX_VALUE, block = block)
+    }
+
+    fun wrapQuoteIfNeeded(
+        expendable: Boolean = true,
+        determinateLength: Int = 100,
+        block: FormattedTextBuilder.() -> Unit
+    ): FormattedTextBuilder {
         val start = sb.length
         block()
         if (sb.endsWith("\n\n")) sb.deleteAt(sb.lastIndex)
+        if (!sb.endsWith('\n')) sb.appendLine()
         val end = sb.length
-        entities.add(TdApi.TextEntity(start, end - start,
-            if (expendable) TdApi.TextEntityTypeExpandableBlockQuote() else TdApi.TextEntityTypeBlockQuote()))
+
+        val length = end - start
+        if (length >= determinateLength) {
+            entities.add(TdApi.TextEntity(start, length,
+                if (expendable) TdApi.TextEntityTypeExpandableBlockQuote() else TdApi.TextEntityTypeBlockQuote()))
+        } else {
+            if (start > 0 && sb.get(start - 1) != '\n') sb.insert(start, "\n\n")
+            else sb.insert(start, '\n')
+
+            val offset = sb.length - end
+            for (entity in entities) {
+                if (entity.offset >= start) {
+                    entity.offset += offset
+                }
+            }
+        }
         return this
     }
 

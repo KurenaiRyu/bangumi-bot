@@ -32,7 +32,7 @@ internal object PersonService {
             .appendLink(person.name, link)
             .appendLine().appendLine()
             .appendFormattedInfoBox(infoBox)
-            .wrapQuote {
+            .wrapQuoteIfNeeded {
                 appendText(person.summary)
             }.build()
             .trimMessage()

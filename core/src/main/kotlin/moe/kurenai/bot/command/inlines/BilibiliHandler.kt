@@ -8,9 +8,12 @@ import moe.kurenai.bot.command.*
 import moe.kurenai.bot.command.InlineDispatcher.PUB_DATE_PATTERN
 import moe.kurenai.bot.command.InlineDispatcher.fallback
 import moe.kurenai.bot.service.BiliBiliService
+import moe.kurenai.bot.util.FormattedTextBuilder
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
 import moe.kurenai.bot.util.TelegramUtil.fmt
 import moe.kurenai.bot.util.TelegramUtil.markdown
+import moe.kurenai.bot.util.TelegramUtil.trimCaption
+import moe.kurenai.bot.util.TelegramUtil.trimMessage
 import moe.kurenai.common.util.*
 import java.net.URI
 import java.time.LocalDateTime
@@ -162,7 +165,6 @@ object BilibiliHandler : InlineHandler {
     internal suspend fun doHandle(id: String, p: Int, t: Float): Array<InputInlineQueryResult>? {
 
         val videoInfo = BiliBiliService.getVideoInfo(id)
-        val desc = videoInfo.data.desc.trimString()
         val page = videoInfo.data.pages.find { it.page == p.coerceAtLeast(1) } ?: return null
         val streamInfo = BiliBiliService.getPlayUrl(videoInfo.data.bvid, page.cid)
         var link = "https://www.bilibili.com/video/${videoInfo.data.bvid}"
@@ -175,48 +177,60 @@ object BilibiliHandler : InlineHandler {
             link += "?$paramStr"
         }
 
-        val up = "UP: [${videoInfo.data.owner.name.markdown()}](https://space.bilibili.com/${videoInfo.data.owner.mid})"
-        val playCount = "${((videoInfo.data.stat.view / 10.0).roundToInt() / 100.0).toString().markdown()}K 播放"
+        val playCount = "${((videoInfo.data.stat.view / 10.0).roundToInt() / 100.0)}K 播放"
         val videoTitle = videoInfo.data.title.trim()
         val partTitle = page.part.trim()
         val inlineTitle: String
-        var contentTitle = if (p == 0 || videoInfo.data.pages.size == 1 || videoTitle.contains(partTitle)) {
-            inlineTitle = videoTitle
-            "[${videoTitle.markdown()}]($link)"
-        } else if (partTitle.startsWith(videoTitle) || partTitle.endsWith(videoTitle)) {
-            val partTitleCp = partTitle.replace(videoTitle, "").trim()
-            inlineTitle = "$videoTitle / $partTitleCp"
-            "[${videoTitle.markdown()}]($link) / $partTitleCp"
-        } else {
-            inlineTitle = "$videoTitle / $partTitle"
-            "[${videoTitle.markdown()}]($link) / ${partTitle.markdown()}"
-        }
-
-        if (t > 0) {
-            val timeStr = (t * 1000).toLong().milliseconds.formatToTime().markdown()
-            contentTitle += " / 跳转到 $timeStr"
-        }
 
         val rank =
             if (videoInfo.data.stat.nowRank == 0) "" else "/ ${videoInfo.data.stat.nowRank} 名 / 历史最高 ${videoInfo.data.stat.nowRank} 名"
         val createDate = LocalDateTime.ofEpochSecond(videoInfo.data.pubdate.toLong(), 0, ZoneOffset.ofHours(8))
             .format(PUB_DATE_PATTERN)
-            .markdown()
-        val duration = page.duration.seconds.formatToSeparateUnit().markdown()
-        val content = (contentTitle +
-            "\n\n$up / $playCount $rank / $duration" +
-            "\n发布时间: $createDate" +
-            "\n\n**>${desc.markdown()}||").fmt()
+        val duration = page.duration.seconds.formatToSeparateUnit()
+
+        val builder = FormattedTextBuilder()
+
+        if (p == 0 || videoInfo.data.pages.size == 1 || videoTitle.contains(partTitle)) {
+            inlineTitle = videoTitle
+            builder.appendLink(videoTitle, link)
+        } else if (partTitle.startsWith(videoTitle) || partTitle.endsWith(videoTitle)) {
+            val partTitleCp = partTitle.replace(videoTitle, "").trim()
+            inlineTitle = "$videoTitle / $partTitleCp"
+            builder.appendLink(videoTitle, link)
+                .appendText(" / $partTitleCp")
+        } else {
+            inlineTitle = "$videoTitle / $partTitle"
+            builder.appendLink(videoTitle, link)
+                .appendText(" / $partTitle")
+        }
+
+        if (t > 0) {
+            val timeStr = (t * 1000).toLong().milliseconds.formatToTime()
+            builder.appendText(" / 跳转到 $timeStr")
+        }
+
+        val formattedText = builder
+            .appendLine().appendLine()
+            .appendText("UP: ")
+            .appendLink(videoInfo.data.owner.name, "https://space.bilibili.com/${videoInfo.data.owner.mid}")
+            .appendText(" / $playCount $rank / $duration")
+            .appendLine()
+            .appendText(createDate)
+            .appendLine().appendLine()
+            .wrapQuoteIfNeeded {
+                appendText(videoInfo.data.desc)
+            }.build()
 
         val canShowVideo = BiliBiliService.fetchStreamLength(streamInfo.data!!.durl.first().url) in 1..12*1024*1024
+        val id = "${videoInfo.data.bvid.substring(2)}${videoInfo.data.cid.toHexString(hexFormat)}"
         return arrayOf(
             InputInlineQueryResultArticle().apply {
-                this.id = "A${videoInfo.data.bvid.substring(2)}${videoInfo.data.cid.toHexString(hexFormat)}"
+                this.id = "A$id"
                 this.title = inlineTitle
                 this.description = "Preview info with Photo"
                 thumbnailUrl = (videoInfo.data.pic + "@240w_!web-dynamic.jpg")
                 inputMessageContent = InputMessageText().apply {
-                    this.text = content
+                    this.text = formattedText.trimCaption()
                     this.linkPreviewOptions = LinkPreviewOptions().apply {
                         this.url = videoInfo.data.pic + "@1920w_!web-dynamic.jpg".encodeUrl()
                         this.showAboveText = true
@@ -225,14 +239,19 @@ object BilibiliHandler : InlineHandler {
                 }
             },
             InputInlineQueryResultVideo().apply {
-                this.id = "V${videoInfo.data.bvid.substring(2)}${videoInfo.data.cid.toHexString(hexFormat)}"
+                this.id = "V$id"
                 this.title = inlineTitle
-                this.description = if (canShowVideo) "Preview info with Video" else "May not be able to show video"
+                this.description = "Preview info with Video"
+                if (canShowVideo) this.description += " (May not be able to show)"
                 videoUrl = streamInfo.data.durl.first().url
                 thumbnailUrl = (videoInfo.data.pic + "@240w_!web-dynamic.jpg")
                 mimeType = MimeTypes.Video.MP4
+                this.videoDuration = page.duration
                 inputMessageContent = InputMessageVideo().apply {
-                    this.caption = content
+                    this.caption = formattedText.trimCaption()
+                    this.duration = page.duration
+                    this.height = page.dimension.height
+                    this.width = page.dimension.width
                 }
             }
         )
