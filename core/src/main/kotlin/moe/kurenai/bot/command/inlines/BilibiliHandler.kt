@@ -97,7 +97,7 @@ object BilibiliHandler : InlineHandler {
 
         val builder = FormattedTextBuilder()
         builder.appendBold(info.data.item.modules.moduleAuthor.name)
-            .appendText(" - ${pubTime}:\nhttps://t.bilibili.com/${id}\n\n")
+            .appendText(" - ${pubTime}:\n\n")
             .wrapQuoteIfNeeded {
                 appendText(content)
             }
@@ -108,10 +108,10 @@ object BilibiliHandler : InlineHandler {
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
             builder.wrapQuote {
                     appendBold(orig.modules.moduleAuthor.name)
-                    appendText(" - ${pubTime}:\nhttps://t.bilibili.com/${orig.idStr}\n\n$quoteContent")
+                    appendText(" - ${pubTime}:\n\n$quoteContent\n\nhttps://t.bilibili.com/${orig.idStr}")
             }
         }
-        val formattedText = builder.build()
+        val formattedText = builder.appendText("\nhttps://t.bilibili.com/${id}").build()
 
         val items = moduleDynamic.major?.opus?.pics?.mapIndexed { index, pic ->
             InputInlineQueryResultArticle().apply {

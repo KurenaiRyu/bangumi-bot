@@ -8,6 +8,9 @@ import moe.kurenai.bot.service.BiliBiliService
 import moe.kurenai.bot.util.FormattedTextBuilder
 import moe.kurenai.bot.util.TelegramUtil.asText
 import moe.kurenai.bot.util.TelegramUtil.trimCaption
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 class BiliDynamic : CommandHandler {
 
@@ -18,34 +21,34 @@ class BiliDynamic : CommandHandler {
         val url = args.firstOrNull() ?: return
         val id = url.substringAfterLast("/")
         val info = BiliBiliService.getDynamicDetail(id)
+        val modules = info.data.item.modules
+        val moduleDynamic = modules.moduleDynamic
 
-        val modules = if (info.data.item.orig != null) info.data.item.orig.modules else info.data.item.modules
-        val summary = modules.moduleDynamic.major!!.opus.summary.text
-
+        val content = moduleDynamic.major?.opus?.summary?.text ?: moduleDynamic.desc?.text ?: ""
+        val pubTime = LocalDateTime.ofEpochSecond(modules.moduleAuthor.pubTs, 0, ZoneOffset.ofHours(8))
+            .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 
         val builder = FormattedTextBuilder()
-        builder.appendBold(info.data.item.modules.moduleAuthor.name)
-            .appendText(" - ${info.data.item.modules.moduleAuthor.pubTime}:\nhttps://t.bilibili.com/${id}\n\n")
+        builder.appendBold(modules.moduleAuthor.name)
+            .appendText(" - ${pubTime}:\n\n")
             .wrapQuoteIfNeeded {
-                appendText(summary)
+                appendText(content)
             }
 
         info.data.item.orig?.let { orig ->
             val quoteContent = orig.modules.moduleDynamic.major?.opus?.summary?.text ?: ""
-            builder.appendLine().appendLine()
-                .appendBold("Reply\n")
-                .appendText("https://t.bilibili.com/${orig.idStr}\n")
-                .wrapQuote {
-                    appendBold(orig.modules.moduleAuthor.name)
-                    appendText(" - ${orig.modules.moduleAuthor.pubTime}:\n\n$quoteContent")
-                }
+            val pubTime = LocalDateTime.ofEpochSecond(orig.modules.moduleAuthor.pubTs, 0, ZoneOffset.ofHours(8))
+                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+            builder.wrapQuote {
+                appendBold(orig.modules.moduleAuthor.name)
+                appendText(" - ${pubTime}:\n\n$quoteContent\n\nhttps://t.bilibili.com/${orig.idStr}")
+            }
         }
+        val formattedText = builder.appendText("\nhttps://t.bilibili.com/${id}").build()
 
-        val caption = builder.build()
-
-        if (modules.moduleDynamic.major.opus.pics.isNotEmpty()) {
+        if (moduleDynamic.major!!.opus.pics.isNotEmpty()) {
             val list = modules.moduleDynamic.major.opus.pics.mapIndexed { index, pic ->
-                pic.url to caption.takeIf { index == 0 }
+                pic.url to formattedText.takeIf { index == 0 }
             }
             sendAlbumPhoto(message.chatId, list)
         } else {
@@ -53,7 +56,7 @@ class BiliDynamic : CommandHandler {
                 SendMessage().apply {
                     this.chatId = chatId
                     this.inputMessageContent = InputMessageText().apply {
-                        this.text = caption.trimCaption()
+                        this.text = formattedText.trimCaption()
                         this.linkPreviewOptions = LinkPreviewOptions().apply {
                             this.isDisabled = true
                         }
