@@ -74,7 +74,7 @@ data class DynamicInfo(
                     @SerialName("pub_time")
                     val pubTime: String,
                     @SerialName("pub_ts")
-                    val pubTs: Int,
+                    val pubTs: Long,
                     val type: String,
                 ) {
 

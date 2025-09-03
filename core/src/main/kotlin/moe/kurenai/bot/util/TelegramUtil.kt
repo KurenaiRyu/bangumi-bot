@@ -2,7 +2,6 @@ package moe.kurenai.bot.util
 
 import it.tdlight.jni.TdApi
 import moe.kurenai.bot.TelegramBot
-import org.jetbrains.kotlin.gradle.internal.utils.addToStdlib.cast
 
 /**
  * @author Kurenai
@@ -106,16 +105,11 @@ object TelegramUtil {
         }
     }
 
-    fun TdApi.FormattedText.trimMessage(): TdApi.FormattedText {
-        if (text.length > MAX_MESSAGE_LENGTH) {
-            text = text.substring(0, MAX_MESSAGE_LENGTH)
-        }
-        return this
-    }
+    fun TdApi.FormattedText.trimCaption(): TdApi.FormattedText = trimMessage(MAX_CAPTION_LENGTH)
 
-    fun TdApi.FormattedText.trimCaption(): TdApi.FormattedText {
-        if (text.length > MAX_CAPTION_LENGTH) {
-            text = text.substring(0, MAX_CAPTION_LENGTH)
+    fun TdApi.FormattedText.trimMessage(maxLength: Int = MAX_MESSAGE_LENGTH): TdApi.FormattedText {
+        if (text.length > maxLength) {
+            text = text.substring(0, maxLength)
         }
 
         entities = entities.filter {

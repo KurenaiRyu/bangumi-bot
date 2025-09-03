@@ -35,7 +35,7 @@ class FormattedTextBuilder {
     }
 
     fun wrapQuote(expendable: Boolean = true, block: FormattedTextBuilder.() -> Unit): FormattedTextBuilder {
-        return wrapQuoteIfNeeded(expendable, determinateLength = Int.MAX_VALUE, block = block)
+        return wrapQuoteIfNeeded(expendable, determinateLength = 0, block = block)
     }
 
     fun wrapQuoteIfNeeded(
@@ -45,8 +45,7 @@ class FormattedTextBuilder {
     ): FormattedTextBuilder {
         val start = sb.length
         block()
-        if (sb.endsWith("\n\n")) sb.deleteAt(sb.lastIndex)
-        else if (!sb.endsWith('\n')) sb.appendLine()
+        if (!sb.endsWith('\n')) sb.appendLine()
         val end = sb.length
 
         val length = end - start

@@ -18,6 +18,7 @@ import moe.kurenai.common.util.*
 import java.net.URI
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -91,23 +92,24 @@ object BilibiliHandler : InlineHandler {
         val moduleDynamic = info.data.item.modules.moduleDynamic
 
         val content = moduleDynamic.major?.opus?.summary?.text ?: moduleDynamic.desc?.text ?: ""
+        val pubTime = LocalDateTime.ofEpochSecond(info.data.item.modules.moduleAuthor.pubTs, 0, ZoneOffset.ofHours(8))
+                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 
         val builder = FormattedTextBuilder()
         builder.appendBold(info.data.item.modules.moduleAuthor.name)
-            .appendText(" - ${info.data.item.modules.moduleAuthor.pubTime}:\nhttps://t.bilibili.com/${id}\n\n")
+            .appendText(" - ${pubTime}:\nhttps://t.bilibili.com/${id}\n\n")
             .wrapQuoteIfNeeded {
                 appendText(content)
             }
 
         info.data.item.orig?.let { orig ->
             val quoteContent = orig.modules.moduleDynamic.major?.opus?.summary?.text ?: ""
-            builder.appendLine().appendLine()
-                .appendBold("Reply\n")
-                .appendText("https://t.bilibili.com/${orig.idStr}\n")
-                .wrapQuote {
+            val pubTime = LocalDateTime.ofEpochSecond(orig.modules.moduleAuthor.pubTs, 0, ZoneOffset.ofHours(8))
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+            builder.wrapQuote {
                     appendBold(orig.modules.moduleAuthor.name)
-                    appendText(" - ${orig.modules.moduleAuthor.pubTime}:\n\n$quoteContent")
-                }
+                    appendText(" - ${pubTime}:\nhttps://t.bilibili.com/${orig.idStr}\n\n$quoteContent")
+            }
         }
         val formattedText = builder.build()
 
