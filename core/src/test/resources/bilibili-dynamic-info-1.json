@@ -1,0 +1,510 @@
+{
+    "code": 0,
+    "message": "0",
+    "ttl": 1,
+    "data": {
+        "item": {
+            "basic": {
+                "comment_id_str": "1108240032124108804",
+                "comment_type": 17,
+                "like_icon": {
+                    "action_url": "",
+                    "end_url": "",
+                    "id": 0,
+                    "start_url": ""
+                },
+                "rid_str": "1108240032124108804"
+            },
+            "id_str": "1108240032124108804",
+            "modules": {
+                "module_author": {
+                    "avatar": {
+                        "container_size": {
+                            "height": 1.375,
+                            "width": 1.375
+                        },
+                        "fallback_layers": {
+                            "is_critical_group": true,
+                            "layers": [
+                                {
+                                    "general_spec": {
+                                        "pos_spec": {
+                                            "axis_x": 0.6875,
+                                            "axis_y": 0.6875,
+                                            "coordinate_pos": 2
+                                        },
+                                        "render_spec": {
+                                            "opacity": 1
+                                        },
+                                        "size_spec": {
+                                            "height": 0.787,
+                                            "width": 0.787
+                                        }
+                                    },
+                                    "layer_config": {
+                                        "is_critical": true,
+                                        "tags": {
+                                            "AVATAR_LAYER": {},
+                                            "GENERAL_CFG": {
+                                                "config_type": 1,
+                                                "general_config": {
+                                                    "web_css_style": {
+                                                        "borderRadius": "50%"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "resource": {
+                                        "res_image": {
+                                            "image_src": {
+                                                "placeholder": 6,
+                                                "remote": {
+                                                    "bfs_style": "widget-layer-avatar",
+                                                    "url": "https://i1.hdslb.com/bfs/face/f5fe224201cb532436668e5172d960c877f56baf.jpg"
+                                                },
+                                                "src_type": 1
+                                            }
+                                        },
+                                        "res_type": 3
+                                    },
+                                    "visible": true
+                                },
+                                {
+                                    "general_spec": {
+                                        "pos_spec": {
+                                            "axis_x": 0.6875,
+                                            "axis_y": 0.6875,
+                                            "coordinate_pos": 2
+                                        },
+                                        "render_spec": {
+                                            "opacity": 1
+                                        },
+                                        "size_spec": {
+                                            "height": 1.375,
+                                            "width": 1.375
+                                        }
+                                    },
+                                    "layer_config": {
+                                        "tags": {
+                                            "PENDENT_LAYER": {}
+                                        }
+                                    },
+                                    "resource": {
+                                        "res_image": {
+                                            "image_src": {
+                                                "remote": {
+                                                    "bfs_style": "widget-layer-avatar",
+                                                    "url": "https://i1.hdslb.com/bfs/garb/open/3017ca2696498b0cad365b95a90dc4d3dfecc5d3.png"
+                                                },
+                                                "src_type": 1
+                                            }
+                                        },
+                                        "res_type": 3
+                                    },
+                                    "visible": true
+                                },
+                                {
+                                    "general_spec": {
+                                        "pos_spec": {
+                                            "axis_x": 0.7560000000000001,
+                                            "axis_y": 0.7726666666666667,
+                                            "coordinate_pos": 1
+                                        },
+                                        "render_spec": {
+                                            "opacity": 1
+                                        },
+                                        "size_spec": {
+                                            "height": 0.41666666666666663,
+                                            "width": 0.41666666666666663
+                                        }
+                                    },
+                                    "layer_config": {
+                                        "tags": {
+                                            "GENERAL_CFG": {
+                                                "config_type": 1,
+                                                "general_config": {
+                                                    "web_css_style": {
+                                                        "background-color": "rgb(255,255,255)",
+                                                        "border": "2px solid rgba(255,255,255,1)",
+                                                        "borderRadius": "50%",
+                                                        "boxSizing": "border-box"
+                                                    }
+                                                }
+                                            },
+                                            "ICON_LAYER": {}
+                                        }
+                                    },
+                                    "resource": {
+                                        "res_image": {
+                                            "image_src": {
+                                                "local": 1,
+                                                "src_type": 2
+                                            }
+                                        },
+                                        "res_type": 3
+                                    },
+                                    "visible": true
+                                }
+                            ]
+                        },
+                        "mid": "170338"
+                    },
+                    "decorate": {
+                        "card_url": "https://i0.hdslb.com/bfs/garb/open/547bb90ed1022245e626e04a15e10b0f3e938ddc.png",
+                        "fan": {
+                            "color": "#BFC8D2",
+                            "color_format": {
+                                "colors": [
+                                    "#B8C7D0FF",
+                                    "#A2A7B0FF"
+                                ],
+                                "end_point": "100,100",
+                                "gradients": [
+                                    0,
+                                    100
+                                ],
+                                "start_point": "0,0"
+                            },
+                            "is_fan": true,
+                            "num_prefix": "NO.",
+                            "num_str": "000520",
+                            "number": 520
+                        },
+                        "id": 73872,
+                        "jump_url": "https://www.bilibili.com/h5/mall/digital-card/home?act_id=109211\u0026from=post\u0026f_source=garb\u0026-Abrowser=live\u0026hybrid_set_header=2\u0026navhide=1\u0026anchor_task=1",
+                        "name": "DOA XVV",
+                        "type": 3
+                    },
+                    "face": "https://i1.hdslb.com/bfs/face/f5fe224201cb532436668e5172d960c877f56baf.jpg",
+                    "face_nft": false,
+                    "following": null,
+                    "jump_url": "//space.bilibili.com/170338/dynamic",
+                    "label": "",
+                    "mid": 170338,
+                    "name": "手冢文轩",
+                    "official_verify": {
+                        "desc": "",
+                        "type": -1
+                    },
+                    "pendant": {
+                        "expire": 0,
+                        "image": "https://i1.hdslb.com/bfs/garb/open/3017ca2696498b0cad365b95a90dc4d3dfecc5d3.png",
+                        "image_enhance": "https://i1.hdslb.com/bfs/garb/open/3017ca2696498b0cad365b95a90dc4d3dfecc5d3.png",
+                        "image_enhance_frame": "",
+                        "n_pid": 1755231081001,
+                        "name": "DEAD OR ALIVE XVV",
+                        "pid": -1410543063
+                    },
+                    "pub_action": "",
+                    "pub_location_text": "",
+                    "pub_time": "2025年09月03日 11:37",
+                    "pub_ts": 1756870640,
+                    "type": "AUTHOR_TYPE_NORMAL",
+                    "vip": {
+                        "avatar_subscript": 1,
+                        "avatar_subscript_url": "",
+                        "due_date": 1772208000000,
+                        "label": {
+                            "bg_color": "#FB7299",
+                            "bg_style": 1,
+                            "border_color": "",
+                            "img_label_uri_hans": "",
+                            "img_label_uri_hans_static": "https://i0.hdslb.com/bfs/vip/8d4f8bfc713826a5412a0a27eaaac4d6b9ede1d9.png",
+                            "img_label_uri_hant": "",
+                            "img_label_uri_hant_static": "https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/VEW8fCC0hg.png",
+                            "label_theme": "annual_vip",
+                            "path": "http://i0.hdslb.com/bfs/vip/label_annual.png",
+                            "text": "年度大会员",
+                            "text_color": "#FFFFFF",
+                            "use_img_label": true
+                        },
+                        "nickname_color": "#FB7299",
+                        "status": 1,
+                        "theme_type": 0,
+                        "type": 2
+                    }
+                },
+                "module_dynamic": {
+                    "additional": null,
+                    "desc": {
+                        "rich_text_nodes": [
+                            {
+                                "orig_text": "安心です",
+                                "text": "安心です",
+                                "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                            },
+                            {
+                                "emoji": {
+                                    "icon_url": "https://i0.hdslb.com/bfs/emote/3c210366a5585706c09d4c686a9d942b39feeb50.png",
+                                    "size": 1,
+                                    "text": "[支持]",
+                                    "type": 1
+                                },
+                                "orig_text": "[支持]",
+                                "text": "[支持]",
+                                "type": "RICH_TEXT_NODE_TYPE_EMOJI"
+                            }
+                        ],
+                        "text": "安心です[支持]"
+                    },
+                    "major": null,
+                    "topic": null
+                },
+                "module_more": {
+                    "three_point_items": [
+                        {
+                            "label": "举报",
+                            "type": "THREE_POINT_REPORT"
+                        }
+                    ]
+                },
+                "module_stat": {
+                    "comment": {
+                        "count": 4,
+                        "forbidden": false
+                    },
+                    "forward": {
+                        "count": 0,
+                        "forbidden": false
+                    },
+                    "like": {
+                        "count": 134,
+                        "forbidden": false,
+                        "status": false
+                    }
+                }
+            },
+            "orig": {
+                "basic": {
+                    "comment_id_str": "",
+                    "comment_type": 0,
+                    "jump_url": "//www.bilibili.com/opus/1108225175847960578",
+                    "like_icon": {
+                        "action_url": "",
+                        "end_url": "",
+                        "id": 0,
+                        "start_url": ""
+                    },
+                    "rid_str": ""
+                },
+                "id_str": "1108225175847960578",
+                "modules": {
+                    "module_author": {
+                        "avatar": {
+                            "container_size": {
+                                "height": 1.35,
+                                "width": 1.35
+                            },
+                            "fallback_layers": {
+                                "is_critical_group": true,
+                                "layers": [
+                                    {
+                                        "general_spec": {
+                                            "pos_spec": {
+                                                "axis_x": 0.675,
+                                                "axis_y": 0.675,
+                                                "coordinate_pos": 2
+                                            },
+                                            "render_spec": {
+                                                "opacity": 1
+                                            },
+                                            "size_spec": {
+                                                "height": 1,
+                                                "width": 1
+                                            }
+                                        },
+                                        "layer_config": {
+                                            "is_critical": true,
+                                            "tags": {
+                                                "AVATAR_LAYER": {},
+                                                "GENERAL_CFG": {
+                                                    "config_type": 1,
+                                                    "general_config": {
+                                                        "web_css_style": {
+                                                            "borderRadius": "50%"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "resource": {
+                                            "res_image": {
+                                                "image_src": {
+                                                    "placeholder": 6,
+                                                    "remote": {
+                                                        "bfs_style": "widget-layer-avatar",
+                                                        "url": "https://i1.hdslb.com/bfs/face/90d5ae033cd4b16805eceaf188bf89b715102fe3.jpg"
+                                                    },
+                                                    "src_type": 1
+                                                }
+                                            },
+                                            "res_type": 3
+                                        },
+                                        "visible": true
+                                    },
+                                    {
+                                        "general_spec": {
+                                            "pos_spec": {
+                                                "axis_x": 0.8000000000000002,
+                                                "axis_y": 0.8000000000000002,
+                                                "coordinate_pos": 1
+                                            },
+                                            "render_spec": {
+                                                "opacity": 1
+                                            },
+                                            "size_spec": {
+                                                "height": 0.41666666666666663,
+                                                "width": 0.41666666666666663
+                                            }
+                                        },
+                                        "layer_config": {
+                                            "tags": {
+                                                "GENERAL_CFG": {
+                                                    "config_type": 1,
+                                                    "general_config": {
+                                                        "web_css_style": {
+                                                            "background-color": "rgb(255,255,255)",
+                                                            "border": "2px solid rgba(255,255,255,1)",
+                                                            "borderRadius": "50%",
+                                                            "boxSizing": "border-box"
+                                                        }
+                                                    }
+                                                },
+                                                "ICON_LAYER": {}
+                                            }
+                                        },
+                                        "resource": {
+                                            "res_image": {
+                                                "image_src": {
+                                                    "local": 3,
+                                                    "src_type": 2
+                                                }
+                                            },
+                                            "res_type": 3
+                                        },
+                                        "visible": true
+                                    }
+                                ]
+                            },
+                            "mid": "2755363"
+                        },
+                        "decorate": {
+                            "card_url": "https://i0.hdslb.com/bfs/garb/31d0458569d01bc3c8423170f4ff8a773860ff11.png",
+                            "fan": {
+                                "color": "#FF9D00",
+                                "color_format": {
+                                    "colors": [
+                                        "#FF9D00FF",
+                                        "#FF9D00FF"
+                                    ],
+                                    "end_point": "0,100",
+                                    "gradients": [
+                                        0,
+                                        100
+                                    ],
+                                    "start_point": "0,0"
+                                },
+                                "is_fan": true,
+                                "num_prefix": "NO.",
+                                "num_str": "114514",
+                                "number": 114514
+                            },
+                            "id": 1722419073001,
+                            "jump_url": "https://www.bilibili.com/h5/mall/equity-link/collect-home?item_id=1722419073001\u0026isdiy=0\u0026part=card\u0026from=post\u0026f_source=garb\u0026vmid=2755363\u0026native.theme=1\u0026navhide=1",
+                            "name": "熊人族粉丝动态卡片粉丝",
+                            "type": 3
+                        },
+                        "face": "https://i1.hdslb.com/bfs/face/90d5ae033cd4b16805eceaf188bf89b715102fe3.jpg",
+                        "face_nft": false,
+                        "following": null,
+                        "jump_url": "//space.bilibili.com/2755363/dynamic",
+                        "label": "",
+                        "mid": 2755363,
+                        "name": "熊人族嗷非秀",
+                        "official_verify": {
+                            "desc": "",
+                            "type": 0
+                        },
+                        "pendant": {
+                            "expire": 0,
+                            "image": "",
+                            "image_enhance": "",
+                            "image_enhance_frame": "",
+                            "n_pid": 0,
+                            "name": "",
+                            "pid": 0
+                        },
+                        "pub_action": "",
+                        "pub_time": "",
+                        "pub_ts": 1756867181,
+                        "type": "AUTHOR_TYPE_NORMAL",
+                        "vip": {
+                            "avatar_subscript": 1,
+                            "avatar_subscript_url": "",
+                            "due_date": 1783440000000,
+                            "label": {
+                                "bg_color": "#FB7299",
+                                "bg_style": 1,
+                                "border_color": "",
+                                "img_label_uri_hans": "",
+                                "img_label_uri_hans_static": "https://i0.hdslb.com/bfs/vip/8d4f8bfc713826a5412a0a27eaaac4d6b9ede1d9.png",
+                                "img_label_uri_hant": "",
+                                "img_label_uri_hant_static": "https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/VEW8fCC0hg.png",
+                                "label_theme": "annual_vip",
+                                "path": "http://i0.hdslb.com/bfs/vip/label_annual.png",
+                                "text": "年度大会员",
+                                "text_color": "#FFFFFF",
+                                "use_img_label": true
+                            },
+                            "nickname_color": "#FB7299",
+                            "status": 1,
+                            "theme_type": 0,
+                            "type": 2
+                        }
+                    },
+                    "module_dynamic": {
+                        "additional": null,
+                        "desc": null,
+                        "major": {
+                            "opus": {
+                                "fold_action": [
+                                    "展开",
+                                    "收起"
+                                ],
+                                "jump_url": "//www.bilibili.com/opus/1108225175847960578",
+                                "pics": [
+                                    {
+                                        "aigc": null,
+                                        "height": 402,
+                                        "live_url": null,
+                                        "size": 65.70703125,
+                                        "url": "http://i0.hdslb.com/bfs/new_dyn/0bb95d592227f4979b520d52438177cf2755363.jpg",
+                                        "width": 305
+                                    }
+                                ],
+                                "summary": {
+                                    "rich_text_nodes": [
+                                        {
+                                            "orig_text": "补觉去了",
+                                            "text": "补觉去了",
+                                            "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                                        }
+                                    ],
+                                    "text": "补觉去了"
+                                },
+                                "title": null
+                            },
+                            "type": "MAJOR_TYPE_OPUS"
+                        },
+                        "topic": null
+                    }
+                },
+                "type": "DYNAMIC_TYPE_DRAW",
+                "visible": true
+            },
+            "type": "DYNAMIC_TYPE_FORWARD",
+            "visible": true
+        }
+    }
+}
