@@ -86,16 +86,16 @@ data class DynamicInfo(
 
                     @Serializable
                     data class Pendant(
-                        val expire: Int,
+                        val expire: Long,
                         val image: String,
                         @SerialName("image_enhance")
                         val imageEnhance: String,
                         @SerialName("image_enhance_frame")
                         val imageEnhanceFrame: String,
                         @SerialName("n_pid")
-                        val nPid: Int,
+                        val nPid: Long,
                         val name: String,
-                        val pid: Int
+                        val pid: Long
                     )
 
                 }
