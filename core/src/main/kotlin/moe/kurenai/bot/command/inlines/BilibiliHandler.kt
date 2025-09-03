@@ -91,35 +91,39 @@ object BilibiliHandler : InlineHandler {
         val moduleDynamic = info.data.item.modules.moduleDynamic
 
         val content = moduleDynamic.major?.opus?.summary?.text ?: moduleDynamic.desc?.text ?: ""
-        val summary =
-            "${info.data.item.modules.moduleAuthor.name} - ${info.data.item.modules.moduleAuthor.pubTime}:\n\n$content\n\nhttps://t.bilibili.com/${id}"
 
-        val caption = summary.markdown().fmt()
+        val builder = FormattedTextBuilder()
+        builder.appendBold(info.data.item.modules.moduleAuthor.name)
+            .appendText(" - ${info.data.item.modules.moduleAuthor.pubTime}:\nhttps://t.bilibili.com/${id}\n\n")
+            .wrapQuoteIfNeeded {
+                appendText(content)
+            }
 
         info.data.item.orig?.let { orig ->
             val quoteContent = orig.modules.moduleDynamic.major?.opus?.summary?.text ?: ""
-            val quoteSummary =
-                "${orig.modules.moduleAuthor.name} - ${orig.modules.moduleAuthor.pubTime}:\n\n$quoteContent\n\nhttps://t.bilibili.com/${orig.idStr}"
-            val start = caption.text.length
-            caption.entities += TextEntity().apply {
-                this.offset = start
-                this.length = quoteSummary.length
-                this.type = TextEntityTypeBlockQuote()
-            }
-            caption.text += quoteSummary
+            builder.appendLine().appendLine()
+                .appendBold("Reply\n")
+                .appendText("https://t.bilibili.com/${orig.idStr}\n")
+                .wrapQuote {
+                    appendBold(orig.modules.moduleAuthor.name)
+                    appendText(" - ${orig.modules.moduleAuthor.pubTime}:\n\n$quoteContent")
+                }
         }
+        val formattedText = builder.build()
 
         val items = moduleDynamic.major?.opus?.pics?.mapIndexed { index, pic ->
-            InputInlineQueryResultPhoto().apply {
+            InputInlineQueryResultArticle().apply {
                 this.id = index.toString()
                 title =
                     "${info.data.item.modules.moduleAuthor.name} ${info.data.item.modules.moduleAuthor.pubTime}[$index]"
                 thumbnailUrl = pic.url + "@240w_!web-dynamic.webp"
-                photoUrl = pic.url + "@1920w_!web-dynamic.webp"
-                photoWidth = pic.width
-                photoHeight = pic.height
-                inputMessageContent = InputMessagePhoto().apply {
-                    this.caption = caption
+                inputMessageContent = InputMessageText().apply {
+                    this.text = formattedText.trimMessage()
+                    this.linkPreviewOptions = LinkPreviewOptions().apply {
+                        this.url = pic.url + "@1920w_!web-dynamic.webp"
+                        this.forceLargeMedia = true
+                        this.showAboveText = true
+                    }
                 }
             }
         }?.toTypedArray()?.takeIf { it.isNotEmpty() }
@@ -128,7 +132,7 @@ object BilibiliHandler : InlineHandler {
                 this.title =
                     "${info.data.item.modules.moduleAuthor.name} ${info.data.item.modules.moduleAuthor.pubTime}"
                 this.inputMessageContent = InputMessageText().apply {
-                    this.text = caption
+                    this.text = formattedText.trimMessage()
                 }
             })
 
@@ -228,11 +232,11 @@ object BilibiliHandler : InlineHandler {
                 this.id = "A$id"
                 this.title = inlineTitle
                 this.description = "With Photo"
-                thumbnailUrl = (videoInfo.data.pic + "@240w_!web-dynamic.jpg")
+                thumbnailUrl = videoInfo.data.pic
                 inputMessageContent = InputMessageText().apply {
                     this.text = formattedText.trimCaption()
                     this.linkPreviewOptions = LinkPreviewOptions().apply {
-                        this.url = videoInfo.data.pic + "@1920w_!web-dynamic.jpg".encodeUrl()
+                        this.url = videoInfo.data.pic
                         this.showAboveText = true
                         this.forceLargeMedia = true
                     }
@@ -244,7 +248,7 @@ object BilibiliHandler : InlineHandler {
                 this.description = "With Video"
                 if (!canShowVideo) this.description += " (May not be able to show)"
                 videoUrl = streamInfo.data.durl.first().url
-                thumbnailUrl = videoInfo.data.pic + "@240w_!web-dynamic.jpg".encodeUrl()
+                thumbnailUrl = videoInfo.data.pic
                 mimeType = MimeTypes.Video.MP4
                 this.videoDuration = page.duration
                 this.videoWidth = page.dimension.width
