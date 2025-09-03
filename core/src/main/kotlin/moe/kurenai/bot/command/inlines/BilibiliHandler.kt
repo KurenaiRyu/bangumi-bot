@@ -227,7 +227,7 @@ object BilibiliHandler : InlineHandler {
             InputInlineQueryResultArticle().apply {
                 this.id = "A$id"
                 this.title = inlineTitle
-                this.description = "Preview info with Photo"
+                this.description = "With Photo"
                 thumbnailUrl = (videoInfo.data.pic + "@240w_!web-dynamic.jpg")
                 inputMessageContent = InputMessageText().apply {
                     this.text = formattedText.trimCaption()
@@ -241,17 +241,16 @@ object BilibiliHandler : InlineHandler {
             InputInlineQueryResultVideo().apply {
                 this.id = "V$id"
                 this.title = inlineTitle
-                this.description = "Preview info with Video"
-                if (canShowVideo) this.description += " (May not be able to show)"
+                this.description = "With Video"
+                if (!canShowVideo) this.description += " (May not be able to show)"
                 videoUrl = streamInfo.data.durl.first().url
-                thumbnailUrl = (videoInfo.data.pic + "@240w_!web-dynamic.jpg")
+                thumbnailUrl = videoInfo.data.pic + "@240w_!web-dynamic.jpg".encodeUrl()
                 mimeType = MimeTypes.Video.MP4
                 this.videoDuration = page.duration
+                this.videoWidth = page.dimension.width
+                this.videoHeight = page.dimension.height
                 inputMessageContent = InputMessageVideo().apply {
                     this.caption = formattedText.trimCaption()
-                    this.duration = page.duration
-                    this.height = page.dimension.height
-                    this.width = page.dimension.width
                 }
             }
         )
