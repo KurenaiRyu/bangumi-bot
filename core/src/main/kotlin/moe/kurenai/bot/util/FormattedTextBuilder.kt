@@ -46,7 +46,7 @@ class FormattedTextBuilder {
         val start = sb.length
         block()
         if (sb.endsWith("\n\n")) sb.deleteAt(sb.lastIndex)
-        if (!sb.endsWith('\n')) sb.appendLine()
+        else if (!sb.endsWith('\n')) sb.appendLine()
         val end = sb.length
 
         val length = end - start
@@ -54,8 +54,12 @@ class FormattedTextBuilder {
             entities.add(TdApi.TextEntity(start, length,
                 if (expendable) TdApi.TextEntityTypeExpandableBlockQuote() else TdApi.TextEntityTypeBlockQuote()))
         } else {
-            if (start > 0 && sb.get(start - 1) != '\n') sb.insert(start, "\n\n")
-            else sb.insert(start, '\n')
+            // Leave a blank line
+            if (start >= 1 && sb.get(start - 1) != '\n') {
+                sb.insert(start, "\n\n")
+            } else if (start >= 2 && sb.get(start - 2) != '\n') {
+                sb.insert(start, '\n')
+            }
 
             val offset = sb.length - end
             for (entity in entities) {

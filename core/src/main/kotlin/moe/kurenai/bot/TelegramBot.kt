@@ -11,6 +11,7 @@ import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.*
 import moe.kurenai.bot.command.CommandDispatcher
 import moe.kurenai.bot.command.HandlerInitializer
+import moe.kurenai.bot.util.TelegramUtil.trimCaption
 import moe.kurenai.common.util.getLogger
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
@@ -105,7 +106,7 @@ object TelegramBot {
 
         val contents = pairs.map { (url, msg) ->
             InputMessagePhoto().apply {
-                this.caption = msg
+                this.caption = msg?.trimCaption()
                 this.photo = InputFileRemote(url)
             }
         }.toTypedArray()
