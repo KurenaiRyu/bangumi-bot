@@ -5,16 +5,16 @@ import it.tdlight.jni.TdApi.*
 import moe.kurenai.bot.Config.Companion.CONFIG
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.command.*
-import moe.kurenai.bot.command.InlineDispatcher.PUB_DATE_PATTERN
 import moe.kurenai.bot.command.InlineDispatcher.fallback
 import moe.kurenai.bot.service.BiliBiliService
 import moe.kurenai.bot.util.FormattedTextBuilder
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
-import moe.kurenai.bot.util.TelegramUtil.fmt
-import moe.kurenai.bot.util.TelegramUtil.markdown
 import moe.kurenai.bot.util.TelegramUtil.trimCaption
 import moe.kurenai.bot.util.TelegramUtil.trimMessage
-import moe.kurenai.common.util.*
+import moe.kurenai.common.util.MimeTypes
+import moe.kurenai.common.util.formatToSeparateUnit
+import moe.kurenai.common.util.formatToTime
+import moe.kurenai.common.util.getLogger
 import java.net.URI
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -82,7 +82,8 @@ object BilibiliHandler : InlineHandler {
         doHandle(inlineQuery, id, p, t)
     }
 
-    private suspend fun handleDynamic(inlineQuery: UpdateNewInlineQuery, uri: URI) {
+    private suspend fun handleDynamic(inlineQuery: UpdateNewInlineQuery, uri: URI
+                                      ) {
         log.info("Handle bilibili dynamic: $uri")
         val id = uri.path.substringAfterLast("/").takeIf { it.isNotBlank() } ?: run {
             fallback(inlineQuery)
@@ -93,7 +94,7 @@ object BilibiliHandler : InlineHandler {
 
         val content = moduleDynamic.major?.opus?.summary?.text ?: moduleDynamic.desc?.text ?: ""
         val pubTime = LocalDateTime.ofEpochSecond(info.data.item.modules.moduleAuthor.pubTs, 0, ZoneOffset.ofHours(8))
-                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                .format(InlineDispatcher.DATE_TIME_PATTERN)
 
         val builder = FormattedTextBuilder()
         builder.appendBold(info.data.item.modules.moduleAuthor.name)
@@ -191,7 +192,7 @@ object BilibiliHandler : InlineHandler {
         val rank =
             if (videoInfo.data.stat.nowRank == 0) "" else "/ ${videoInfo.data.stat.nowRank} 名 / 历史最高 ${videoInfo.data.stat.nowRank} 名"
         val createDate = LocalDateTime.ofEpochSecond(videoInfo.data.pubdate.toLong(), 0, ZoneOffset.ofHours(8))
-            .format(PUB_DATE_PATTERN)
+            .format(InlineDispatcher.DATE_TIME_PATTERN)
         val duration = page.duration.seconds.formatToSeparateUnit()
 
         val builder = FormattedTextBuilder()

@@ -6,6 +6,7 @@ import moe.kurenai.bot.command.*
 import moe.kurenai.bot.command.InlineDispatcher.fallback
 import moe.kurenai.bot.service.SakugabooruService
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
+import moe.kurenai.bot.util.TelegramUtil.answerInlineQueryEmpty
 import moe.kurenai.common.util.getLogger
 import java.net.URI
 
@@ -26,13 +27,17 @@ object SakugabooruHandler : InlineHandler {
     }
 
     private suspend fun doHandle(inlineQuery: UpdateNewInlineQuery, uri: URI) {
-        log.info("Handle Sakugabooru")
+        log.info("Handle Sakugabooru [$uri]")
         val params = uri.path.split("/")
         if (params.size == 4) {
             if (params[1] == "post" && params[2] == "show") {
                 val id = params[3]
                 kotlin.runCatching {
-                    send { answerInlineQuery(inlineQuery.id, arrayOf(SakugabooruService.findOne(id, uri))) }
+                    SakugabooruService.findPostById(id)?.let {
+                        send { answerInlineQuery(inlineQuery.id, arrayOf(it), cacheTime = 3600) }
+                    }?: run {
+                        fallback(inlineQuery)
+                    }
                 }.onFailure {
                     log.error(it.message, it)
                     fallback(inlineQuery)

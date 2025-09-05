@@ -27,12 +27,6 @@ class Status : CommandHandler {
         val msg = """
             总可用内存: ${arr[0]}/${arr[1]}
             剩余可用分配内存: ${arr[2]}/${arr[3]}
-            --------------------------------------
-            SakugabooruCache: ${
-            SakugabooruService.cacheStats.snapshot().hitCount()
-        } / ${SakugabooruService.cacheStats.snapshot().loadCount()} (${
-            SakugabooruService.cacheStats.snapshot().hitRate()
-        })
         """.trimIndent()
 
         send(messageText(message.chatId, msg.asText()))

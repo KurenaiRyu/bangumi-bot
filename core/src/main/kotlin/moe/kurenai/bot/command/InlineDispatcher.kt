@@ -12,9 +12,13 @@ import java.util.*
 
 object InlineDispatcher {
 
-    internal val PUB_DATE_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    internal val DATE_TIME_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
     private val registeredHandlers: TreeSet<HandlerAware> = sortedSetOf()
+
+    suspend fun execute(inlineHandler: UpdateNewInlineQuery, input: String) {
+
+    }
 
     suspend fun execute(inlineQuery: UpdateNewInlineQuery, uri: URI) {
 
