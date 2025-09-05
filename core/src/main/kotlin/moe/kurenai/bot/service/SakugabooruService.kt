@@ -9,6 +9,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
 import moe.kurenai.bot.command.InlineDispatcher
+import moe.kurenai.bot.model.sakugabooru.Note
 import moe.kurenai.bot.model.sakugabooru.Post
 import moe.kurenai.bot.util.FormattedTextBuilder
 import moe.kurenai.bot.util.TelegramUtil.trimCaption
@@ -52,24 +53,57 @@ internal object SakugabooruService {
             .appendText(" / ${post.author} / $dateTime")
             .appendLine().appendLine()
 
-        for (tag in post.tags.split(" ")) {
-            builder.appendText("- $tag")
-            builder.appendLine()
+        val notes: Array<Note> = json.decodeFromString(client.get("https://www.sakugabooru.com/note.json?post_id=$id").bodyAsText())
+        if (notes.isNotEmpty()) {
+            val noteContent = notes.joinToString("\n\n") { it.body }
+            builder.appendText(noteContent)
+            builder.appendLine().appendLine()
+        }
+
+        if (post.source.isNotBlank()) {
+            builder.appendBold("source")
+                .appendText(": ${post.source}")
+        }
+
+        builder.wrapQuote {
+            for (tag in post.tags.split(" ")) {
+                appendText("- ")
+                appendLink(tag, "https://www.sakugabooru.com/post?tags=$tag")
+                appendLine()
+            }
         }
 
         val formattedText = builder.build()
 
-        return InputInlineQueryResultVideo().apply {
-            this.id = "SAKUGA-POST-$id"
-            title = id
-            videoUrl = post.fileUrl
-            videoWidth = post.width
-            videoHeight = post.height
-            mimeType = MimeTypes.Video.MP4
-            thumbnailUrl = post.previewUrl
-            inputMessageContent = InputMessageVideo().apply {
-                this.caption = formattedText.trimCaption()
+        return when (post.fileExt) {
+            "mp4" -> {
+                InputInlineQueryResultVideo().apply {
+                    this.id = "SAKUGA-POST-$id"
+                    title = id
+                    videoUrl = post.fileUrl
+                    videoWidth = post.width
+                    videoHeight = post.height
+                    mimeType = MimeTypes.Video.MP4
+                    thumbnailUrl = post.previewUrl
+                    inputMessageContent = InputMessageVideo().apply {
+                        this.caption = formattedText.trimCaption()
+                    }
+                }
             }
+            "jpg" -> {
+                InputInlineQueryResultPhoto().apply {
+                    this.id = "SAKUGA-POST-$id"
+                    title = id
+                    photoUrl = post.fileUrl
+                    photoWidth = post.width
+                    photoHeight = post.height
+                    thumbnailUrl = post.previewUrl
+                    inputMessageContent = InputMessageVideo().apply {
+                        this.caption = formattedText.trimCaption()
+                    }
+                }
+            }
+            else -> null
         }
     }
 
