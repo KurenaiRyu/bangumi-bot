@@ -2,6 +2,7 @@ package moe.kurenai.bot.util
 
 import it.tdlight.jni.TdApi
 import moe.kurenai.bot.TelegramBot
+import org.apache.logging.log4j.message.FormattedMessage
 
 /**
  * @author Kurenai
@@ -108,20 +109,27 @@ object TelegramUtil {
     fun TdApi.FormattedText.trimCaption(): TdApi.FormattedText = trimMessage(MAX_CAPTION_LENGTH)
 
     fun TdApi.FormattedText.trimMessage(maxLength: Int = MAX_MESSAGE_LENGTH): TdApi.FormattedText {
-        if (text.length > maxLength) {
-            text = text.substring(0, maxLength)
-        }
+        if (text.length < maxLength) return this
 
-        entities = entities.filter {
-            it.offset < text.length
-        }.toTypedArray()
+        val new = TdApi.FormattedText()
+        new.text = text.substring(0, maxLength)
 
+        val newEntities = mutableListOf<TdApi.TextEntity>()
         for (entity in entities) {
-            if (entity.offset + entity.length >= text.length) {
-                entity.length = text.length - entity.offset
+            if (entity.offset >= new.text.length) continue
+
+            if (entity.offset + entity.length >= new.text.length) {
+                newEntities.add(TdApi.TextEntity().apply {
+                    this.offset = entity.offset
+                    this.length = new.text.length - entity.offset
+                    this.type = entity.type
+                })
+            } else {
+                newEntities.add(entity)
             }
         }
-        return this
+
+        return new
     }
 
     val TdApi.Message.userSender: TdApi.MessageSenderUser? get() = this.senderId as? TdApi.MessageSenderUser
