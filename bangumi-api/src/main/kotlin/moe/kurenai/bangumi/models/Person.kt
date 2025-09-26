@@ -18,6 +18,7 @@ package moe.kurenai.bangumi.models
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import moe.kurenai.bangumi.constant.PersonCareer
 
 /**
  *

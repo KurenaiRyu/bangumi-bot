@@ -52,7 +52,15 @@ fun generateAction(
 
         typeMappings.set(
             mapOf(
-                "number" to "kotlin.Float"
+                "number" to "kotlin.Float",
+                "PersonCareer" to "moe.kurenai.bangumi.constant.PersonCareer",
+                "WikiV0" to "moe.kurenai.bangumi.models.InfoBox",
+            )
+        )
+        importMappings.set(
+            mapOf(
+                "PersonCareer" to "moe.kurenai.bangumi.constant.PersonCareer",
+                "WikiV0" to "moe.kurenai.bangumi.models.InfoBox",
             )
         )
 

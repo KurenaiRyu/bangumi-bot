@@ -1,0 +1,78 @@
+{
+    "last_modified": "0001-01-01T00:00:00Z",
+    "blood_type": null,
+    "birth_year": 1996,
+    "birth_day": 6,
+    "birth_mon": 3,
+    "gender": "female",
+    "images": {
+        "small": "https://lain.bgm.tv/r/100/pic/crt/l/1a/96/19560_prsn_dIRg5.jpg?r=1709906617",
+        "grid": "https://lain.bgm.tv/pic/crt/g/1a/96/19560_prsn_dIRg5.jpg?r=1709906617",
+        "large": "https://lain.bgm.tv/pic/crt/l/1a/96/19560_prsn_dIRg5.jpg?r=1709906617",
+        "medium": "https://lain.bgm.tv/r/400/pic/crt/l/1a/96/19560_prsn_dIRg5.jpg?r=1709906617"
+    },
+    "summary": "日本的女性声优，爱知县名古屋市出身。I'm Enterprise所属。\r\n高中二年级进入日本播音演技研究所名古屋校就读，2015年4月进入I'm Enterprise。\r\n高中时代加入戏剧社，但因为身高矮小无法演出护士，而改以不会被外貌影响的声优为目标。\r\n交情好的声优有目前在《见习神仙 秘密的心灵》中共同演出的潘惠美、事务所的前辈小泽亚李与长绳麻理亚。\r\n对于演出婴儿的声音很有自信。\r\n2019年，获得第13回声优奖的新人女优赏。",
+    "name": "本渡楓",
+    "img": "https://lain.bgm.tv/pic/crt/l/1a/96/19560_prsn_dIRg5.jpg?r=1709906617",
+    "infobox": [
+        {
+            "key": "简体中文名",
+            "value": "本渡枫"
+        },
+        {
+            "key": "别名",
+            "value": [
+                {
+                    "k": "纯假名",
+                    "v": "ほんど かえで"
+                },
+                {
+                    "k": "罗马字",
+                    "v": "Hondo Kaede"
+                },
+                {
+                    "k": "昵称",
+                    "v": "えーでちゃん、ほんどちゃん、かえちゃん"
+                }
+            ]
+        },
+        {
+            "key": "性别",
+            "value": "女"
+        },
+        {
+            "key": "生日",
+            "value": "1996年3月6日"
+        },
+        {
+            "key": "引用来源",
+            "value": "Wikipedia"
+        },
+        {
+            "key": "出身地",
+            "value": "愛知県名古屋市"
+        },
+        {
+            "key": "事务所",
+            "value": "アイムエンタープライズ"
+        },
+        {
+            "key": "出道时间",
+            "value": "2015"
+        },
+        {
+            "key": "事务所个人主页",
+            "value": "https://www.imenterprise.jp/profile.php?id=78"
+        }
+    ],
+    "career": [
+        "seiyu"
+    ],
+    "stat": {
+        "comments": 141,
+        "collects": 552
+    },
+    "id": 19560,
+    "locked": false,
+    "type": 1
+}
