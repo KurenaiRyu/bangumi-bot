@@ -37,7 +37,7 @@ fun generateAction(
         outputDir.set(layout.buildDirectory.file(generatedRoot).get().asFile.absolutePath)
         packageName.set(pkgName)
         apiNameSuffix.set(apiSuffix)
-        removeOperationIdPrefix = true
+        removeOperationIdPrefix.set(true)
 
         additionalProperties.set(
             mapOf(

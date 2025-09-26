@@ -86,7 +86,9 @@ kotlin {
     compilerOptions {
         freeCompilerArgs = listOf(
             "-Xjsr305=strict",
-            "-Xcontext-parameters"
+            "-Xcontext-parameters",
+            "--release NN",
+            "--enable-preview"
         )
         javaParameters = true
     }
