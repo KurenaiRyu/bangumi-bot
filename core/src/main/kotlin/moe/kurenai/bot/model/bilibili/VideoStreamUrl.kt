@@ -35,16 +35,16 @@ data class VideoStreamUrl(
         @SerialName("support_formats")
         val supportFormats: List<SupportFormat>,
         @SerialName("last_play_time")
-        val lastPlayTime: Int,
+        val lastPlayTime: Long,
         @SerialName("last_play_cid")
-        val lastPlayCid: Int,
+        val lastPlayCid: Long,
         val dash: Dash? = null
     ) {
         @Serializable
         data class Durl(
-            val order: Int,
-            val length: Int,
-            val size: Int,
+            val order: Long,
+            val length: Long,
+            val size: Long,
             val ahead: String,
             val vhead: String,
             val url: String,
@@ -67,7 +67,7 @@ data class VideoStreamUrl(
         @Serializable
         data class Dash(
             val audio: List<Audio>,
-            val duration: Int,
+            val duration: Long,
             val minBufferTime: Double,
             val video: List<Video>
         ) {
@@ -76,11 +76,11 @@ data class VideoStreamUrl(
                 val backupUrl: List<String>,
                 val bandwidth: Int,
                 val baseUrl: String,
-                val codecid: Int,
+                val codecid: Long,
                 val codecs: String,
                 val frameRate: String,
                 val height: Int,
-                val id: Int,
+                val id: Long,
                 val mimeType: String,
                 val sar: String,
                 @SerialName("segment_base")
@@ -102,11 +102,11 @@ data class VideoStreamUrl(
                 val backupUrl: List<String>,
                 val bandwidth: Int,
                 val baseUrl: String,
-                val codecid: Int,
+                val codecid: Long,
                 val codecs: String,
                 val frameRate: String,
                 val height: Int,
-                val id: Int,
+                val id: Long,
                 val mimeType: String,
                 val sar: String,
                 @SerialName("segment_base")
