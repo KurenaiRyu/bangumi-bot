@@ -2,9 +2,6 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
 }
 
-group = "moe.kurenai.bot"
-version = "unspecified"
-
 repositories {
     mavenCentral()
 }

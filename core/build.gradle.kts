@@ -6,9 +6,6 @@ plugins {
     alias(libs.plugins.lombok)
 }
 
-group = "moe.kurenai.bot"
-version = "1.0-SNAPSHOT"
-
 dependencies {
     implementation(project(":bangumi-api"))
     implementation(project(":common"))

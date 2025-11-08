@@ -1,4 +1,6 @@
 allprojects {
+    group = "moe.kurenai.bot"
+    version = "1.0-SNAPSHOT"
     repositories {
         maven("https://mvn.mchv.eu/repository/mchv/") {
             content {
