@@ -73,11 +73,12 @@ internal object SubjectService {
             }.build()
             .trimMessage()
 
+        val itemTitle = sub.name + "(${sub.nameCn})"
         val resultList = mutableListOf(
             InputInlineQueryResultArticle().apply {
                 this.id = "S${sub.id}"
                 this.thumbnailUrl = sub.images.getLarge().toGrid()
-                this.title = sub.name + "(${sub.nameCn})"
+                this.title = itemTitle
                 inputMessageContent = InputMessageText().apply {
                     this.text = formattedText
                     this.linkPreviewOptions = LinkPreviewOptions().apply {
@@ -94,7 +95,7 @@ internal object SubjectService {
             resultList.add(
                 InputInlineQueryResultArticle().apply {
                     this.id = "S${sub.id}_${i + 1}"
-                    this.title = title
+                    this.title = title.ifBlank { itemTitle }
                     this.thumbnailUrl = url
                     this.inputMessageContent = InputMessageText().apply {
                         this.text = formattedText

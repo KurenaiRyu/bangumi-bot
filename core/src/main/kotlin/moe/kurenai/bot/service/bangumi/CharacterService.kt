@@ -91,7 +91,7 @@ internal object CharacterService {
             resultList.add(InputInlineQueryResultArticle().apply {
                 id = "C${character.id}_$i"
                 thumbnailUrl = url
-                this.title = title
+                this.title = title.ifBlank { character.name }
                 this.inputMessageContent = InputMessageText().apply {
                     this.text = formattedText
                     this.linkPreviewOptions = LinkPreviewOptions().apply {

@@ -56,7 +56,7 @@ internal object PersonService {
         BgmUtil.handleOgImageInfo(infoBox) { title, url, i ->
             resultList.add(InputInlineQueryResultArticle().apply {
                 this.id = "P${person.id}_$i"
-                this.title = title
+                this.title = title.ifBlank { person.name }
                 this.inputMessageContent = InputMessageText().apply {
                     this.text = formattedText
                     this.linkPreviewOptions = LinkPreviewOptions().apply {
