@@ -77,3 +77,27 @@ fun Duration.formatToSeparateUnit(): String {
         res
     }
 }
+
+fun removeOverlap(a: String, b: String): String {
+    var maxLen = 0
+    var startIndex = -1
+
+    // 寻找最长公共子串
+    for (i in a.indices) {
+        for (j in b.indices) {
+            var k = 0
+            while (i + k < a.length && j + k < b.length && a[i + k] == b[j + k]) {
+                k++
+            }
+            if (k > maxLen) {
+                maxLen = k
+                startIndex = i
+            }
+        }
+    }
+
+    // 如果有重叠部分则去掉
+    return if (maxLen > 0) {
+        a.removeRange(startIndex, startIndex + maxLen)
+    } else a
+}
