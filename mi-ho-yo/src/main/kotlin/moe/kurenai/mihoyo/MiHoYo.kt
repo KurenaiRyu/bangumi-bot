@@ -57,7 +57,7 @@ object MiHoYo {
             headers.setIfAbsent(HttpHeaders.UserAgent, UA)
             headers.setIfAbsent(HttpHeaders.Referrer, "https://webstatic.mihoyo.com/")
 
-            headers.get(MiHoYoHeaders.X_RPC_DEVICE_FP)?.ifBlank {
+            headers[MiHoYoHeaders.X_RPC_DEVICE_FP]?.ifBlank {
                 headers.remove(MiHoYoHeaders.X_RPC_DEVICE_FP)
                 headers[MiHoYoHeaders.X_RPC_DEVICE_FP] = getDeviceFp()
             }
@@ -167,14 +167,14 @@ object MiHoYo {
         return ret.deviceFp
     }
 
-    context(AccountContext)
+    context(ctx: AccountContext)
     suspend fun getZZZAvatarList(): List<AvatarListResult.Avatar> {
         val url = "https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/avatar/basic"
         val ret = client.get(url) {
-            parameter("role_id", zzzInfo.gameUid)
-            parameter("server", zzzInfo.region)
+            parameter("role_id", ctx.zzzInfo.gameUid)
+            parameter("server", ctx.zzzInfo.region)
 
-            header(HttpHeaders.Cookie, cookie)
+            header(HttpHeaders.Cookie, ctx.cookie)
             header(MiHoYoHeaders.X_RPC_APP_ID, APP_ID)
             header(MiHoYoHeaders.X_RPC_APP_VERSION, APP_VERSION)
             header(MiHoYoHeaders.X_RPC_DEVICE_ID, DEVICE_ID)
@@ -185,16 +185,16 @@ object MiHoYo {
         return ret.avatarList
     }
 
-    context(AccountContext)
+    context(ctx: AccountContext)
     suspend fun getZZZAvatarDetail(agentId: Int, needWiki: Boolean = false): AvatarDetailResult {
         val url = "https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/avatar/info"
         val ret = client.get(url) {
-            parameter("role_id", zzzInfo.gameUid)
-            parameter("server", zzzInfo.region)
+            parameter("role_id", ctx.zzzInfo.gameUid)
+            parameter("server", ctx.zzzInfo.region)
             parameter("need_wiki", needWiki)
             parameter("id_list[]", agentId)
 
-            header(HttpHeaders.Cookie, cookie)
+            header(HttpHeaders.Cookie, ctx.cookie)
             header(MiHoYoHeaders.X_RPC_APP_ID, APP_ID)
             header(MiHoYoHeaders.X_RPC_APP_VERSION, APP_VERSION)
             header(MiHoYoHeaders.X_RPC_DEVICE_ID, DEVICE_ID)
@@ -207,15 +207,15 @@ object MiHoYo {
         return ret
     }
 
-    context(AccountContext)
+    context(ctx: AccountContext)
     suspend fun getZZZMemDetail(previously: Boolean = false): MemDetail {
         val url = "https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/mem_detail"
         val ret = client.get(url) {
-            parameter("uid", zzzInfo.gameUid)
-            parameter("region", zzzInfo.region)
+            parameter("uid", ctx.zzzInfo.gameUid)
+            parameter("region", ctx.zzzInfo.region)
             parameter("schedule_type", if (previously) 2 else 1)
 
-            header(HttpHeaders.Cookie, cookie)
+            header(HttpHeaders.Cookie, ctx.cookie)
             header(MiHoYoHeaders.X_RPC_APP_ID, APP_ID)
             header(MiHoYoHeaders.X_RPC_APP_VERSION, APP_VERSION)
             header(MiHoYoHeaders.X_RPC_DEVICE_ID, DEVICE_ID)
@@ -228,15 +228,15 @@ object MiHoYo {
         return ret
     }
 
-    context(AccountContext)
+    context(ctx: AccountContext)
     suspend fun getZZZChallenge(previously: Boolean = false): MemDetail {
         val url = "https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/challenge"
         val ret = client.get(url) {
-            parameter("role_id", zzzInfo.gameUid)
-            parameter("server", zzzInfo.region)
+            parameter("role_id", ctx.zzzInfo.gameUid)
+            parameter("server", ctx.zzzInfo.region)
             parameter("schedule_type", if (previously) 2 else 1)
 
-            header(HttpHeaders.Cookie, cookie)
+            header(HttpHeaders.Cookie, ctx.cookie)
             header(MiHoYoHeaders.X_RPC_APP_ID, APP_ID)
             header(MiHoYoHeaders.X_RPC_APP_VERSION, APP_VERSION)
             header(MiHoYoHeaders.X_RPC_DEVICE_ID, DEVICE_ID)
@@ -249,28 +249,28 @@ object MiHoYo {
         return ret
     }
 
-    context(AccountContext)
+    context(ctx: AccountContext)
     suspend fun getSignList(): SignList {
         val url = "https://api-takumi.mihoyo.com/event/luna/home"
         return client.get(url) {
             parameter("act_id", GameInfo.ZZZ.actId)
             parameter("lang", "zh-cn")
 
-            header(HttpHeaders.Cookie, cookie)
+            header(HttpHeaders.Cookie, ctx.cookie)
             header(MiHoYoHeaders.X_RPC_SIGNGAME, GameInfo.ZZZ.gameName)
         }.body<BaseResponse<SignList>>().unwrap()
     }
 
-    context(AccountContext)
+    context(ctx: AccountContext)
     suspend fun getZZZSignInfo(): JsonElement {
         val url = "https://api-takumi.mihoyo.com/event/luna/zzz/info"
         return client.get(url) {
             parameter("act_id", GameInfo.ZZZ.actId)
-            parameter("uid", zzzInfo.gameUid)
-            parameter("region", zzzInfo.region)
+            parameter("uid", ctx.zzzInfo.gameUid)
+            parameter("region", ctx.zzzInfo.region)
             parameter("lang", "zh-cn")
 
-            header(HttpHeaders.Cookie, cookie)
+            header(HttpHeaders.Cookie, ctx.cookie)
             header(MiHoYoHeaders.X_RPC_APP_ID, APP_ID)
             header(MiHoYoHeaders.X_RPC_APP_VERSION, APP_VERSION)
             header(MiHoYoHeaders.X_RPC_DEVICE_ID, DEVICE_ID)
@@ -282,7 +282,7 @@ object MiHoYo {
         }.body<BaseResponse<JsonElement>>().unwrap()
     }
 
-    context(AccountContext)
+    context(ctx: AccountContext)
     suspend fun zzzSign() {
         val url = "https://api-takumi.mihoyo.com/event/luna/sign"
     }
