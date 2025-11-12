@@ -12,20 +12,38 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import it.tdlight.jni.TdApi.InputInlineQueryResult
+import it.tdlight.jni.TdApi.InputInlineQueryResultArticle
+import it.tdlight.jni.TdApi.InputInlineQueryResultVideo
+import it.tdlight.jni.TdApi.InputMessageText
+import it.tdlight.jni.TdApi.InputMessageVideo
+import it.tdlight.jni.TdApi.LinkPreviewOptions
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import moe.kurenai.bot.Config.Companion.CONFIG
+import moe.kurenai.bot.command.InlineDispatcher
 import moe.kurenai.bot.model.bilibili.DynamicInfo
 import moe.kurenai.bot.model.bilibili.VideoInfo
 import moe.kurenai.bot.model.bilibili.VideoStreamUrl
+import moe.kurenai.bot.util.FormattedTextBuilder
 import moe.kurenai.bot.util.HttpUtil.DYNAMIC_USER_AGENT
+import moe.kurenai.bot.util.TelegramUtil.trimCaption
+import moe.kurenai.common.util.MimeTypes
+import moe.kurenai.common.util.formatToSeparateUnit
+import moe.kurenai.common.util.formatToTime
 import moe.kurenai.common.util.getLogger
 import moe.kurenai.common.util.json
+import moe.kurenai.common.util.removeOverlap
 import org.jsoup.Jsoup
 import java.net.URI
 import java.time.Duration
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 
 /**
@@ -39,6 +57,13 @@ internal object BiliBiliService {
     private val httpLogger = object : Logger {
         override fun log(message: String) {
             log.debug(message)
+        }
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    private val hexFormat = HexFormat{
+        number {
+            removeLeadingZeros = true
         }
     }
 
@@ -76,7 +101,7 @@ internal object BiliBiliService {
         return Url(redirectUrl)
     }
 
-    fun getIdAndPByShortLink(uri: URI, redirectUrl: Url): Triple<String, Int, Float> {
+    fun getIdPartNumAndTime(uri: URI, redirectUrl: Url): Triple<String, Int, Float> {
         val segments = redirectUrl.rawSegments
         if (segments.isEmpty()) error("Get short link error, origin: ${uri}, redirect: ${redirectUrl}, segments: $segments")
         val p = redirectUrl.parameters["p"]?.toInt() ?: 0
@@ -118,6 +143,114 @@ internal object BiliBiliService {
 
     suspend fun fetchStreamLength(url: String): Long {
         return client.head(url).headers[HttpHeaders.ContentLength]?.toLongOrNull()?:-1
+    }
+
+
+    @OptIn(ExperimentalStdlibApi::class)
+    suspend fun handleVideo(id: String, p: Int, t: Float): Array<InputInlineQueryResult> {
+
+        val videoInfo = getVideoInfo(id)
+
+        val playCount = "${((videoInfo.data.stat.view / 10.0).roundToInt() / 100.0)}K 播放"
+        val videoTitle = videoInfo.data.title.trim()
+        val linkWithoutPage = "https://www.bilibili.com/video/${videoInfo.data.bvid}"
+
+        val parameters = mutableListOf<String>()
+        if (p > 0) parameters.add("p=$p")
+        if (t > 0) parameters.add("t=$t")
+        val link = if (parameters.isNotEmpty()) {
+            val paramStr = parameters.joinToString("&")
+            "$linkWithoutPage?$paramStr"
+        } else {
+            linkWithoutPage
+        }
+
+        val rank =
+            if (videoInfo.data.stat.nowRank == 0) "" else "/ ${videoInfo.data.stat.nowRank} 名 / 历史最高 ${videoInfo.data.stat.nowRank} 名"
+        val createDate = LocalDateTime.ofEpochSecond(videoInfo.data.pubdate.toLong(), 0, ZoneOffset.ofHours(8))
+            .format(InlineDispatcher.DATE_TIME_PATTERN)
+
+        val results = ArrayList<InputInlineQueryResult>()
+        for ((index, page) in videoInfo.data.pages.withIndex()) {
+            val pageNum = index + 1
+            if (p > 0 && p != pageNum) continue // 指定分P则只处理对应分P
+            else if (t > 0 && pageNum != 1) continue  // 未指定分P的空降应该是空降在1P
+
+            val streamInfo = getPlayUrl(videoInfo.data.bvid, page.cid)
+            val pageTitle = page.part.trim()
+            val duration = page.duration.seconds.formatToSeparateUnit()
+
+            val builder = FormattedTextBuilder()
+
+            val inlineTitle: String
+            if (p == 0 && videoInfo.data.pages.size == 1) { // no specific page
+                inlineTitle = videoTitle
+                builder.appendLink(videoTitle, link)
+            } else  {
+                val pTitle = if (videoTitle.trim() == pageTitle.trim()) {
+                    "P$p"
+                } else {
+                    removeOverlap(pageTitle, videoTitle).trim()
+                }
+                builder.appendLink(videoTitle, linkWithoutPage)
+                    .appendText(" / ")
+                    .appendLink(pTitle, link)
+
+                inlineTitle = "${pTitle}_$videoTitle"
+            }
+
+            if (t > 0) {
+                val timeStr = (t * 1000).toLong().milliseconds.formatToTime()
+                builder.appendText(" / 跳转到 $timeStr")
+            }
+
+            val formattedText = builder
+                .appendLine().appendLine()
+                .appendText("UP: ")
+                .appendLink(videoInfo.data.owner.name, "https://space.bilibili.com/${videoInfo.data.owner.mid}")
+                .appendText(" / $playCount $rank / $duration")
+                .appendLine()
+                .appendText(createDate)
+                .appendLine().appendLine()
+                .wrapQuoteIfNeeded {
+                    appendText(videoInfo.data.desc)
+                }.build()
+
+            val canShowVideo = fetchStreamLength(streamInfo.data!!.durl.first().url) in 1..12*1024*1024
+            val id = "${videoInfo.data.bvid.substring(2)}${page.cid.toHexString(hexFormat)}"
+            results.add(
+                InputInlineQueryResultArticle().apply {
+                    this.id = "A$id"
+                    this.title = inlineTitle
+                    this.description = "With Photo"
+                    thumbnailUrl = videoInfo.data.pic
+                    inputMessageContent = InputMessageText().apply {
+                        this.text = formattedText.trimCaption()
+                        this.linkPreviewOptions = LinkPreviewOptions().apply {
+                            this.url = videoInfo.data.pic
+                            this.showAboveText = true
+                            this.forceLargeMedia = true
+                        }
+                    }
+                })
+            results.add(
+                InputInlineQueryResultVideo().apply {
+                    this.id = "V$id"
+                    this.title = inlineTitle
+                    this.description = "With Video"
+                    if (!canShowVideo) this.description += " (May not be able to show)"
+                    videoUrl = streamInfo.data.durl.first().url
+                    thumbnailUrl = videoInfo.data.pic
+                    mimeType = MimeTypes.Video.MP4
+                    this.videoDuration = page.duration
+                    this.videoWidth = page.dimension.width
+                    this.videoHeight = page.dimension.height
+                    inputMessageContent = InputMessageVideo().apply {
+                        this.caption = formattedText.trimCaption()
+                    }
+                })
+        }
+        return results.toTypedArray()
     }
 
 }

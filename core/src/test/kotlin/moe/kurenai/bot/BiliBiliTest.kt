@@ -8,9 +8,13 @@ import io.ktor.util.*
 import kotlinx.coroutines.runBlocking
 import moe.kurenai.bot.model.bilibili.DynamicInfo
 import moe.kurenai.bot.model.bilibili.VideoInfo
+import moe.kurenai.bot.service.BiliBiliService
 import moe.kurenai.common.util.json
 import org.jsoup.Jsoup
+import org.junit.Assert
 import org.junit.Test
+import java.net.URI
+import kotlin.test.Asserter
 
 /**
  * @author Kurenai
@@ -30,6 +34,23 @@ class BiliBiliTest {
             val segments = redirectUrl.rawSegments
             println(redirectUrl.rawSegments.last().takeIf { it.isNotBlank() } ?: segments[segments.lastIndex - 1])
         }
+    }
+
+    @Test
+    fun testMultiPartShortLink(): Unit = runBlocking {
+        val uri = URI.create("https://b23.tv/7L0i0W1")
+
+        val redirectUrl = BiliBiliService.getRedirectUrl(uri)
+        val (id, p, t) = BiliBiliService.getIdPartNumAndTime(uri, redirectUrl)
+        Assert.assertEquals(0, p)
+        Assert.assertEquals(0.0F,  t)
+        val results = BiliBiliService.handleVideo(id, p, t)
+        Assert.assertTrue(results.size > 2)
+    }
+
+    @Test
+    fun testVideoHandle(): Unit = runBlocking {
+        BiliBiliService.handleVideo("BV1sKJNzpEXs", 2, 0F)
     }
 
     @Test
