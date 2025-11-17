@@ -19,21 +19,27 @@ package moe.kurenai.bangumi.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+
 /**
  * `1`, `2`, `3` 表示 `个人`, `公司`, `组合`
  *
  * Values: Individual,Corporation,Association
  */
-@Serializable
+@Serializable(with = PersonTypeSerializer::class)
 enum class PersonType(val value: kotlin.Int) {
 
-    @SerialName(value = "1")
     Individual(1),
 
-    @SerialName(value = "2")
     Corporation(2),
 
-    @SerialName(value = "3")
     Association(3);
 
     /**
@@ -62,4 +68,19 @@ enum class PersonType(val value: kotlin.Int) {
         }
     }
 }
+
+internal object PersonTypeSerializer : KSerializer<PersonType> {
+    override val descriptor = kotlin.Int.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): PersonType {
+        val value = decoder.decodeSerializableValue(kotlin.Int.serializer())
+        return PersonType.values().firstOrNull { it.value == value }
+            ?: throw IllegalArgumentException("Unknown enum value: $value")
+    }
+
+    override fun serialize(encoder: Encoder, value: PersonType) {
+        encoder.encodeSerializableValue(kotlin.Int.serializer(), value.value)
+    }
+}
+
 

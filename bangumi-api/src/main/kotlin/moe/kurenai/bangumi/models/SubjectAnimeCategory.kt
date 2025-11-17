@@ -19,27 +19,31 @@ package moe.kurenai.bangumi.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+
 /**
  * 动画类型 - `0` 为 其他 - `1` 为 TV - `2` 为 OVA - `3` 为 Movie - `5` 为 WEB
  *
  * Values: Other,TV,OVA,Movie,WEB
  */
-@Serializable
+@Serializable(with = SubjectAnimeCategorySerializer::class)
 enum class SubjectAnimeCategory(val value: kotlin.Int) {
 
-    @SerialName(value = "0")
     Other(0),
 
-    @SerialName(value = "1")
     TV(1),
 
-    @SerialName(value = "2")
     OVA(2),
 
-    @SerialName(value = "3")
     Movie(3),
 
-    @SerialName(value = "5")
     WEB(5);
 
     /**
@@ -68,4 +72,19 @@ enum class SubjectAnimeCategory(val value: kotlin.Int) {
         }
     }
 }
+
+internal object SubjectAnimeCategorySerializer : KSerializer<SubjectAnimeCategory> {
+    override val descriptor = kotlin.Int.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): SubjectAnimeCategory {
+        val value = decoder.decodeSerializableValue(kotlin.Int.serializer())
+        return SubjectAnimeCategory.values().firstOrNull { it.value == value }
+            ?: throw IllegalArgumentException("Unknown enum value: $value")
+    }
+
+    override fun serialize(encoder: Encoder, value: SubjectAnimeCategory) {
+        encoder.encodeSerializableValue(kotlin.Int.serializer(), value.value)
+    }
+}
+
 

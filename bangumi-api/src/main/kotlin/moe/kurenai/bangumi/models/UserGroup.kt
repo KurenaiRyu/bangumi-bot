@@ -19,39 +19,39 @@ package moe.kurenai.bangumi.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+
 /**
  * 用户组 - 1 = 管理员 - 2 = Bangumi 管理猿 - 3 = 天窗管理猿 - 4 = 禁言用户 - 5 = 禁止访问用户 - 8 = 人物管理猿 - 9 = 维基条目管理猿 - 10 = 用户 - 11 = 维基人
  *
  * Values: Admin,BangumiAdmin,DoujinAdmin,MutedUser,BlockedUser,PersonAdmin,WikiAdmin,User,WikiUser
  */
-@Serializable
+@Serializable(with = UserGroupSerializer::class)
 enum class UserGroup(val value: kotlin.Int) {
 
-    @SerialName(value = "1")
     Admin(1),
 
-    @SerialName(value = "2")
     BangumiAdmin(2),
 
-    @SerialName(value = "3")
     DoujinAdmin(3),
 
-    @SerialName(value = "4")
     MutedUser(4),
 
-    @SerialName(value = "5")
     BlockedUser(5),
 
-    @SerialName(value = "8")
     PersonAdmin(8),
 
-    @SerialName(value = "9")
     WikiAdmin(9),
 
-    @SerialName(value = "10")
     User(10),
 
-    @SerialName(value = "11")
     WikiUser(11);
 
     /**
@@ -80,4 +80,19 @@ enum class UserGroup(val value: kotlin.Int) {
         }
     }
 }
+
+internal object UserGroupSerializer : KSerializer<UserGroup> {
+    override val descriptor = kotlin.Int.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): UserGroup {
+        val value = decoder.decodeSerializableValue(kotlin.Int.serializer())
+        return UserGroup.values().firstOrNull { it.value == value }
+            ?: throw IllegalArgumentException("Unknown enum value: $value")
+    }
+
+    override fun serialize(encoder: Encoder, value: UserGroup) {
+        encoder.encodeSerializableValue(kotlin.Int.serializer(), value.value)
+    }
+}
+
 

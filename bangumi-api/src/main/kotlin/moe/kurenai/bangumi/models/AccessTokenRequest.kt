@@ -16,11 +16,12 @@
 package moe.kurenai.bangumi.models
 
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
- *
+ * 
  *
  * @param grantType 授权方式，`authorization_code` 需要用到code，refresh_token需要用到
  * @param clientId App ID

@@ -19,33 +19,35 @@ package moe.kurenai.bangumi.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+
 /**
  * 本篇 = 0 特别篇 = 1 OP = 2 ED = 3 预告/宣传/广告 = 4 MAD = 5 其他 = 6
  *
  * Values: MainStory,SP,OP,ED,PV,MAD,Other
  */
-@Serializable
+@Serializable(with = EpTypeSerializer::class)
 enum class EpType(val value: kotlin.Int) {
 
-    @SerialName(value = "0")
     MainStory(0),
 
-    @SerialName(value = "1")
     SP(1),
 
-    @SerialName(value = "2")
     OP(2),
 
-    @SerialName(value = "3")
     ED(3),
 
-    @SerialName(value = "4")
     PV(4),
 
-    @SerialName(value = "5")
     MAD(5),
 
-    @SerialName(value = "6")
     Other(6);
 
     /**
@@ -74,4 +76,19 @@ enum class EpType(val value: kotlin.Int) {
         }
     }
 }
+
+internal object EpTypeSerializer : KSerializer<EpType> {
+    override val descriptor = kotlin.Int.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): EpType {
+        val value = decoder.decodeSerializableValue(kotlin.Int.serializer())
+        return EpType.values().firstOrNull { it.value == value }
+            ?: throw IllegalArgumentException("Unknown enum value: $value")
+    }
+
+    override fun serialize(encoder: Encoder, value: EpType) {
+        encoder.encodeSerializableValue(kotlin.Int.serializer(), value.value)
+    }
+}
+
 

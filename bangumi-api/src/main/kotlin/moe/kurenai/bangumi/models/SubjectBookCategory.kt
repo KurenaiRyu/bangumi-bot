@@ -19,24 +19,29 @@ package moe.kurenai.bangumi.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+
 /**
  * 书籍类型 - `0` 为 其他 - `1001` 为 漫画 - `1002` 为 小说 - `1003` 为 画集
  *
  * Values: Other,Comic,Novel,Illustration
  */
-@Serializable
+@Serializable(with = SubjectBookCategorySerializer::class)
 enum class SubjectBookCategory(val value: kotlin.Int) {
 
-    @SerialName(value = "0")
     Other(0),
 
-    @SerialName(value = "1001")
     Comic(1001),
 
-    @SerialName(value = "1002")
     Novel(1002),
 
-    @SerialName(value = "1003")
     Illustration(1003);
 
     /**
@@ -65,4 +70,19 @@ enum class SubjectBookCategory(val value: kotlin.Int) {
         }
     }
 }
+
+internal object SubjectBookCategorySerializer : KSerializer<SubjectBookCategory> {
+    override val descriptor = kotlin.Int.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): SubjectBookCategory {
+        val value = decoder.decodeSerializableValue(kotlin.Int.serializer())
+        return SubjectBookCategory.values().firstOrNull { it.value == value }
+            ?: throw IllegalArgumentException("Unknown enum value: $value")
+    }
+
+    override fun serialize(encoder: Encoder, value: SubjectBookCategory) {
+        encoder.encodeSerializableValue(kotlin.Int.serializer(), value.value)
+    }
+}
+
 

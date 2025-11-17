@@ -16,8 +16,9 @@
 package moe.kurenai.bangumi.models
 
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  * 别名（另外添加出来的 key 为 0 开始的数字）

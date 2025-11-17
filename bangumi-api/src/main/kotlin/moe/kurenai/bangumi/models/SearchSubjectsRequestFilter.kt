@@ -15,9 +15,11 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.SubjectType
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  * 不同条件之间是 `且` 的关系
@@ -27,8 +29,9 @@ import kotlinx.serialization.Serializable
  * @param tag 标签，可以多次出现。多值之间为 `且` 关系。
  * @param airDate 播出日期/发售日期，日期必需为 `YYYY-MM-DD` 格式。多值之间为 `且` 关系。
  * @param rating 用于搜索指定评分的条目，多值之间为 `且` 关系。
+ * @param ratingCount 用于按照评分人数筛选条目，多值之间为 `且` 关系，格式与 `rating` 相同。
  * @param rank 用于搜索指定排名的条目，多值之间为 `且` 关系。
- * @param nsfw 无权限的用户会直接忽略此字段，不会返回R18条目。  默认或者 `null` 会返回包含 R18 的所有搜索结果。  `true` 只会返回 R18 条目。  `false` 只会返回非 R18 条目。
+ * @param nsfw 无权限的用户会直接忽略此字段，不会返回R18条目。  默认或者 `null` 会返回包含 R18 的所有搜索结果。  `true` 只会返回 R18 条目。  `false` 只会返回非 R18 条目。 
  */
 @Serializable
 
@@ -53,6 +56,10 @@ data class SearchSubjectsRequestFilter (
     /* 用于搜索指定评分的条目，多值之间为 `且` 关系。 */
     @SerialName(value = "rating")
     val rating: kotlin.collections.List<kotlin.String>? = null,
+
+    /* 用于按照评分人数筛选条目，多值之间为 `且` 关系，格式与 `rating` 相同。 */
+    @SerialName(value = "rating_count")
+    val ratingCount: kotlin.collections.List<kotlin.String>? = null,
 
     /* 用于搜索指定排名的条目，多值之间为 `且` 关系。 */
     @SerialName(value = "rank")

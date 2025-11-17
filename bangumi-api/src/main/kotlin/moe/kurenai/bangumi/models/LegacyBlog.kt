@@ -15,8 +15,11 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.LegacyUser
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  * 日志
@@ -29,7 +32,7 @@ import kotlinx.serialization.Serializable
  * @param replies 回复数
  * @param timestamp 发布时间
  * @param dateline 发布时间
- * @param user
+ * @param user 
  */
 @Serializable
 

@@ -16,14 +16,15 @@
 package moe.kurenai.bangumi.models
 
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  * 修改目录中条目的信息
  *
  * @param sort 排序条件，越小越靠前
- * @param comment
+ * @param comment 
  */
 @Serializable
 

@@ -19,27 +19,31 @@ package moe.kurenai.bangumi.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+
 /**
  * 游戏类型 - `0` 为 其他 - `4001` 为 游戏 - `4002` 为 软件 - `4003` 为 扩展包 - `4005` 为 桌游
  *
  * Values: Other,Games,Software,DLC,Tabletop
  */
-@Serializable
+@Serializable(with = SubjectGameCategorySerializer::class)
 enum class SubjectGameCategory(val value: kotlin.Int) {
 
-    @SerialName(value = "0")
     Other(0),
 
-    @SerialName(value = "4001")
     Games(4001),
 
-    @SerialName(value = "4003")
     Software(4003),
 
-    @SerialName(value = "4002")
     DLC(4002),
 
-    @SerialName(value = "4005")
     Tabletop(4005);
 
     /**
@@ -68,4 +72,19 @@ enum class SubjectGameCategory(val value: kotlin.Int) {
         }
     }
 }
+
+internal object SubjectGameCategorySerializer : KSerializer<SubjectGameCategory> {
+    override val descriptor = kotlin.Int.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): SubjectGameCategory {
+        val value = decoder.decodeSerializableValue(kotlin.Int.serializer())
+        return SubjectGameCategory.values().firstOrNull { it.value == value }
+            ?: throw IllegalArgumentException("Unknown enum value: $value")
+    }
+
+    override fun serialize(encoder: Encoder, value: SubjectGameCategory) {
+        encoder.encodeSerializableValue(kotlin.Int.serializer(), value.value)
+    }
+}
+
 

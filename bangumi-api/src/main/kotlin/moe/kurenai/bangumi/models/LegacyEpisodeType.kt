@@ -19,33 +19,35 @@ package moe.kurenai.bangumi.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+
 /**
  * 章节类型 <br> 0 = 本篇 <br> 1 = 特别篇 <br> 2 = OP <br> 3 = ED <br> 4 = 预告/宣传/广告 <br> 5 = MAD <br> 6 = 其他
  *
  * Values: _0,_1,_2,_3,_4,_5,_6
  */
-@Serializable
+@Serializable(with = LegacyEpisodeTypeSerializer::class)
 enum class LegacyEpisodeType(val value: kotlin.Int) {
 
-    @SerialName(value = "0")
     _0(0),
 
-    @SerialName(value = "1")
     _1(1),
 
-    @SerialName(value = "2")
     _2(2),
 
-    @SerialName(value = "3")
     _3(3),
 
-    @SerialName(value = "4")
     _4(4),
 
-    @SerialName(value = "5")
     _5(5),
 
-    @SerialName(value = "6")
     _6(6);
 
     /**
@@ -74,4 +76,19 @@ enum class LegacyEpisodeType(val value: kotlin.Int) {
         }
     }
 }
+
+internal object LegacyEpisodeTypeSerializer : KSerializer<LegacyEpisodeType> {
+    override val descriptor = kotlin.Int.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): LegacyEpisodeType {
+        val value = decoder.decodeSerializableValue(kotlin.Int.serializer())
+        return LegacyEpisodeType.values().firstOrNull { it.value == value }
+            ?: throw IllegalArgumentException("Unknown enum value: $value")
+    }
+
+    override fun serialize(encoder: Encoder, value: LegacyEpisodeType) {
+        encoder.encodeSerializableValue(kotlin.Int.serializer(), value.value)
+    }
+}
+
 

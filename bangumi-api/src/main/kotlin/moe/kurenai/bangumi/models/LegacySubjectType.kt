@@ -19,27 +19,31 @@ package moe.kurenai.bangumi.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+
 /**
  * 条目类型 <br> 1 = book <br> 2 = anime <br> 3 = music <br> 4 = game <br> 6 = real
  *
  * Values: _1,_2,_3,_4,_6
  */
-@Serializable
+@Serializable(with = LegacySubjectTypeSerializer::class)
 enum class LegacySubjectType(val value: kotlin.Int) {
 
-    @SerialName(value = "1")
     _1(1),
 
-    @SerialName(value = "2")
     _2(2),
 
-    @SerialName(value = "3")
     _3(3),
 
-    @SerialName(value = "4")
     _4(4),
 
-    @SerialName(value = "6")
     _6(6);
 
     /**
@@ -68,4 +72,19 @@ enum class LegacySubjectType(val value: kotlin.Int) {
         }
     }
 }
+
+internal object LegacySubjectTypeSerializer : KSerializer<LegacySubjectType> {
+    override val descriptor = kotlin.Int.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): LegacySubjectType {
+        val value = decoder.decodeSerializableValue(kotlin.Int.serializer())
+        return LegacySubjectType.values().firstOrNull { it.value == value }
+            ?: throw IllegalArgumentException("Unknown enum value: $value")
+    }
+
+    override fun serialize(encoder: Encoder, value: LegacySubjectType) {
+        encoder.encodeSerializableValue(kotlin.Int.serializer(), value.value)
+    }
+}
+
 

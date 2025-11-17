@@ -16,11 +16,12 @@
 package moe.kurenai.bangumi.models
 
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
- *
+ * 
  *
  * @param error error message
  * @param path request path

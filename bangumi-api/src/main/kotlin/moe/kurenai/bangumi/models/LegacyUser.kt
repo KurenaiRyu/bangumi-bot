@@ -15,9 +15,12 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.LegacyUserAvatar
+import moe.kurenai.bangumi.models.LegacyUserGroup
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  * 用户信息
@@ -26,9 +29,9 @@ import kotlinx.serialization.Serializable
  * @param url 用户主页地址
  * @param username 用户名
  * @param nickname 昵称
- * @param avatar
+ * @param avatar 
  * @param sign 签名
- * @param usergroup
+ * @param usergroup 
  */
 @Serializable
 

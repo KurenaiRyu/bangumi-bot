@@ -19,27 +19,31 @@ package moe.kurenai.bangumi.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+
 /**
  * - `1`: 想看 - `2`: 看过 - `3`: 在看 - `4`: 搁置 - `5`: 抛弃
  *
  * Values: Wish,Done,Doing,OnHold,Dropped
  */
-@Serializable
+@Serializable(with = SubjectCollectionTypeSerializer::class)
 enum class SubjectCollectionType(val value: kotlin.Int) {
 
-    @SerialName(value = "1")
     Wish(1),
 
-    @SerialName(value = "2")
     Done(2),
 
-    @SerialName(value = "3")
     Doing(3),
 
-    @SerialName(value = "4")
     OnHold(4),
 
-    @SerialName(value = "5")
     Dropped(5);
 
     /**
@@ -68,4 +72,19 @@ enum class SubjectCollectionType(val value: kotlin.Int) {
         }
     }
 }
+
+internal object SubjectCollectionTypeSerializer : KSerializer<SubjectCollectionType> {
+    override val descriptor = kotlin.Int.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): SubjectCollectionType {
+        val value = decoder.decodeSerializableValue(kotlin.Int.serializer())
+        return SubjectCollectionType.values().firstOrNull { it.value == value }
+            ?: throw IllegalArgumentException("Unknown enum value: $value")
+    }
+
+    override fun serialize(encoder: Encoder, value: SubjectCollectionType) {
+        encoder.encodeSerializableValue(kotlin.Int.serializer(), value.value)
+    }
+}
+
 

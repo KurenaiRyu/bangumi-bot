@@ -15,10 +15,57 @@
 
 package moe.kurenai.bangumi.apis
 
-import io.ktor.client.*
-import io.ktor.client.engine.*
+import moe.kurenai.bangumi.models.Character
+import moe.kurenai.bangumi.models.CharacterPerson
+import moe.kurenai.bangumi.models.CharacterRevision
+import moe.kurenai.bangumi.models.DetailedRevision
+import moe.kurenai.bangumi.models.EpType
+import moe.kurenai.bangumi.models.EpisodeDetail
+import moe.kurenai.bangumi.models.ErrorDetail
+import moe.kurenai.bangumi.models.GetCalendar200ResponseInner
+import moe.kurenai.bangumi.models.GetMyself200Response
+import moe.kurenai.bangumi.models.GetUserSubjectEpisodeCollection200Response
+import moe.kurenai.bangumi.models.Index
+import moe.kurenai.bangumi.models.IndexBasicInfo
+import moe.kurenai.bangumi.models.IndexSubjectAddInfo
+import moe.kurenai.bangumi.models.IndexSubjectEditInfo
+import moe.kurenai.bangumi.models.PagedCharacter
+import moe.kurenai.bangumi.models.PagedEpisode
+import moe.kurenai.bangumi.models.PagedPerson
+import moe.kurenai.bangumi.models.PagedRevision
+import moe.kurenai.bangumi.models.PagedSubject
+import moe.kurenai.bangumi.models.PagedUserCharacterCollection
+import moe.kurenai.bangumi.models.PagedUserCollection
+import moe.kurenai.bangumi.models.PagedUserPersonCollection
+import moe.kurenai.bangumi.models.PatchUserSubjectEpisodeCollectionRequest
+import moe.kurenai.bangumi.models.PersonCharacter
+import moe.kurenai.bangumi.models.PersonDetail
+import moe.kurenai.bangumi.models.PersonRevision
+import moe.kurenai.bangumi.models.PutUserEpisodeCollectionRequest
+import moe.kurenai.bangumi.models.RelatedCharacter
+import moe.kurenai.bangumi.models.RelatedPerson
+import moe.kurenai.bangumi.models.SearchCharactersRequest
+import moe.kurenai.bangumi.models.SearchPersonsRequest
+import moe.kurenai.bangumi.models.SearchSubjectsRequest
+import moe.kurenai.bangumi.models.Subject
+import moe.kurenai.bangumi.models.SubjectCategory
+import moe.kurenai.bangumi.models.SubjectCollectionType
+import moe.kurenai.bangumi.models.SubjectRevision
+import moe.kurenai.bangumi.models.SubjectType
+import moe.kurenai.bangumi.models.User
+import moe.kurenai.bangumi.models.UserCharacterCollection
+import moe.kurenai.bangumi.models.UserEpisodeCollection
+import moe.kurenai.bangumi.models.UserPersonCollection
+import moe.kurenai.bangumi.models.UserSubjectCollection
+import moe.kurenai.bangumi.models.UserSubjectCollectionModifyPayload
+import moe.kurenai.bangumi.models.V0RelatedSubject
+import moe.kurenai.bangumi.models.V0SubjectRelation
+
 import moe.kurenai.bangumi.infrastructure.*
-import moe.kurenai.bangumi.models.*
+import io.ktor.client.HttpClientConfig
+import io.ktor.client.request.forms.formData
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.http.ParametersBuilder
 
 open class DefaultApi(
     baseUrl: String = ApiClient.BASE_URL,
@@ -1957,7 +2004,7 @@ open class DefaultApi(
     /**
      * POST /v0/search/subjects
      * 条目搜索
-     * ## 实验性 API， 本 schema 和实际的 API 行为都可能随时发生改动  目前支持的筛选条件包括: - &#x60;type&#x60;: 条目类型，参照 &#x60;SubjectType&#x60; enum， &#x60;或&#x60;。 - &#x60;tag&#x60;: 标签，可以多次出现。&#x60;且&#x60; 关系。 - &#x60;air_date&#x60;: 播出日期/发售日期。&#x60;且&#x60; 关系。 - &#x60;rating&#x60;: 用于搜索指定评分的条目。&#x60;且&#x60; 关系。 - &#x60;rank&#x60;: 用于搜索指定排名的条目。&#x60;且&#x60; 关系。 - &#x60;nsfw&#x60;: 使用 &#x60;include&#x60; 包含NSFW搜索结果。默认排除搜索NSFW条目。无权限情况下忽略此选项，不会返回NSFW条目。  不同筛选条件之间为 &#x60;且&#x60;
+     * ## 实验性 API， 本 schema 和实际的 API 行为都可能随时发生改动  目前支持的筛选条件包括: - &#x60;type&#x60;: 条目类型，参照 &#x60;SubjectType&#x60; enum， &#x60;或&#x60;。 - &#x60;tag&#x60;: 标签，可以多次出现。&#x60;且&#x60; 关系。 - &#x60;air_date&#x60;: 播出日期/发售日期。&#x60;且&#x60; 关系。 - &#x60;rating&#x60;: 用于搜索指定评分的条目。&#x60;且&#x60; 关系。 - &#x60;rating_count&#x60;: 用于按照评分人数筛选条目。&#x60;且&#x60; 关系。 - &#x60;rank&#x60;: 用于搜索指定排名的条目。&#x60;且&#x60; 关系。 - &#x60;nsfw&#x60;: 使用 &#x60;include&#x60; 包含NSFW搜索结果。默认排除搜索NSFW条目。无权限情况下忽略此选项，不会返回NSFW条目。  不同筛选条件之间为 &#x60;且&#x60;
      * @param limit 分页参数 (optional)
      * @param offset 分页参数 (optional)
      * @param searchSubjectsRequest  (optional)

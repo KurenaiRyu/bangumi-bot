@@ -15,18 +15,98 @@
 
 package moe.kurenai.bangumi.models
 
+
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
 
 /**
  *
  *
+ * Values: _0,_1001,_1002,_1003,_1,_2,_3,_5,_4001,_4003,_4002,_4005,_6001,_6002,_6003,_6004
  */
-@Serializable
+@Serializable(with = SubjectCategorySerializer::class)
+enum class SubjectCategory(val value: kotlin.Int) {
 
-class SubjectCategory (
+    _0(0),
 
-) {
+    _1001(1001),
 
+    _1002(1002),
 
+    _1003(1003),
+
+    _1(1),
+
+    _2(2),
+
+    _3(3),
+
+    _5(5),
+
+    _4001(4001),
+
+    _4003(4003),
+
+    _4002(4002),
+
+    _4005(4005),
+
+    _6001(6001),
+
+    _6002(6002),
+
+    _6003(6003),
+
+    _6004(6004);
+
+    /**
+     * Override [toString()] to avoid using the enum variable name as the value, and instead use
+     * the actual value defined in the API spec file.
+     *
+     * This solves a problem when the variable name and its value are different, and ensures that
+     * the client sends the correct enum values to the server always.
+     */
+    override fun toString(): kotlin.String = value.toString()
+
+    companion object {
+        /**
+         * Converts the provided [data] to a [String] on success, null otherwise.
+         */
+        fun encode(data: kotlin.Any?): kotlin.String? = if (data is SubjectCategory) "$data" else null
+
+        /**
+         * Returns a valid [SubjectCategory] for [data], null otherwise.
+         */
+        fun decode(data: kotlin.Any?): SubjectCategory? = data?.let {
+            val normalizedData = "$it".lowercase()
+            values().firstOrNull { value ->
+                it == value || normalizedData == "$value".lowercase()
+            }
+        }
+    }
 }
+
+internal object SubjectCategorySerializer : KSerializer<SubjectCategory> {
+    override val descriptor = kotlin.Int.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): SubjectCategory {
+        val value = decoder.decodeSerializableValue(kotlin.Int.serializer())
+        return SubjectCategory.values().firstOrNull { it.value == value }
+            ?: throw IllegalArgumentException("Unknown enum value: $value")
+    }
+
+    override fun serialize(encoder: Encoder, value: SubjectCategory) {
+        encoder.encodeSerializableValue(kotlin.Int.serializer(), value.value)
+    }
+}
+
 

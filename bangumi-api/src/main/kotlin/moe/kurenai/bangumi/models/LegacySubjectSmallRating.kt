@@ -15,14 +15,17 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.LegacySubjectSmallRatingCount
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  * 评分
  *
  * @param total 总评分人数
- * @param count
+ * @param count 
  * @param score 评分
  */
 @Serializable

@@ -15,11 +15,16 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.LegacySubjectSmallCollection
+import moe.kurenai.bangumi.models.LegacySubjectSmallImages
+import moe.kurenai.bangumi.models.LegacySubjectSmallRating
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
- *
+ * 
  *
  * @param id 条目 ID
  * @param url 条目地址
@@ -29,12 +34,12 @@ import kotlinx.serialization.Serializable
  * @param summary 剧情简介
  * @param airDate 放送开始日期
  * @param airWeekday 放送星期
- * @param images
+ * @param images 
  * @param eps 话数
  * @param epsCount 话数
- * @param rating
+ * @param rating 
  * @param rank 排名
- * @param collection
+ * @param collection 
  */
 @Serializable
 

@@ -15,8 +15,11 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.LegacyMonoBaseImages
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  * 人物
@@ -24,7 +27,7 @@ import kotlinx.serialization.Serializable
  * @param id 人物 ID
  * @param url 人物地址
  * @param name 姓名
- * @param images
+ * @param images 
  * @param nameCn 简体中文名
  * @param comment 回复数量
  * @param collects 收藏人数

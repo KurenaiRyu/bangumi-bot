@@ -15,14 +15,16 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.EpisodeCollectionType
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
+ * 
  *
- *
- * @param type
+ * @param type 
  */
 @Serializable
 

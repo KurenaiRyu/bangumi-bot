@@ -15,9 +15,12 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.Avatar
+import moe.kurenai.bangumi.models.UserGroup
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  *
@@ -58,11 +61,11 @@ data class GetMyself200Response (
 
     /* 用户绑定的邮箱地址 */
     @SerialName(value = "email")
-    val email: kotlin.String,
+    val email: kotlin.String? = null,
 
     /* 用户注册时间。比如 2017-12-03T08:51:16+08:00 */
     @Contextual @SerialName(value = "reg_time")
-    val regTime: java.time.OffsetDateTime,
+    val regTime: java.time.OffsetDateTime? = null,
 
     /* 用户设置的时区偏移，以小时为单位。比如 GMT+8（shanghai/beijing）为 8 */
     @SerialName(value = "time_offset")

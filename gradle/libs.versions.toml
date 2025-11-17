@@ -51,4 +51,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 kotlin-lombok = { id = "org.jetbrains.kotlin.plugin.lombok", version.ref = "ktolin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
-openapi-generator = {id = "org.openapi.generator", version = "7.13.0"}
+openapi-generator = {id = "org.openapi.generator", version = "7.17.0"}

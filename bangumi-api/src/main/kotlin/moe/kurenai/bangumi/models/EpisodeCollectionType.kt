@@ -19,21 +19,27 @@ package moe.kurenai.bangumi.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+
 /**
  * - `0`: 未收藏 - `1`: 想看 - `2`: 看过 - `3`: 抛弃
  *
  * Values: _1,_2,_3
  */
-@Serializable
+@Serializable(with = EpisodeCollectionTypeSerializer::class)
 enum class EpisodeCollectionType(val value: kotlin.Int) {
 
-    @SerialName(value = "1")
     _1(1),
 
-    @SerialName(value = "2")
     _2(2),
 
-    @SerialName(value = "3")
     _3(3);
 
     /**
@@ -62,4 +68,19 @@ enum class EpisodeCollectionType(val value: kotlin.Int) {
         }
     }
 }
+
+internal object EpisodeCollectionTypeSerializer : KSerializer<EpisodeCollectionType> {
+    override val descriptor = kotlin.Int.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): EpisodeCollectionType {
+        val value = decoder.decodeSerializableValue(kotlin.Int.serializer())
+        return EpisodeCollectionType.values().firstOrNull { it.value == value }
+            ?: throw IllegalArgumentException("Unknown enum value: $value")
+    }
+
+    override fun serialize(encoder: Encoder, value: EpisodeCollectionType) {
+        encoder.encodeSerializableValue(kotlin.Int.serializer(), value.value)
+    }
+}
+
 

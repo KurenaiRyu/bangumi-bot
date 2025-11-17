@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 
-data class SearchSubjectByKeywords200ResponseOneOf (
+data class SearchSubjectByKeywords200ResponseOneOf(
 
     /* 总条数 */
     @SerialName(value = "results")

@@ -19,39 +19,39 @@ package moe.kurenai.bangumi.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+
 /**
  * 用户组 <br> 1 = 管理员 <br> 2 = Bangumi 管理猿 <br> 3 = 天窗管理猿 <br> 4 = 禁言用户 <br> 5 = 禁止访问用户 <br> 8 = 人物管理猿 <br> 9 = 维基条目管理猿 <br> 10 = 用户 <br> 11 = 维基人
  *
  * Values: _1,_2,_3,_4,_5,_8,_9,_10,_11
  */
-@Serializable
+@Serializable(with = LegacyUserGroupSerializer::class)
 enum class LegacyUserGroup(val value: kotlin.Int) {
 
-    @SerialName(value = "1")
     _1(1),
 
-    @SerialName(value = "2")
     _2(2),
 
-    @SerialName(value = "3")
     _3(3),
 
-    @SerialName(value = "4")
     _4(4),
 
-    @SerialName(value = "5")
     _5(5),
 
-    @SerialName(value = "8")
     _8(8),
 
-    @SerialName(value = "9")
     _9(9),
 
-    @SerialName(value = "10")
     _10(10),
 
-    @SerialName(value = "11")
     _11(11);
 
     /**
@@ -80,4 +80,19 @@ enum class LegacyUserGroup(val value: kotlin.Int) {
         }
     }
 }
+
+internal object LegacyUserGroupSerializer : KSerializer<LegacyUserGroup> {
+    override val descriptor = kotlin.Int.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): LegacyUserGroup {
+        val value = decoder.decodeSerializableValue(kotlin.Int.serializer())
+        return LegacyUserGroup.values().firstOrNull { it.value == value }
+            ?: throw IllegalArgumentException("Unknown enum value: $value")
+    }
+
+    override fun serialize(encoder: Encoder, value: LegacyUserGroup) {
+        encoder.encodeSerializableValue(kotlin.Int.serializer(), value.value)
+    }
+}
+
 

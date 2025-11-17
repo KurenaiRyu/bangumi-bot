@@ -19,24 +19,29 @@ package moe.kurenai.bangumi.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+
 /**
  * Blood type of a person. A, B, AB, O
  *
  * Values: A,B,AB,O
  */
-@Serializable
+@Serializable(with = BloodTypeSerializer::class)
 enum class BloodType(val value: kotlin.Int) {
 
-    @SerialName(value = "1")
     A(1),
 
-    @SerialName(value = "2")
     B(2),
 
-    @SerialName(value = "3")
     AB(3),
 
-    @SerialName(value = "4")
     O(4);
 
     /**
@@ -65,4 +70,19 @@ enum class BloodType(val value: kotlin.Int) {
         }
     }
 }
+
+internal object BloodTypeSerializer : KSerializer<BloodType> {
+    override val descriptor = kotlin.Int.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): BloodType {
+        val value = decoder.decodeSerializableValue(kotlin.Int.serializer())
+        return BloodType.values().firstOrNull { it.value == value }
+            ?: throw IllegalArgumentException("Unknown enum value: $value")
+    }
+
+    override fun serialize(encoder: Encoder, value: BloodType) {
+        encoder.encodeSerializableValue(kotlin.Int.serializer(), value.value)
+    }
+}
+
 

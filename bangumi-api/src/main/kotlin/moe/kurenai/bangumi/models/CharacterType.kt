@@ -19,24 +19,29 @@ package moe.kurenai.bangumi.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+
 /**
  * type of a character 角色，机体，舰船，组织...
  *
  * Values: Character,Mechanic,Ship,Organization
  */
-@Serializable
+@Serializable(with = CharacterTypeSerializer::class)
 enum class CharacterType(val value: kotlin.Int) {
 
-    @SerialName(value = "1")
     Character(1),
 
-    @SerialName(value = "2")
     Mechanic(2),
 
-    @SerialName(value = "3")
     Ship(3),
 
-    @SerialName(value = "4")
     Organization(4);
 
     /**
@@ -65,4 +70,19 @@ enum class CharacterType(val value: kotlin.Int) {
         }
     }
 }
+
+internal object CharacterTypeSerializer : KSerializer<CharacterType> {
+    override val descriptor = kotlin.Int.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): CharacterType {
+        val value = decoder.decodeSerializableValue(kotlin.Int.serializer())
+        return CharacterType.values().firstOrNull { it.value == value }
+            ?: throw IllegalArgumentException("Unknown enum value: $value")
+    }
+
+    override fun serialize(encoder: Encoder, value: CharacterType) {
+        encoder.encodeSerializableValue(kotlin.Int.serializer(), value.value)
+    }
+}
+
 

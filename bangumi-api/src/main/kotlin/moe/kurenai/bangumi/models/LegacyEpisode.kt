@@ -15,16 +15,18 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.LegacyEpisodeType
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  * 章节信息
  *
  * @param id 章节 ID
  * @param url 章节地址
- * @param type
+ * @param type 
  * @param sort 集数
  * @param name 标题
  * @param nameCn 简体中文标题

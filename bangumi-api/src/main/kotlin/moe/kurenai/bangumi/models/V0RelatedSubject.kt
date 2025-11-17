@@ -15,9 +15,11 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.SubjectType
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  *
@@ -25,6 +27,7 @@ import kotlinx.serialization.Serializable
  * @param id
  * @param type
  * @param staff
+ * @param eps 参与章节/曲目
  * @param name
  * @param nameCn
  * @param image
@@ -41,6 +44,10 @@ data class V0RelatedSubject (
 
     @SerialName(value = "staff")
     val staff: kotlin.String,
+
+    /* 参与章节/曲目 */
+    @SerialName(value = "eps")
+    val eps: kotlin.String,
 
     @SerialName(value = "name")
     val name: kotlin.String,

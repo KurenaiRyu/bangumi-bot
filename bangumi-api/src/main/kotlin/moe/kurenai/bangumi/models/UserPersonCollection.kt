@@ -15,10 +15,12 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.PersonImages
+import moe.kurenai.bangumi.models.PersonType
+
 import kotlinx.serialization.Serializable
-import moe.kurenai.bangumi.constant.PersonCareer
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  *
@@ -45,7 +47,7 @@ data class UserPersonCollection (
     val type: PersonType,
 
     @SerialName(value = "career")
-    val career: kotlin.collections.List<@Contextual PersonCareer>,
+    val career: kotlin.collections.List<@Contextual moe.kurenai.bangumi.constant.PersonCareer>,
 
     @Contextual @SerialName(value = "created_at")
     val createdAt: java.time.OffsetDateTime,

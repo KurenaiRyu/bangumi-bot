@@ -1,14 +1,27 @@
 package moe.kurenai.bangumi.infrastructure
 
 
-import io.ktor.client.*
-import io.ktor.client.engine.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
+import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.forms.FormDataContent
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.header
+import io.ktor.client.request.parameter
+import io.ktor.client.request.request
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.*
-import io.ktor.http.content.*
+import io.ktor.http.contentType
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import io.ktor.http.Parameters
+import io.ktor.http.URLBuilder
+import io.ktor.http.content.PartData
+import io.ktor.http.encodeURLQueryComponent
+import io.ktor.http.encodedPath
+import io.ktor.http.takeFrom
 import moe.kurenai.bangumi.auth.*
 
 open class ApiClient(
@@ -29,11 +42,10 @@ open class ApiClient(
         httpClientEngine?.let { HttpClient(it, clientConfig) } ?: HttpClient(clientConfig)
     }
 
-    private val httpBearerAuth = HttpBearerAuth("bearer")
     private val authentications: kotlin.collections.Map<String, Authentication> by lazy {
         mapOf(
-            "OptionalHTTPBearer" to httpBearerAuth,
-            "HTTPBearer" to httpBearerAuth
+            "OptionalHTTPBearer" to HttpBearerAuth("bearer"),
+            "HTTPBearer" to HttpBearerAuth("bearer")
         )
     }
 

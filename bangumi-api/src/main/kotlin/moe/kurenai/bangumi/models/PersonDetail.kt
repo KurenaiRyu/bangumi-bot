@@ -15,10 +15,14 @@
 
 package moe.kurenai.bangumi.models
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.SerialName
+import moe.kurenai.bangumi.models.BloodType
+import moe.kurenai.bangumi.models.PersonImages
+import moe.kurenai.bangumi.models.PersonType
+import moe.kurenai.bangumi.models.Stat
+
 import kotlinx.serialization.Serializable
-import moe.kurenai.bangumi.constant.PersonCareer
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  *
@@ -54,7 +58,7 @@ data class PersonDetail (
     val type: PersonType,
 
     @SerialName(value = "career")
-    val career: kotlin.collections.List<@Contextual PersonCareer>,
+    val career: kotlin.collections.List<@Contextual moe.kurenai.bangumi.constant.PersonCareer>,
 
     @SerialName(value = "summary")
     val summary: kotlin.String,
@@ -75,7 +79,7 @@ data class PersonDetail (
 
     /* server parsed infobox, a map from key to string or tuple null if server infobox is not valid */
     @SerialName(value = "infobox")
-    val infobox: kotlin.collections.List<InfoBox>? = null,
+    val infobox: kotlin.collections.List<@Contextual kotlin.Any>? = null,
 
     /* parsed from wiki, maybe null */
     @SerialName(value = "gender")

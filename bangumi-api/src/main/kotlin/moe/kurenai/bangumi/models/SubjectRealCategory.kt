@@ -19,36 +19,37 @@ package moe.kurenai.bangumi.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+
 /**
  * 电影类型 - `0` 为 其他 - `1` 为 日剧 - `2` 为 欧美剧 - `3` 为 华语剧 - `6001` 为 电视剧 - `6002` 为 电影 - `6003` 为 演出 - `6004` 为 综艺
  *
  * Values: Other,JP,EN,CN,TV,Movie,Live,Show
  */
-@Serializable
+@Serializable(with = SubjectRealCategorySerializer::class)
 enum class SubjectRealCategory(val value: kotlin.Int) {
 
-    @SerialName(value = "0")
     Other(0),
 
-    @SerialName(value = "1")
     JP(1),
 
-    @SerialName(value = "2")
     EN(2),
 
-    @SerialName(value = "3")
     CN(3),
 
-    @SerialName(value = "6001")
     TV(6001),
 
-    @SerialName(value = "6002")
     Movie(6002),
 
-    @SerialName(value = "6003")
     Live(6003),
 
-    @SerialName(value = "6004")
     Show(6004);
 
     /**
@@ -77,4 +78,19 @@ enum class SubjectRealCategory(val value: kotlin.Int) {
         }
     }
 }
+
+internal object SubjectRealCategorySerializer : KSerializer<SubjectRealCategory> {
+    override val descriptor = kotlin.Int.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): SubjectRealCategory {
+        val value = decoder.decodeSerializableValue(kotlin.Int.serializer())
+        return SubjectRealCategory.values().firstOrNull { it.value == value }
+            ?: throw IllegalArgumentException("Unknown enum value: $value")
+    }
+
+    override fun serialize(encoder: Encoder, value: SubjectRealCategory) {
+        encoder.encodeSerializableValue(kotlin.Int.serializer(), value.value)
+    }
+}
+
 
