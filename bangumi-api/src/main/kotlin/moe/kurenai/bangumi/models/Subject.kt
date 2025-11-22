@@ -15,16 +15,9 @@
 
 package moe.kurenai.bangumi.models
 
-import moe.kurenai.bangumi.models.Collection
-import moe.kurenai.bangumi.models.Images
-import moe.kurenai.bangumi.models.Item
-import moe.kurenai.bangumi.models.Rating
-import moe.kurenai.bangumi.models.SubjectType
-import moe.kurenai.bangumi.models.Tag
-
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  *
@@ -115,7 +108,7 @@ data class Subject (
     val date: kotlin.String? = null,
 
     @SerialName(value = "infobox")
-    val infobox: kotlin.collections.List<Item>? = null
+    val infobox: kotlin.collections.List<InfoBox>? = null
 
 ) {
 
