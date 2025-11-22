@@ -10,7 +10,7 @@ import moe.kurenai.bot.service.BiliBiliService
 import moe.kurenai.bot.util.FormattedTextBuilder
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
 import moe.kurenai.bot.util.TelegramUtil.trimMessage
-import moe.kurenai.common.util.*
+import moe.kurenai.common.util.getLogger
 import java.net.URI
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -126,18 +126,16 @@ object BilibiliHandler : InlineHandler {
                 }
             })
 
-        send {
-            answerInlineQuery(inlineQuery.id, items).apply {
-                if ((moduleDynamic.major?.opus?.pics?.size ?: 0) > 1) {
-                    this.button = InlineQueryResultsButton().apply {
-                        this.text = "合并图片为一条消息"
-                        this.type = InlineQueryResultsButtonTypeStartBot().apply {
-                            parameter = "dynamic$id"
-                        }
+        send(answerInlineQuery(inlineQuery.id, items).apply {
+            if ((moduleDynamic.major?.opus?.pics?.size ?: 0) > 1) {
+                this.button = InlineQueryResultsButton().apply {
+                    this.text = "合并图片为一条消息"
+                    this.type = InlineQueryResultsButtonTypeStartBot().apply {
+                        parameter = "dynamic$id"
                     }
                 }
             }
-        }
+        })
 
     }
 
@@ -145,11 +143,9 @@ object BilibiliHandler : InlineHandler {
         log.info("Handle bilibili: $id, p=$p, t=$t")
         val results = BiliBiliService.handleVideo(id, p, t)
 
-        send(untilPersistent = true) {
-            answerInlineQuery(inlineQuery.id, results).also {
-                log.trace("Handle bilibili: {}", it)
-            }
-        }
+        send(answerInlineQuery(inlineQuery.id, results).also {
+            log.trace("Handle bilibili: {}", it)
+        })
     }
 
 }

@@ -12,12 +12,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import it.tdlight.jni.TdApi.InputInlineQueryResult
-import it.tdlight.jni.TdApi.InputInlineQueryResultArticle
-import it.tdlight.jni.TdApi.InputInlineQueryResultVideo
-import it.tdlight.jni.TdApi.InputMessageText
-import it.tdlight.jni.TdApi.InputMessageVideo
-import it.tdlight.jni.TdApi.LinkPreviewOptions
+import it.tdlight.jni.TdApi.*
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
@@ -30,12 +25,7 @@ import moe.kurenai.bot.model.bilibili.VideoStreamUrl
 import moe.kurenai.bot.util.FormattedTextBuilder
 import moe.kurenai.bot.util.HttpUtil.DYNAMIC_USER_AGENT
 import moe.kurenai.bot.util.TelegramUtil.trimCaption
-import moe.kurenai.common.util.MimeTypes
-import moe.kurenai.common.util.formatToSeparateUnit
-import moe.kurenai.common.util.formatToTime
-import moe.kurenai.common.util.getLogger
-import moe.kurenai.common.util.json
-import moe.kurenai.common.util.removeOverlap
+import moe.kurenai.common.util.*
 import org.jsoup.Jsoup
 import java.net.URI
 import java.time.Duration
@@ -158,12 +148,7 @@ internal object BiliBiliService {
         val parameters = mutableListOf<String>()
         if (p > 0) parameters.add("p=$p")
         if (t > 0) parameters.add("t=$t")
-        val link = if (parameters.isNotEmpty()) {
-            val paramStr = parameters.joinToString("&")
-            "$linkWithoutPage?$paramStr"
-        } else {
-            linkWithoutPage
-        }
+        val parameterStr = parameters.joinToString("&")
 
         val rank =
             if (videoInfo.data.stat.nowRank == 0) "" else "/ ${videoInfo.data.stat.nowRank} 名 / 历史最高 ${videoInfo.data.stat.nowRank} 名"
@@ -185,7 +170,7 @@ internal object BiliBiliService {
             val inlineTitle: String
             if (p == 0 && videoInfo.data.pages.size == 1) { // no specific page
                 inlineTitle = videoTitle
-                builder.appendLink(videoTitle, link)
+                builder.appendLink(videoTitle, "$linkWithoutPage?$parameterStr")
             } else  {
                 val pTitle = if (videoTitle.trim() == pageTitle.trim()) {
                     "P$p"
@@ -194,7 +179,7 @@ internal object BiliBiliService {
                 }
                 builder.appendLink(videoTitle, linkWithoutPage)
                     .appendText(" / ")
-                    .appendLink(pTitle, link)
+                    .appendLink(pTitle, "$linkWithoutPage?p=$pageNum&t=$t")
 
                 inlineTitle = "${pTitle}_$videoTitle"
             }
