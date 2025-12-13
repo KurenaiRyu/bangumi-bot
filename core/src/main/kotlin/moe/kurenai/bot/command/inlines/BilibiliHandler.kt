@@ -7,14 +7,9 @@ import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.command.*
 import moe.kurenai.bot.command.InlineDispatcher.fallback
 import moe.kurenai.bot.service.BiliBiliService
-import moe.kurenai.bot.util.FormattedTextBuilder
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
-import moe.kurenai.bot.util.TelegramUtil.trimMessage
 import moe.kurenai.common.util.getLogger
 import java.net.URI
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 
 object BilibiliHandler : InlineHandler {
 
@@ -69,65 +64,16 @@ object BilibiliHandler : InlineHandler {
         doHandle(inlineQuery, id, p, t)
     }
 
-    private suspend fun handleDynamic(inlineQuery: UpdateNewInlineQuery, uri: URI
-                                      ) {
+    private suspend fun handleDynamic(inlineQuery: UpdateNewInlineQuery, uri: URI) {
         log.info("Handle bilibili dynamic: $uri")
         val id = uri.path.substringAfterLast("/").takeIf { it.isNotBlank() } ?: run {
             fallback(inlineQuery)
             return
         }
-        val info = BiliBiliService.getDynamicDetail(id)
-        val moduleDynamic = info.data.item.modules.moduleDynamic
-
-        val content = moduleDynamic.major?.opus?.summary?.text ?: moduleDynamic.desc?.text ?: ""
-        val pubTime = LocalDateTime.ofEpochSecond(info.data.item.modules.moduleAuthor.pubTs, 0, ZoneOffset.ofHours(8))
-                .format(InlineDispatcher.DATE_TIME_PATTERN)
-
-        val builder = FormattedTextBuilder()
-        builder.appendBold(info.data.item.modules.moduleAuthor.name)
-            .appendText(" - ${pubTime}:\n\n")
-            .wrapQuoteIfNeeded {
-                appendText(content)
-            }
-
-        info.data.item.orig?.let { orig ->
-            val quoteContent = orig.modules.moduleDynamic.major?.opus?.summary?.text ?: ""
-            val pubTime = LocalDateTime.ofEpochSecond(orig.modules.moduleAuthor.pubTs, 0, ZoneOffset.ofHours(8))
-                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-            builder.wrapQuote {
-                    appendBold(orig.modules.moduleAuthor.name)
-                    appendText(" - ${pubTime}:\n\n$quoteContent\n\nhttps://t.bilibili.com/${orig.idStr}")
-            }
-        }
-        val formattedText = builder.appendText("\nhttps://t.bilibili.com/${id}").build()
-
-        val items = moduleDynamic.major?.opus?.pics?.mapIndexed { index, pic ->
-            InputInlineQueryResultArticle().apply {
-                this.id = index.toString()
-                title =
-                    "${info.data.item.modules.moduleAuthor.name} ${info.data.item.modules.moduleAuthor.pubTime}[$index]"
-                thumbnailUrl = pic.url + "@240w_!web-dynamic.webp"
-                inputMessageContent = InputMessageText().apply {
-                    this.text = formattedText.trimMessage()
-                    this.linkPreviewOptions = LinkPreviewOptions().apply {
-                        this.url = pic.url + "@1920w_!web-dynamic.webp"
-                        this.forceLargeMedia = true
-                        this.showAboveText = true
-                    }
-                }
-            }
-        }?.toTypedArray()?.takeIf { it.isNotEmpty() }
-            ?: arrayOf(InputInlineQueryResultArticle().apply {
-                this.id = "dynamic$id"
-                this.title =
-                    "${info.data.item.modules.moduleAuthor.name} ${info.data.item.modules.moduleAuthor.pubTime}"
-                this.inputMessageContent = InputMessageText().apply {
-                    this.text = formattedText.trimMessage()
-                }
-            })
+        val items = BiliBiliService.handleDynamic(id)
 
         send(answerInlineQuery(inlineQuery.id, items).apply {
-            if ((moduleDynamic.major?.opus?.pics?.size ?: 0) > 1) {
+            if (items.size > 1) {
                 this.button = InlineQueryResultsButton().apply {
                     this.text = "合并图片为一条消息"
                     this.type = InlineQueryResultsButtonTypeStartBot().apply {
