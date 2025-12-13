@@ -22,4 +22,11 @@ class BiliBiliServiceTest {
     fun testRedirection() = runBlocking {
         println(BiliBiliService.getRedirectUrl(URI("https://b23.tv/1XUGxgS")))
     }
+
+    @Test
+    fun testFormatterNoEffect(): Unit = runBlocking {
+        for (result in BiliBiliService.handleVideo("BV1eamjBpEgy")) {
+            println(result.toJsonString())
+        }
+    }
 }

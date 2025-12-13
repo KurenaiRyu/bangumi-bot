@@ -139,7 +139,7 @@ internal object BiliBiliService {
 
 
     @OptIn(ExperimentalStdlibApi::class)
-    suspend fun handleVideo(id: String, p: Int, t: Float): Array<InputInlineQueryResult> {
+    suspend fun handleVideo(id: String, p: Int = 0, t: Float = 0F): Array<InputInlineQueryResult> {
 
         val videoInfo = getVideoInfo(id)
 

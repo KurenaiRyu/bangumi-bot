@@ -2,7 +2,6 @@ package moe.kurenai.bot.util
 
 import it.tdlight.jni.TdApi
 import moe.kurenai.bot.TelegramBot
-import org.apache.logging.log4j.message.FormattedMessage
 
 /**
  * @author Kurenai
@@ -118,7 +117,7 @@ object TelegramUtil {
         for (entity in entities) {
             if (entity.offset >= new.text.length) continue
 
-            if (entity.offset + entity.length >= new.text.length) {
+            if (entity.offset + entity.length > new.text.length) {
                 newEntities.add(TdApi.TextEntity().apply {
                     this.offset = entity.offset
                     this.length = new.text.length - entity.offset
@@ -128,7 +127,7 @@ object TelegramUtil {
                 newEntities.add(entity)
             }
         }
-
+        new.entities = newEntities.toTypedArray()
         return new
     }
 

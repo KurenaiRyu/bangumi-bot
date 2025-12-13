@@ -111,7 +111,7 @@ class FormattedTextBuilder {
             sb.deleteAt(sb.lastIndex)
             for (entity in entities) {
                 if (entity.offset + entity.length > sb.length) {
-                    entity.length = sb.length - entity.length
+                    entity.length = sb.length - entity.offset
                 }
             }
         }
