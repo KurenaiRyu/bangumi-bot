@@ -2,8 +2,6 @@ package moe.kurenai.bot
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.sksamuel.aedile.core.asCache
-import com.sksamuel.aedile.core.caffeineBuilder
-import com.sksamuel.aedile.core.expireAfterWrite
 import it.tdlight.Init
 import it.tdlight.client.*
 import it.tdlight.jni.TdApi
@@ -16,7 +14,6 @@ import moe.kurenai.common.util.getLogger
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import it.tdlight.client.Result as TdResult
 
@@ -56,7 +53,7 @@ object TelegramBot {
             downloadedFilesDirectoryPath = sessionPath.resolve("downloads")
             isFileDatabaseEnabled = true
             isChatInfoDatabaseEnabled = true
-            isMessageDatabaseEnabled = true
+            isMessageDatabaseEnabled = false
         }
     }
 
