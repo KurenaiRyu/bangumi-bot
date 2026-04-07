@@ -27,6 +27,7 @@ import moe.kurenai.mihoyo.util.MiHoYoHeaders
 import java.io.ByteArrayOutputStream
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
 object MiHoYo {

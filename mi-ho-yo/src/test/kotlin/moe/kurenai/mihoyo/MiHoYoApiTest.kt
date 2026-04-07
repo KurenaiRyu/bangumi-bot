@@ -12,6 +12,7 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.util.encodeBase64
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
@@ -26,9 +27,12 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.util.*
+import kotlin.io.encoding.Base64
 import kotlin.io.path.createDirectories
+import kotlin.io.path.readBytes
 import kotlin.io.path.readLines
 import kotlin.io.path.readText
+import kotlin.io.path.writeBytes
 import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
@@ -363,5 +367,14 @@ class MiHoYoApiTest {
             }
             println()
         }
+    }
+
+    @Test
+    fun encoder64() {
+        val bytes =
+            Path.of("C:\\Users\\Liufuhong\\Downloads\\jetbra-8f6785eac5e6e7e8b20e6174dd28bb19d8da7550.zip").readBytes()
+
+        Path.of("C:\\Users\\Liufuhong\\Downloads\\base64.txt")
+            .writeText(bytes.encodeBase64())
     }
 }
