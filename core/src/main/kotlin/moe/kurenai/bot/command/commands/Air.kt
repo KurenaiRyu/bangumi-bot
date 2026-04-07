@@ -1,5 +1,8 @@
 package moe.kurenai.bot.command.commands
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
 import it.tdlight.jni.TdApi.Message
 import it.tdlight.jni.TdApi.MessageSenderUser
 import moe.kurenai.bot.TelegramBot.sendAlbumPhoto
@@ -11,6 +14,8 @@ import moe.kurenai.bot.service.bangumi.TokenService
 import moe.kurenai.bot.util.TelegramUtil.asText
 import java.time.LocalDate
 
+@ContributesBinding(AppScope::class)
+@Inject
 class Air : CommandHandler {
 
     override val command: String = "air"

@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.lombok)
     alias(libs.plugins.lombok)
+    alias(libs.plugins.metro)
 }
 
 dependencies {

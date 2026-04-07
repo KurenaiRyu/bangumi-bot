@@ -2,6 +2,7 @@ package moe.kurenai.bot
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.sksamuel.aedile.core.asCache
+import dev.zacsweers.metro.createGraph
 import it.tdlight.Init
 import it.tdlight.client.*
 import it.tdlight.jni.TdApi
@@ -9,6 +10,7 @@ import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.*
 import moe.kurenai.bot.command.CommandDispatcher
 import moe.kurenai.bot.command.HandlerInitializer
+import moe.kurenai.bot.config.AppGraph
 import moe.kurenai.bot.util.TelegramUtil.trimCaption
 import moe.kurenai.common.util.getLogger
 import java.nio.file.Paths
@@ -25,6 +27,9 @@ import it.tdlight.client.Result as TdResult
 object TelegramBot {
 
     val log = getLogger()
+
+    internal val appGraph = createGraph<AppGraph>()
+    internal val commandDispatcher = appGraph.commandDispatcher
 
     private val apiToken: APIToken
 
@@ -66,11 +71,11 @@ object TelegramBot {
             if (update.authorizationState.constructor == AuthorizationStateReady.CONSTRUCTOR) {
                 log.info("Telegram bot started.")
                 CoroutineScope(Dispatchers.Default).launch {
-                    client.addUpdatesHandler(CommandDispatcher::handle)
+                    client.addUpdatesHandler(commandDispatcher::handle)
                     send {
                         SetCommands().apply {
                             this.scope = BotCommandScopeAllPrivateChats()
-                            this.commands = CommandDispatcher.commands.map { cmd ->
+                            this.commands = commandDispatcher.commands.map { cmd ->
                                 BotCommand().apply {
                                     this.command = cmd.key.lowercase()
                                     this.description = cmd.value.description

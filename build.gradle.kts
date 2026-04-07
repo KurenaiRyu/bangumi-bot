@@ -1,3 +1,6 @@
+plugins {
+    alias(libs.plugins.kotlin.jvm)
+}
 allprojects {
     group = "moe.kurenai.bot"
     version = "1.0-SNAPSHOT"

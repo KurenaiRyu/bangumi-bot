@@ -3,6 +3,9 @@ package moe.kurenai.bot.command.commands
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.sksamuel.aedile.core.asCache
 import com.sksamuel.aedile.core.caffeineBuilder
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
 import it.tdlight.jni.TdApi.Message
 import it.tdlight.jni.TdApi.MessageSenderUser
 import kotlinx.coroutines.sync.Mutex
@@ -25,6 +28,8 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.time.Duration.Companion.hours
 
+@ContributesBinding(AppScope::class)
+@Inject
 class Collections : CommandHandler {
     override val command: String = "collections"
     override val description: String = "返回用户收藏列表json，CD时间1小时"

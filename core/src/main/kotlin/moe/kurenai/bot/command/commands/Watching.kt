@@ -1,5 +1,8 @@
 package moe.kurenai.bot.command.commands
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
 import it.tdlight.jni.TdApi
 import moe.kurenai.bangumi.models.SubjectCollectionType
 import moe.kurenai.bangumi.models.SubjectType
@@ -15,6 +18,8 @@ import moe.kurenai.bot.util.TelegramUtil.markdown
 import moe.kurenai.bot.util.TelegramUtil.messageText
 import moe.kurenai.common.util.getLogger
 
+@ContributesBinding(AppScope::class)
+@Inject
 class Watching : CommandHandler {
     override val command: String = "watching"
     override val description: String = "返回用户观看列表"

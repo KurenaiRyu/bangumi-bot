@@ -1,5 +1,7 @@
 package moe.kurenai.bot.command
 
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.createGraph
 import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -8,7 +10,7 @@ import moe.kurenai.bot.TelegramBot
 import moe.kurenai.bot.TelegramBot.getChat
 import moe.kurenai.bot.TelegramBot.getUsername
 import moe.kurenai.bot.TelegramBot.send
-import moe.kurenai.bot.command.commands.*
+import moe.kurenai.bot.config.AppGraph
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQueryEmpty
 import moe.kurenai.bot.util.TelegramUtil.text
 import moe.kurenai.common.util.getLogger
@@ -16,19 +18,21 @@ import java.net.URI
 import java.time.Instant
 import it.tdlight.client.Result as TdResult
 
-object CommandDispatcher {
+@Inject
+class CommandDispatcher(
+    commands: Set<CommandHandler>
+) {
 
     private val log = getLogger()
 
-    val commands: Map<String, CommandHandler> = listOf(
-        Air(), Collections(), Start(), Status(), Watching(), BiliDynamic()
-    ).associateBy { handler ->
-        handler.command.lowercase().also {
-            log.debug("Load command: $it")
+    internal val commands: Map<String, CommandHandler> =
+        commands.associateBy { handler ->
+            handler.command.lowercase().also {
+                log.debug("Registry command: $it")
+            }
         }
-    }
 
-    val uriInlineCommandHandler = InlineDispatcher
+    internal val uriInlineCommandHandler = InlineDispatcher
 
     fun handle(update: Update) = CoroutineScope(Dispatchers.Default).launch {
         log.trace("Incoming update: {}", update.toString().trim())

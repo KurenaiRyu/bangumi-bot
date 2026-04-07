@@ -1,5 +1,8 @@
 package moe.kurenai.bot.command.commands
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
 import it.tdlight.jni.TdApi.*
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.TelegramBot.sendAlbumPhoto
@@ -12,6 +15,8 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
+@ContributesBinding(AppScope::class)
+@Inject
 class BiliDynamic : CommandHandler {
 
     override val command: String = "dynamic"
