@@ -53,6 +53,8 @@ data class DynamicInfo(
                 val moduleAuthor: ModuleAuthor,
                 @SerialName("module_dynamic")
                 val moduleDynamic: ModuleDynamic,
+                @SerialName("module_stat")
+                val moduleStat: ModuleStat,
             ) {
                 @Serializable
                 data class ModuleAuthor(
@@ -104,6 +106,7 @@ data class DynamicInfo(
                 data class ModuleDynamic(
                     val desc: TextNode? = null,
                     val major: Major? = null,
+                    val topic: Topic? = null,
                 ) {
 
                     @Serializable
@@ -145,6 +148,23 @@ data class DynamicInfo(
                             }
                         }
                     }
+                    @Serializable
+                    data class Topic(
+                        val name: String,
+                    )
+                }
+
+                @Serializable
+                data class ModuleStat(
+                    val comment: StatDetail,
+                    val forward: StatDetail,
+                    val like: StatDetail,
+                ) {
+                    @Serializable
+                    data class StatDetail(
+                        val count: Int,
+                        val forbidden: Boolean,
+                    )
                 }
             }
         }

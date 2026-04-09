@@ -243,17 +243,29 @@ internal object BiliBiliService {
     suspend fun handleDynamic(id: String): Array<InputInlineQueryResultArticle> {
         val info = getDynamicDetail(id)
         val moduleDynamic = info.data.item.modules.moduleDynamic
+        val moduleAuthor = info.data.item.modules.moduleAuthor
+        val moduleStat = info.data.item.modules.moduleStat
 
-        val content = moduleDynamic.major?.opus?.summary?.text ?: moduleDynamic.desc?.text ?: ""
-        val pubTime = LocalDateTime.ofEpochSecond(info.data.item.modules.moduleAuthor.pubTs, 0, ZoneOffset.ofHours(8))
+        val content = moduleDynamic.desc?.text ?: moduleDynamic.major?.opus?.summary?.text ?: ""
+        val pubTime = LocalDateTime.ofEpochSecond(moduleAuthor.pubTs, 0, ZoneOffset.ofHours(8))
             .format(InlineDispatcher.DATE_TIME_PATTERN)
 
         val builder = FormattedTextBuilder()
-        builder.appendBold(info.data.item.modules.moduleAuthor.name)
-            .appendText(" - ${pubTime}:\n\n")
-            .wrapQuoteIfNeeded {
-                appendText(content)
-            }
+
+        if (moduleAuthor.jumpUrl != null) {
+            builder.appendLink(moduleAuthor.name, moduleAuthor.jumpUrl)
+        } else {
+            builder.appendBold(moduleAuthor.name)
+        }
+
+        builder.appendText(" - ${pubTime}\n\n")
+
+        val title = moduleDynamic.major?.opus?.title
+        if (title?.isNotBlank()?: false) {
+            builder.appendBold(title).appendLine().appendLine()
+        }
+
+        builder.wrapQuoteIfNeeded { appendText(content) }
 
         info.data.item.orig?.let { orig ->
             val quoteContent = orig.modules.moduleDynamic.major?.opus?.summary?.text ?: ""
@@ -264,13 +276,34 @@ internal object BiliBiliService {
                 appendText(" - ${pubTime}:\n\n$quoteContent\n\nhttps://t.bilibili.com/${orig.idStr}")
             }
         }
-        val formattedText = builder.appendText("\nhttps://t.bilibili.com/${id}").build()
+
+        moduleDynamic.topic?.let {
+            builder.appendText("#${it.name}")
+        }
+
+
+        val stats = ArrayList<String>(3)
+        if (!moduleStat.comment.forbidden) {
+            stats.add("评论 ${moduleStat.comment.count}")
+        }
+        if (!moduleStat.forward.forbidden) {
+            stats.add("转发 ${moduleStat.comment.count}")
+        }
+        if (!moduleStat.like.forbidden) {
+            stats.add("点赞 ${moduleStat.comment.count}")
+        }
+
+        val formattedText =builder.appendLine()
+            .appendText(stats.joinToString(" / "))
+            .appendLine()
+            .appendText("https://t.bilibili.com/${id}")
+            .build()
 
         return moduleDynamic.major?.opus?.pics?.mapIndexed { index, pic ->
             InputInlineQueryResultArticle().apply {
                 this.id = index.toString()
-                title =
-                    "${info.data.item.modules.moduleAuthor.name} ${info.data.item.modules.moduleAuthor.pubTime}[$index]"
+                this.title =
+                    "${moduleAuthor.name} ${moduleAuthor.pubTime}[$index]"
                 thumbnailUrl = pic.url + "@240w_!web-dynamic.webp"
                 inputMessageContent = InputMessageText().apply {
                     this.text = formattedText.trimMessage()
@@ -285,7 +318,7 @@ internal object BiliBiliService {
             ?: arrayOf(InputInlineQueryResultArticle().apply {
                 this.id = "dynamic$id"
                 this.title =
-                    "${info.data.item.modules.moduleAuthor.name} ${info.data.item.modules.moduleAuthor.pubTime}"
+                    "${moduleAuthor.name} ${moduleAuthor.pubTime}"
                 this.inputMessageContent = InputMessageText().apply {
                     this.text = formattedText.trimMessage()
                 }

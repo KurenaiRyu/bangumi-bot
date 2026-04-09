@@ -1,6 +1,7 @@
 package moe.kurenai.bot.service
 
 import kotlinx.coroutines.runBlocking
+import moe.kurenai.common.util.json
 import org.junit.Test
 import java.net.URI
 
@@ -27,6 +28,13 @@ class BiliBiliServiceTest {
     fun testFormatterNoEffect(): Unit = runBlocking {
         for (result in BiliBiliService.handleVideo("BV1eamjBpEgy")) {
             println(result.toJsonString())
+        }
+    }
+
+    @Test
+    fun testLongDynamic(): Unit = runBlocking {
+        for (article in BiliBiliService.handleDynamic("1183359413885337633")) {
+            println(article.inputMessageContent.toJsonString())
         }
     }
 }
