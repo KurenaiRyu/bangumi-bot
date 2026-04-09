@@ -1,7 +1,7 @@
 package moe.kurenai.bot.command
 
+import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.createGraph
 import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,14 +19,14 @@ import java.time.Instant
 import it.tdlight.client.Result as TdResult
 
 @Inject
-class CommandDispatcher(
-    commands: Set<CommandHandler>
+class CommandDispatcher (
+    private val cmd: Set<CommandHandler>
 ) {
 
     private val log = getLogger()
 
     internal val commands: Map<String, CommandHandler> =
-        commands.associateBy { handler ->
+        cmd.associateBy { handler ->
             handler.command.lowercase().also {
                 log.debug("Registry command: $it")
             }

@@ -2,6 +2,7 @@ package moe.kurenai.bot.command.commands
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import it.tdlight.jni.TdApi
 import it.tdlight.jni.TdApi.Message
@@ -13,7 +14,7 @@ import moe.kurenai.bot.util.TelegramUtil.asText
 import moe.kurenai.bot.util.TelegramUtil.messageText
 
 
-@ContributesBinding(AppScope::class)
+@ContributesIntoSet(AppScope::class)
 @Inject
 class Status : CommandHandler {
     override val command: String = "status"

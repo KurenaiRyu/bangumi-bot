@@ -1,16 +1,14 @@
 package moe.kurenai.bot.command.commands
 
 import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import it.tdlight.jni.TdApi.Message
 import it.tdlight.jni.TdApi.MessageSenderUser
 import moe.kurenai.bot.BgmAuthServer
-import moe.kurenai.bot.TelegramBot
 import moe.kurenai.bot.TelegramBot.commandDispatcher
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.TelegramBot.sendPhoto
-import moe.kurenai.bot.command.CommandDispatcher
 import moe.kurenai.bot.command.CommandHandler
 import moe.kurenai.bot.service.bangumi.TokenService
 import moe.kurenai.bot.service.bangumi.UserService
@@ -21,7 +19,7 @@ import moe.kurenai.bot.util.TelegramUtil.markdown
 import moe.kurenai.bot.util.TelegramUtil.messageText
 import moe.kurenai.common.util.getLogger
 
-@ContributesBinding(AppScope::class)
+@ContributesIntoSet(AppScope::class)
 @Inject
 class Start : CommandHandler {
     override val command: String = "start"

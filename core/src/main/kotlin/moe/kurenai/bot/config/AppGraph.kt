@@ -6,5 +6,5 @@ import moe.kurenai.bot.command.CommandDispatcher
 
 @DependencyGraph(AppScope::class)
 interface AppGraph {
-    var commandDispatcher: CommandDispatcher
+    val commandDispatcher: CommandDispatcher
 }

@@ -2,6 +2,7 @@ package moe.kurenai.bot.command.commands
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import it.tdlight.jni.TdApi.*
 import moe.kurenai.bot.TelegramBot.send
@@ -15,7 +16,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
-@ContributesBinding(AppScope::class)
+@ContributesIntoSet(AppScope::class)
 @Inject
 class BiliDynamic : CommandHandler {
 

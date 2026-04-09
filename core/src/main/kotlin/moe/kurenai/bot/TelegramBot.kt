@@ -8,7 +8,6 @@ import it.tdlight.client.*
 import it.tdlight.jni.TdApi
 import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.*
-import moe.kurenai.bot.command.CommandDispatcher
 import moe.kurenai.bot.command.HandlerInitializer
 import moe.kurenai.bot.config.AppGraph
 import moe.kurenai.bot.util.TelegramUtil.trimCaption
@@ -28,8 +27,8 @@ object TelegramBot {
 
     val log = getLogger()
 
-    internal val appGraph = createGraph<AppGraph>()
-    internal val commandDispatcher = appGraph.commandDispatcher
+    internal val appGraph by lazy { createGraph<AppGraph>() }
+    internal val commandDispatcher by lazy { appGraph.commandDispatcher }
 
     private val apiToken: APIToken
 
