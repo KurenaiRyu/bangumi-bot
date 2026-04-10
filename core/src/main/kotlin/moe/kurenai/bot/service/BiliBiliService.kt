@@ -253,7 +253,7 @@ internal object BiliBiliService {
         val builder = FormattedTextBuilder()
 
         if (moduleAuthor.jumpUrl != null) {
-            builder.appendLink(moduleAuthor.name, moduleAuthor.jumpUrl)
+            builder.appendLink(moduleAuthor.name, "https:${moduleAuthor.jumpUrl}")
         } else {
             builder.appendBold(moduleAuthor.name)
         }
