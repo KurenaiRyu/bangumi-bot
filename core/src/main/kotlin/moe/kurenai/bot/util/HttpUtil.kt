@@ -8,19 +8,17 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import jdk.dynalink.StandardOperation
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import moe.kurenai.common.util.getLogger
 import moe.kurenai.common.util.json
 import org.jsoup.Jsoup
 import java.nio.file.StandardOpenOption
-import java.util.concurrent.atomic.AtomicReference
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
-import kotlin.io.path.writer
 import kotlin.time.Duration.Companion.days
 
 /**
@@ -41,50 +39,39 @@ object HttpUtil {
         }
     }
     private val scope = CoroutineScope(Dispatchers.IO + CoroutineName("HttpUtil") + SupervisorJob())
-    private val uaUpdateFlow = MutableSharedFlow<String>()
-
-    @Volatile
-    var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0"
-        private set
+    private val uaFlow = MutableStateFlow<String>("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0")
 
     val DYNAMIC_USER_AGENT = createClientPlugin("DynamicUserAgent") {
         onRequest { req, _ ->
-            req.header(HttpHeaders.UserAgent, UA)
+            req.header(HttpHeaders.UserAgent, uaFlow.value)
         }
     }
 
     init {
         scope.launch {
-            uaUpdateFlow.collect {
+            uaFlow.collect {
                 runCatching {
-                    if (UA != it) {
-                        UA = it
-                        uaPath.writeText(it, Charsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
-                        log.info("Update UA: {}", it)
-                    }
+                    uaPath.writeText(it, Charsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+                    log.info("Update UA: {}", it)
                 }.onFailure { ex ->
                     log.error("Update UA error", ex)
                 }
             }
         }
         scope.launch {
-            runCatching {
-                if (uaPath.exists()) {
-                    uaUpdateFlow.emit(uaPath.readText())
-                }
-            }.onFailure {
-                log.error("Read UA file error", it)
-            }
-
             while (true) {
                 runCatching {
                     val ua = getLatestUA()
-                    uaUpdateFlow.emit(ua)
+                    uaFlow.emit(ua)
                 }.onFailure {
                     log.error("Fetch latest UA error", it)
                 }
                 delay(1.days)
             }
+        }
+
+        if (uaPath.exists()) {
+            uaFlow.tryEmit(uaPath.readText())
         }
     }
 

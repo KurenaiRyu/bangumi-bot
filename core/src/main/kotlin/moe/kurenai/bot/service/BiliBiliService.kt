@@ -13,12 +13,19 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import it.tdlight.jni.TdApi.*
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import moe.kurenai.bot.Config.Companion.CONFIG
 import moe.kurenai.bot.command.InlineDispatcher
+import moe.kurenai.bot.config.CookieFiles
 import moe.kurenai.bot.model.bilibili.DynamicInfo
 import moe.kurenai.bot.model.bilibili.VideoInfo
 import moe.kurenai.bot.model.bilibili.VideoStreamUrl
@@ -29,10 +36,15 @@ import moe.kurenai.bot.util.TelegramUtil.trimMessage
 import moe.kurenai.common.util.*
 import org.jsoup.Jsoup
 import java.net.URI
+import java.nio.file.StandardOpenOption
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import kotlin.io.path.Path
+import kotlin.io.path.exists
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -44,7 +56,12 @@ import kotlin.time.Duration.Companion.seconds
  */
 internal object BiliBiliService {
 
-    private val log = getLogger()
+    internal val log = getLogger()
+    internal val cookieFlow = MutableStateFlow("")
+
+    private val scope = CoroutineScope(Dispatchers.IO + CoroutineName("BiliBili") + SupervisorJob())
+
+    private val cookiePath = CookieFiles.BILIBILI.getPath()
 
     private val httpLogger = object : Logger {
         override fun log(message: String) {
@@ -323,6 +340,29 @@ internal object BiliBiliService {
                     this.text = formattedText.trimMessage()
                 }
             })
+    }
+
+    init {
+        scope.launch {
+            cookieFlow.collect { cookie ->
+                client.config {
+                    defaultRequest {
+                        header(HttpHeaders.Cookie, cookie)
+                    }
+                }
+
+                runCatching {
+                    cookiePath.writeText(cookie, Charsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+                }.onFailure {
+                    log.error("Write cookie file error", it)
+                }
+                log.info("Update bilibili cookie successfully")
+            }
+        }
+
+        if (cookiePath.exists()) {
+            cookieFlow.tryEmit(cookiePath.readText())
+        }
     }
 
 }
