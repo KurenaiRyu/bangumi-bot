@@ -11,30 +11,45 @@ import moe.kurenai.bot.command.CommandHandler
 import moe.kurenai.bot.config.CookieVendor
 import moe.kurenai.bot.service.BiliBiliService
 import moe.kurenai.bot.util.FormattedTextBuilder
-import moe.kurenai.bot.util.FormattedTextBuilder.Companion.formattedText
 import moe.kurenai.bot.util.TelegramUtil
 import moe.kurenai.bot.util.TelegramUtil.asText
+import moe.kurenai.common.util.getLogger
 
 @ContributesIntoSet(AppScope::class)
 class Cookie : CommandHandler {
 
+    companion object {
+        private val log = getLogger()
+    }
+
     override val command: String = "cookie"
-    override val description: String = "更新cookie对应，不指定则默认为bilibili，不接cookie则进行查询。e.g. /cookie bilibili your_cookie; /cookie bilibili"
+    override val description: String =
+        "更新cookie对应，不指定则默认为bilibili，不接cookie则进行查询。e.g. /cookie bilibili your_cookie; /cookie bilibili"
 
     override suspend fun execute(message: Message, sender: MessageSenderUser, args: List<String>) {
-        if (sender.userId != Config.CONFIG.telegram.masterId) return // Do no things
-        if (TelegramBot.getChat(message.chatId)?.type?.constructor?.equals(TdApi.ChatTypePrivate.CONSTRUCTOR) ?: false) return
+        if (sender.userId != Config.CONFIG.telegram.masterId) {
+            log.info("No match master id: ${sender.userId}")
+            return
+        }
+        val chat = TelegramBot.getChat(message.chatId)
+        if (!(chat?.type?.constructor?.equals(TdApi.ChatTypePrivate.CONSTRUCTOR)
+                ?: false)
+        ) {
+            log.info("Not support chat type: ${chat?.type}")
+            return
+        }
 
         when (args.size) {
             0 -> getCookie(CookieVendor.BILIBILI, message)
             1 -> {
                 val cookieVendor = CookieVendor.ofName(args[0])
                 if (cookieVendor == null) {
-                    setCookie(CookieVendor.BILIBILI, message,args[0])
+                    setCookie(CookieVendor.BILIBILI, message, args[0])
                 } else {
                     getCookie(cookieVendor, message)
                 }
             }
+
             2 -> {
                 val cookieVendor = CookieVendor.ofName(args[0])
 
@@ -50,6 +65,7 @@ class Cookie : CommandHandler {
 
                 setCookie(cookieVendor, message, args[1])
             }
+
             else -> {
                 TelegramBot.send(TelegramUtil.messageText(message.chatId, "Resolve argument error".asText()))
             }
@@ -61,20 +77,40 @@ class Cookie : CommandHandler {
             CookieVendor.BILIBILI -> BiliBiliService.cookieFlow.value
         }
 
-        TelegramBot.sendMessage(message.chatId, formattedText {
-            appendText("${cookieVendor.name} Cookie:")
-            appendLine()
-            appendCode(cookie)
-        })
+        val msg = FormattedTextBuilder()
+        msg.appendText("${cookieVendor.name} Cookie:")
+            .appendLine()
+            .appendCode(cookie)
+        TelegramBot.send(TelegramUtil.messageText(message.chatId, msg.build()))
     }
 
     private suspend fun setCookie(cookieVendor: CookieVendor, message: Message, cookie: String) {
+        if (!checkCookie(cookie)) {
+            TelegramBot.send(
+                TelegramUtil.messageText(
+                    message.chatId,
+                    "Invalid cookie".asText()
+                )
+            )
+            return
+        }
+
         when (cookieVendor) {
             CookieVendor.BILIBILI -> {
                 BiliBiliService.cookieFlow.emit(cookie)
             }
         }
 
-        TelegramBot.sendMessage(message.chatId, "Update ${cookieVendor.name} cookie successfully".asText())
+        TelegramBot.send(
+            TelegramUtil.messageText(
+                message.chatId,
+                "Update ${cookieVendor.name} cookie successfully".asText()
+            )
+        )
     }
+
+    private fun checkCookie(cookie: String): Boolean {
+        return cookie.contains("=") && cookie.contains(";") && cookie.length > 120
+    }
+
 }
