@@ -54,7 +54,8 @@ data class Telegram(
     var token: String = "",
     var userMode: Boolean = false,
     var updateBaseUrl: String = baseUrl,
-    var linkPreviewGroup: Long? = null
+    var linkPreviewGroup: Long? = null,
+    var masterId: Long? = null,
 )
 
 @Serializable

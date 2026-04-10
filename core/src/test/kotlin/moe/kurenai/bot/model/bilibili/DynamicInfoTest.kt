@@ -1,9 +1,8 @@
 package moe.kurenai.bot.model.bilibili
 
+import kotlinx.coroutines.runBlocking
+import moe.kurenai.bot.service.BiliBiliService
 import moe.kurenai.common.util.json
-import java.nio.file.Path
-import kotlin.io.path.readBytes
-import kotlin.io.path.readText
 import kotlin.test.Test
 
 class DynamicInfoTest {
@@ -14,4 +13,8 @@ class DynamicInfoTest {
         println(info)
     }
 
+    @org.junit.Test
+    fun testUrl(): Unit = runBlocking {
+        println(BiliBiliService.getDynamicDetail("1156842985854337026"))
+    }
 }

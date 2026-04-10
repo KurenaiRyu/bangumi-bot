@@ -3,7 +3,7 @@ package moe.kurenai.bot.config
 import java.nio.file.Path
 import kotlin.io.path.Path
 
-enum class CookieFiles {
+enum class CookieVendor {
     BILIBILI,;
 
     fun getPath(): Path {
@@ -11,8 +11,8 @@ enum class CookieFiles {
     }
 
     companion object {
-        fun ofName(name: String): CookieFiles? {
-            return CookieFiles.entries.find { it.name.equals(name, true) }
+        fun ofName(name: String): CookieVendor? {
+            return CookieVendor.entries.find { it.name.equals(name, true) }
         }
     }
 

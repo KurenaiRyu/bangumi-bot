@@ -13,19 +13,15 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import it.tdlight.jni.TdApi.*
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import moe.kurenai.bot.Config.Companion.CONFIG
 import moe.kurenai.bot.command.InlineDispatcher
-import moe.kurenai.bot.config.CookieFiles
+import moe.kurenai.bot.config.CookieVendor
 import moe.kurenai.bot.model.bilibili.DynamicInfo
 import moe.kurenai.bot.model.bilibili.VideoInfo
 import moe.kurenai.bot.model.bilibili.VideoStreamUrl
@@ -41,7 +37,6 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
@@ -61,7 +56,7 @@ internal object BiliBiliService {
 
     private val scope = CoroutineScope(Dispatchers.IO + CoroutineName("BiliBili") + SupervisorJob())
 
-    private val cookiePath = CookieFiles.BILIBILI.getPath()
+    private val cookiePath = CookieVendor.BILIBILI.getPath()
 
     private val httpLogger = object : Logger {
         override fun log(message: String) {

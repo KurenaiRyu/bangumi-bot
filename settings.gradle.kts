@@ -7,5 +7,3 @@ include(":core")
 include(":bangumi-api")
 include("mi-ho-yo")
 include("common")
-
-include("skland")

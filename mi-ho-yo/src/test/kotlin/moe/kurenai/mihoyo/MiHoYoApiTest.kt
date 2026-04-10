@@ -12,7 +12,7 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.util.encodeBase64
+import io.ktor.util.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
@@ -21,18 +21,14 @@ import moe.kurenai.common.util.md5
 import moe.kurenai.mihoyo.MiHoYo.APP_ID
 import moe.kurenai.mihoyo.module.*
 import moe.kurenai.mihoyo.module.zzz.Challenge
-import moe.kurenai.mihoyo.module.zzz.MemDetail
 import moe.kurenai.mihoyo.util.MiHoYoHeaders
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.util.*
-import kotlin.io.encoding.Base64
-import kotlin.io.path.createDirectories
 import kotlin.io.path.readBytes
 import kotlin.io.path.readLines
 import kotlin.io.path.readText
-import kotlin.io.path.writeBytes
 import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
@@ -177,7 +173,7 @@ class MiHoYoApiTest {
             header(HttpHeaders.Cookie, cookie)
         }.body<BaseResponse<Challenge>>()
 
-        zzzPath.resolve("Challenge_${challengeRes.data!!.scheduleId}.json").writeText(Json.encodeToString(challengeRes.data!!), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+        zzzPath.resolve("Challenge_${challengeRes.data!!.scheduleId}.json").writeText(Json.encodeToString(challengeRes.data), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
     }
 
     @Test
