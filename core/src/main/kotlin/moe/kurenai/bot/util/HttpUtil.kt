@@ -59,7 +59,7 @@ object HttpUtil {
                 runCatching {
                     if (UA != it) {
                         UA = it
-                        uaPath.writeText(it, Charsets.UTF_8, StandardOpenOption.APPEND)
+                        uaPath.writeText(it, Charsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
                         log.info("Update UA: {}", it)
                     }
                 }.onFailure { ex ->
