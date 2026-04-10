@@ -299,10 +299,10 @@ internal object BiliBiliService {
             stats.add("评论 ${moduleStat.comment.count}")
         }
         if (!moduleStat.forward.forbidden) {
-            stats.add("转发 ${moduleStat.comment.count}")
+            stats.add("转发 ${moduleStat.forward.count}")
         }
         if (!moduleStat.like.forbidden) {
-            stats.add("点赞 ${moduleStat.comment.count}")
+            stats.add("点赞 ${moduleStat.like.count}")
         }
 
         val formattedText =builder.appendLine()
