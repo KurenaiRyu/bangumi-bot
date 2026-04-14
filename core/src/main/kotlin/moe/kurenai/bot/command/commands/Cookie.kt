@@ -64,7 +64,7 @@ class Cookie : CommandHandler {
         msg.appendText("${cookieVendor.name} Cookie:")
             .appendLine()
             .appendCode(cookie)
-        TelegramBot.send(TelegramUtil.messageText(message.chatId, msg.build()))
+        TelegramBot.sendMessage(message.chatId, msg.build())
     }
 
     private suspend fun setCookie(cookieVendor: CookieVendor, message: Message, cookie: String) {
@@ -74,6 +74,6 @@ class Cookie : CommandHandler {
             }
         }
 
-        TelegramBot.send(TelegramUtil.messageText(message.chatId, "Update ${cookieVendor.name} cookie successfully".asText()))
+        TelegramBot.sendMessage(message.chatId, "Update ${cookieVendor.name} cookie successfully".asText())
     }
 }

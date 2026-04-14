@@ -87,6 +87,15 @@ object TelegramBot {
         }
     }
 
+    suspend fun sendMessage(chatId: Long, message: FormattedText): Message {
+        return send(SendMessage().apply {
+            this.chatId = chatId
+            inputMessageContent = InputMessageText().apply {
+                this.text = message
+            }
+        })
+    }
+
     suspend fun sendPhoto(chatId: Long, photoUrl: String, msg: FormattedText): Message {
         return send {
             SendMessage().apply {
