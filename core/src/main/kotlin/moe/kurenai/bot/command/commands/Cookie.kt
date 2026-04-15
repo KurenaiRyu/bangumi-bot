@@ -11,6 +11,7 @@ import moe.kurenai.bot.command.CommandHandler
 import moe.kurenai.bot.config.CookieVendor
 import moe.kurenai.bot.service.BiliBiliService
 import moe.kurenai.bot.util.FormattedTextBuilder
+import moe.kurenai.bot.util.FormattedTextBuilder.Companion.formattedText
 import moe.kurenai.bot.util.TelegramUtil
 import moe.kurenai.bot.util.TelegramUtil.asText
 
@@ -60,11 +61,11 @@ class Cookie : CommandHandler {
             CookieVendor.BILIBILI -> BiliBiliService.cookieFlow.value
         }
 
-        val msg = FormattedTextBuilder()
-        msg.appendText("${cookieVendor.name} Cookie:")
-            .appendLine()
-            .appendCode(cookie)
-        TelegramBot.sendMessage(message.chatId, msg.build())
+        TelegramBot.sendMessage(message.chatId, formattedText {
+            appendText("${cookieVendor.name} Cookie:")
+            appendLine()
+            appendCode(cookie)
+        })
     }
 
     private suspend fun setCookie(cookieVendor: CookieVendor, message: Message, cookie: String) {

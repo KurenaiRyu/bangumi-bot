@@ -123,6 +123,10 @@ class FormattedTextBuilder {
         inline fun formattedText(block: FormattedTextBuilder.() -> Unit): TdApi.FormattedText {
             return FormattedTextBuilder().apply(block).build()
         }
+
+        inline fun formattedTextBuilder(block: FormattedTextBuilder.() -> Unit): FormattedTextBuilder {
+            return FormattedTextBuilder().apply(block)
+        }
     }
 
 }
