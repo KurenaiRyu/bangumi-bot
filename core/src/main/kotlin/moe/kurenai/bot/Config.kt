@@ -17,18 +17,16 @@ data class Config(
             encodeDefaultValues = false
         }
         private val file = File("config/config.yml")
-        var CONFIG: Config = Config()
-
-        init {
+        val CONFIG: Config by lazy {
             if (!file.exists()) {
                 file.parentFile.mkdirs()
                 file.createNewFile()
                 yaml.encodeToString(serializer(), CONFIG)
                 throw Exception("请填写配置文件。")
             } else {
-                CONFIG = yaml.decodeFromString(serializer(), file.readText())
-            }
-        }
+                yaml.decodeFromString(serializer(), file.readText())
+            } }
+
     }
 
 }

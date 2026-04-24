@@ -8,7 +8,6 @@ import it.tdlight.client.*
 import it.tdlight.jni.TdApi
 import it.tdlight.jni.TdApi.*
 import kotlinx.coroutines.*
-import moe.kurenai.bot.command.HandlerInitializer
 import moe.kurenai.bot.config.AppGraph
 import moe.kurenai.bot.util.TelegramUtil.trimCaption
 import moe.kurenai.common.util.getLogger
@@ -62,8 +61,6 @@ object TelegramBot {
     }
 
     fun start() {
-        HandlerInitializer.initialize()
-
         client = SimpleTelegramClientFactory().builder(settings)
             .build(AuthenticationSupplier.bot(Config.CONFIG.telegram.token))
         client.addUpdateHandler(UpdateAuthorizationState::class.java) { update ->

@@ -1,21 +1,20 @@
 package moe.kurenai.bot.command.inlines
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoSet
 import io.ktor.http.*
 import it.tdlight.jni.TdApi.*
 import moe.kurenai.bot.Config.Companion.CONFIG
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.command.*
-import moe.kurenai.bot.command.InlineDispatcher.fallback
+import moe.kurenai.bot.command.InlineDispatcher.Companion.fallback
 import moe.kurenai.bot.service.BiliBiliService
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
 import moe.kurenai.common.util.getLogger
 import java.net.URI
 
-object BilibiliHandler : InlineHandler {
-
-    init {
-        InlineDispatcher.registryHandler(this)
-    }
+@ContributesIntoSet(AppScope::class)
+class BilibiliHandler : InlineHandler {
 
     private val log = getLogger()
 

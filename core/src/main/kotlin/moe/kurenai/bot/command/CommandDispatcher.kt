@@ -20,7 +20,8 @@ import it.tdlight.client.Result as TdResult
 
 @Inject
 class CommandDispatcher (
-    private val cmd: Set<CommandHandler>
+    cmd: Set<CommandHandler>,
+    private val uriInlineCommandHandler: InlineDispatcher
 ) {
 
     private val log = getLogger()
@@ -31,8 +32,6 @@ class CommandDispatcher (
                 log.debug("Registry command: $it")
             }
         }
-
-    internal val uriInlineCommandHandler = InlineDispatcher
 
     fun handle(update: Update) = CoroutineScope(Dispatchers.Default).launch {
         log.trace("Incoming update: {}", update.toString().trim())

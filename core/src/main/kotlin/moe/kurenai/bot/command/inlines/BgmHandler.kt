@@ -1,10 +1,12 @@
 package moe.kurenai.bot.command.inlines
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoSet
 import it.tdlight.jni.TdApi.UpdateNewInlineQuery
 import moe.kurenai.bot.TelegramBot.send
 import moe.kurenai.bot.command.HANDLED
 import moe.kurenai.bot.command.HandleResult
-import moe.kurenai.bot.command.InlineDispatcher.fallback
+import moe.kurenai.bot.command.InlineDispatcher.Companion.fallback
 import moe.kurenai.bot.command.InlineHandler
 import moe.kurenai.bot.command.UNHANDLED
 import moe.kurenai.bot.service.bangumi.CharacterService
@@ -16,7 +18,8 @@ import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
 import moe.kurenai.common.util.getLogger
 import java.net.URI
 
-object BgmHandler : InlineHandler {
+@ContributesIntoSet(AppScope::class)
+class BgmHandler : InlineHandler {
 
     private val log = getLogger()
 
