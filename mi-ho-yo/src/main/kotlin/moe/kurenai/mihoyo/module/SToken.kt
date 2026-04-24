@@ -8,9 +8,9 @@ import kotlinx.serialization.json.JsonElement
 @Serializable
 data class SToken(
     @SerialName("need_realperson")
-    val needRealperson: Boolean = false,
+    val needRealPerson: Boolean = false,
     @SerialName("realname_info")
-    val realnameInfo: JsonElement? = null,
+    val realNameInfo: JsonElement? = null,
     val token: Token = Token(),
     @SerialName("user_info")
     val userInfo: UserInfo = UserInfo()

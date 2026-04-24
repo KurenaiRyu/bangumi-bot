@@ -1,7 +1,6 @@
 package moe.kurenai.mihoyo.module
 
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable

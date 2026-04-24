@@ -53,7 +53,8 @@ class QueryQRCodeStatus(
         val mobile: String,
         @SerialName("password_time")
         val passwordTime: String,
-        val realname: String,
+        @SerialName("realname")
+        val realName: String,
         @SerialName("rebind_area_code")
         val rebindAreaCode: String,
         @SerialName("rebind_mobile")
