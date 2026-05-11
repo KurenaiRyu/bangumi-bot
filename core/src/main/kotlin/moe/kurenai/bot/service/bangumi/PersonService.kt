@@ -6,8 +6,7 @@ import moe.kurenai.bangumi.models.UserAccessToken
 import moe.kurenai.bot.service.bangumi.BangumiApi.result
 import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
 import moe.kurenai.bot.util.BgmUtil
-import moe.kurenai.bot.util.BgmUtil.appendFormattedInfoBox
-import moe.kurenai.bot.util.BgmUtil.formatToList
+import moe.kurenai.bot.util.BgmUtil.appendInfoBox
 import moe.kurenai.bot.util.BgmUtil.getLarge
 import moe.kurenai.bot.util.BgmUtil.toGrid
 import moe.kurenai.bot.util.FormattedTextBuilder
@@ -27,11 +26,10 @@ internal object PersonService {
     }
 
     suspend fun getContent(person: PersonDetail, link: String): Array<InputInlineQueryResult> {
-        val infoBox = person.infobox?.formatToList()?: emptyList()
         val formattedText = FormattedTextBuilder()
             .appendLink(person.name, link)
             .appendLine().appendLine()
-            .appendFormattedInfoBox(infoBox)
+            .appendInfoBox(person.infobox)
             .wrapQuoteIfNeeded {
                 appendText(person.summary)
             }.build()
@@ -53,7 +51,7 @@ internal object PersonService {
             },
         )
 
-        BgmUtil.handleOgImageInfo(infoBox) { title, url, i ->
+        BgmUtil.handleOgImageInfo(person.infobox) { title, url, i ->
             resultList.add(InputInlineQueryResultArticle().apply {
                 this.id = "P${person.id}_$i"
                 this.title = title.ifBlank { person.name }

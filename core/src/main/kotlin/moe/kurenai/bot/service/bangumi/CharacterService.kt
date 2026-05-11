@@ -8,7 +8,7 @@ import moe.kurenai.bangumi.models.UserAccessToken
 import moe.kurenai.bot.service.bangumi.BangumiApi.result
 import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
 import moe.kurenai.bot.util.BgmUtil
-import moe.kurenai.bot.util.BgmUtil.appendFormattedInfoBox
+import moe.kurenai.bot.util.BgmUtil.appendInfoBox
 import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.getLarge
 import moe.kurenai.bot.util.BgmUtil.toGrid
@@ -46,7 +46,7 @@ internal object CharacterService {
         val infoBox = character.infobox?.formatToList() ?: emptyList()
         builder.appendLink(character.name, link)
             .appendLine().appendLine()
-            .appendFormattedInfoBox(infoBox)
+            .appendInfoBox(character.infobox)
 
 
 
@@ -56,10 +56,10 @@ internal object CharacterService {
                 appendLine()
                 appendLine()
 
-                joinList(persons.groupBy { it.name }.entries, "\n\n") { (name, list) ->
+                joinList(persons.groupBy { it.name }.entries, "\n") { (name, list) ->
                     appendBold(name)
                     appendText(": ")
-                    joinList(list, "、") {
+                    joinList(list, "\n        ") {
                         appendLink(it.subjectName, "https://$host/subject/${it.subjectId}")
                     }
                 }
@@ -87,7 +87,7 @@ internal object CharacterService {
             },
         )
 
-        BgmUtil.handleOgImageInfo(infoBox) { title, url, i ->
+        BgmUtil.handleOgImageInfo(character.infobox) { title, url, i ->
             resultList.add(InputInlineQueryResultArticle().apply {
                 id = "C${character.id}_$i"
                 thumbnailUrl = url

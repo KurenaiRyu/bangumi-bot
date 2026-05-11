@@ -10,9 +10,8 @@ import moe.kurenai.bangumi.models.UserAccessToken
 import moe.kurenai.bot.service.bangumi.BangumiApi.result
 import moe.kurenai.bot.service.bangumi.BangumiApi.useApi
 import moe.kurenai.bot.util.BgmUtil
-import moe.kurenai.bot.util.BgmUtil.appendFormattedInfoBox
+import moe.kurenai.bot.util.BgmUtil.appendInfoBox
 import moe.kurenai.bot.util.BgmUtil.category
-import moe.kurenai.bot.util.BgmUtil.formatToList
 import moe.kurenai.bot.util.BgmUtil.getLarge
 import moe.kurenai.bot.util.BgmUtil.toGrid
 import moe.kurenai.bot.util.FormattedTextBuilder
@@ -23,25 +22,6 @@ import moe.kurenai.bot.util.TelegramUtil.trimMessage
  * @since 2023/1/26 14:59
  */
 internal object SubjectService {
-
-    private val mainInfoProperties =
-        listOf(
-            "中文名",
-            "话数",
-            "放送开始",
-            "原作",
-            "导演",
-            "音乐",
-            "人物设定",
-            "系列构成",
-            "总作画监督",
-            "製作",
-            "动画制作",
-            "别名",
-            "官方网站",
-            "Copyright"
-        )
-
 
     context(token: UserAccessToken?)
     suspend fun findById(id: Int): Subject {
@@ -63,11 +43,10 @@ internal object SubjectService {
 
     suspend fun getContent(sub: Subject, link: String): Array<InputInlineQueryResult> {
 
-        val infoBox = sub.infobox?.formatToList() ?: emptyList()
         val formattedText = FormattedTextBuilder().appendText("[${sub.type.category()}]　")
             .appendLink(sub.name, link)
             .appendLine().appendLine()
-            .appendFormattedInfoBox(infoBox)
+            .appendInfoBox(sub.infobox)
             .wrapQuoteIfNeeded {
                 appendText(sub.summary)
             }.build()
@@ -91,7 +70,7 @@ internal object SubjectService {
         )
 
 
-        BgmUtil.handleOgImageInfo(infoBox) { title, url, i ->
+        BgmUtil.handleOgImageInfo(sub.infobox) { title, url, i ->
             resultList.add(
                 InputInlineQueryResultArticle().apply {
                     this.id = "S${sub.id}_${i + 1}"

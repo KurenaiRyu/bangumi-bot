@@ -17,11 +17,14 @@ object BgmUtil {
 
     const val DEFAULT_IMAGE = "https://bgm.tv/img/no_icon_subject.png"
 
-    suspend fun fetchOgImageInfo(infoBox: List<Pair<String, String>>): Map<String, MutableList<String>> {
+    suspend fun fetchOgImageInfo(infoBoxes: List<InfoBox>?): Map<String, MutableList<String>> {
+        if (infoBoxes.isNullOrEmpty()) return emptyMap()
         val map = HashMap<String, MutableList<String>>()
-        infoBox.filter { it.second.startsWith("http") }.mapNotNull {
+        infoBoxes.flatMap {
+            it.value.filter { it.v?.startsWith("http")?:false }.map { it.v!! }
+        }.mapNotNull {
             kotlin.runCatching {
-                HttpUtil.getOgImageInfo(Url(it.second))
+                HttpUtil.getOgImageInfo(Url(it))
             }.getOrNull()
         }.forEach { (title, list) ->
             val value = map.getOrPut(title) { mutableListOf() }
@@ -30,7 +33,7 @@ object BgmUtil {
         return map
     }
 
-    suspend fun handleOgImageInfo(infoBox: List<Pair<String, String>>, block: (title: String, url: String, i: Int) -> Unit) {
+    suspend fun handleOgImageInfo(infoBox: List<InfoBox>?, block: (title: String, url: String, i: Int) -> Unit) {
         val info = fetchOgImageInfo(infoBox)
         for ((title, list) in info) {
             var i = 0
@@ -41,34 +44,51 @@ object BgmUtil {
         }
     }
 
-    fun FormattedTextBuilder.appendInfoBox(infoBox: List<InfoBox>?): FormattedTextBuilder {
-        if (infoBox?.isEmpty()?:true) return this
+    fun FormattedTextBuilder.appendInfoBox(infoBoxes: List<InfoBox>?): FormattedTextBuilder {
+        if (infoBoxes?.isEmpty()?:true) return this
+        val infoList = infoBoxes.filter { it.value.size > 1 || it.value.isNotEmpty() && it.value[0].v != null }
+        if (infoList.isEmpty()) return this
 
-        return this.appendFormattedInfoBox(infoBox.formatToList())
-    }
-
-    fun FormattedTextBuilder.appendFormattedInfoBox(infoBox: List<Pair<String, String>>): FormattedTextBuilder {
-        val info = infoBox.filter { it.second.isNotBlank() }
-        if (info.isEmpty()) return this
-
-        val handle = {
-            joinList(info, "\n\n") { (k, v) ->
-                appendBold(k)
-                appendText(": $v")
-            }
-        }
-
-        if (info.size > 8) {
+        if (infoList.size > 8) {
             wrapQuote {
-                handle()
+                joinInfoBoxList(infoList)
             }
         } else {
-            handle()
+            joinInfoBoxList(infoList)
             appendLine()
             appendLine()
         }
 
         return this
+    }
+
+    private fun FormattedTextBuilder.joinInfoBoxList(infoBoxes: List<InfoBox>) {
+        joinList(infoBoxes, "\n") { (label, items) ->
+            appendText("$label: ")
+            var first = true
+            for (item in items) {
+                if (first) {
+                    first = false
+                    if (item.k != null) {
+                        appendLine()
+                        appendText("        ${item.k}: ")
+                    }
+                    appendCode(item.v?:"")
+                } else {
+                    if (item.k != null) {
+                        appendLine()
+                        appendText("        ${item.k}  ")
+                        appendCode(item.v?:"")
+                    } else {
+                        item.v?.let {
+                            appendLine()
+                            appendText("        ")
+                            appendCode(it)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fun List<Pair<String, String>>.format(): String {
@@ -84,8 +104,23 @@ object BgmUtil {
     }
 
     private fun format(infoBox: InfoBox): Pair<String, String> {
-        return infoBox.key to infoBox.value.joinToString("、") { item ->
-            item.v + (item.k?.let { " (${it})" } ?: "")
+        var first = true
+        return infoBox.key to infoBox.value.joinToString("\n") { item ->
+            if (item.k != null) {
+                if (first) {
+                    first = false
+                    "\n    ${item.k} ${item.v}"
+                } else {
+                    "    ${item.k} ${item.v}"
+                }
+            } else {
+                if (first) {
+                    first = false
+                    item.v!!
+                } else {
+                    "    ${item.v}"
+                }
+            }
         }
     }
 
