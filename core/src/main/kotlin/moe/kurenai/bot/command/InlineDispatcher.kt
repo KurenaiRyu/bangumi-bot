@@ -4,7 +4,6 @@ import dev.zacsweers.metro.Inject
 import it.tdlight.jni.TdApi.Ok
 import it.tdlight.jni.TdApi.UpdateNewInlineQuery
 import moe.kurenai.bot.TelegramBot.send
-import moe.kurenai.bot.command.inlines.BgmHandler
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQueryEmpty
 import java.net.URI
 import java.time.format.DateTimeFormatter
@@ -22,20 +21,11 @@ class InlineDispatcher(
         }
     }
 
-    internal val bgmHandler: BgmHandler = inlineHandlers.filterIsInstance<BgmHandler>().first()
-
-    suspend fun execute(inlineHandler: UpdateNewInlineQuery, input: String) {
-
-    }
-
     suspend fun execute(inlineQuery: UpdateNewInlineQuery, uri: URI) {
         for (handler in inlineHandlers) {
             if (handler.handle(inlineQuery, uri) == HANDLED) return
         }
 
-        // default handle bgm.tv
-        if (bgmHandler.handle(inlineQuery, uri) == UNHANDLED) {
-            fallback(inlineQuery)
-        }
+        fallback(inlineQuery)
     }
 }
