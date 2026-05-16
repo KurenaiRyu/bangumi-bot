@@ -9,11 +9,7 @@ import moe.kurenai.bot.command.HandleResult
 import moe.kurenai.bot.command.InlineDispatcher.Companion.fallback
 import moe.kurenai.bot.command.InlineHandler
 import moe.kurenai.bot.command.UNHANDLED
-import moe.kurenai.bot.service.bangumi.CharacterService
-import moe.kurenai.bot.service.bangumi.EpisodeService
-import moe.kurenai.bot.service.bangumi.PersonService
-import moe.kurenai.bot.service.bangumi.SubjectService
-import moe.kurenai.bot.service.bangumi.TokenService
+import moe.kurenai.bot.service.bangumi.*
 import moe.kurenai.bot.util.TelegramUtil.answerInlineQuery
 import moe.kurenai.common.util.getLogger
 import java.net.URI
@@ -22,12 +18,15 @@ import java.net.URI
 class BgmHandler : InlineHandler {
 
     private val log = getLogger()
+    private val hostList = arrayOf("bgm.tv", "bangumi.tv")
 
     override suspend fun handle(inlineQuery: UpdateNewInlineQuery, uri: URI): HandleResult {
         // https://bgm.tv/ep/1561086
         // https://bgm.tv/subject/504054
         // https://bgm.tv/character/169543
         // https://bgm.tv/person/11523
+        if (uri.host !in hostList) return UNHANDLED
+
         val params = uri.path.split("/")
         if (params.size != 3) return UNHANDLED
         doHandle(params, inlineQuery, uri)
