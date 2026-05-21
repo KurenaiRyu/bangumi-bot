@@ -8,7 +8,9 @@ class KuroResponse<T: KuroResponseData> (
     @SerialName("msg")
     val msg: String,
     @SerialName("success")
-    val success: Boolean,
+    val success: Boolean? = null,
+    @SerialName("traceId")
+    val traceId: String,
     @SerialName("data")
     val data: T? = null
 )

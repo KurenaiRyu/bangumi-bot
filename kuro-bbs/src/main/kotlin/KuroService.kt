@@ -4,7 +4,7 @@ class KuroService(
 
     context(ctx: KuroContext)
     suspend fun checkIn() {
-        val mineInfo = client.getMineInfo()
+        val mineInfo = client.getMineInfo(ctx.userId)
         val gamerRoleList = client.getGamerRoleList(mineInfo.mine.userId)
         val roleInfo = gamerRoleList.defaultRoleList[0]
         client.sign(roleInfo)
