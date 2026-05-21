@@ -5,5 +5,6 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 rootProject.name = "bangumi-bot"
 include(":core")
 include(":bangumi-api")
-include("mi-ho-yo")
-include("common")
+include(":mi-ho-yo")
+include(":kuro-bbs")
+include(":common")
