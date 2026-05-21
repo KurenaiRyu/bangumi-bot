@@ -1,3 +1,5 @@
+package moe.kurenai.kuro
+
 import java.io.Serial
 
 class KuroException(

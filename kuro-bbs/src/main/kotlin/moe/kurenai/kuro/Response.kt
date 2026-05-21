@@ -1,4 +1,4 @@
-//import kotlinx.serialization.SerialName
+package moe.kurenai.kuro//import kotlinx.serialization.SerialName
 //import kotlinx.serialization.Serializable
 //import kotlinx.serialization.json.Json
 //import okhttp3.FormBody

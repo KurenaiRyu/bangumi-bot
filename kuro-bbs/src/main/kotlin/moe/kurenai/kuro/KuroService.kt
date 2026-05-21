@@ -1,3 +1,5 @@
+package moe.kurenai.kuro
+
 class KuroService(
     private val client: KuroClient
 ) {
