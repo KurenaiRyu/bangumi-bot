@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-group = "moe.kurenai.kuro"
+group = "moe.kurenai.skyland"
 version = "1.0-SNAPSHOT"
 
 repositories {
