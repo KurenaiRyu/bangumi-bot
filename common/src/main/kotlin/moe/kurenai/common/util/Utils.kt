@@ -6,11 +6,11 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.contextual
 import kotlinx.serialization.modules.plus
+import okio.FileSystem
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URLEncoder
 import java.nio.file.Path
-import java.security.MessageDigest
 import java.util.*
 import kotlin.io.path.exists
 import kotlin.io.path.inputStream
@@ -21,10 +21,7 @@ import kotlin.time.Duration
  * @since 2022/10/27 16:20
  */
 
-
-fun getLogger(name: String = Thread.currentThread().stackTrace[2].className): Logger {
-    return LoggerFactory.getLogger(name)
-}
+val FS = FileSystem.SYSTEM
 
 val json = Json {
     encodeDefaults = false
@@ -35,6 +32,16 @@ val json = Json {
         contextual(LocalDateTimeSerializer())
         contextual(LocalDateSerializer())
         contextual(OffsetDateTimeSerializer())
+    }
+}
+
+fun getLogger(name: String = Thread.currentThread().stackTrace[2].className): Logger = LoggerFactory.getLogger(name)
+
+fun buildKtorLogger(block: (String) -> Unit): io.ktor.client.plugins.logging.Logger {
+    return object: io.ktor.client.plugins.logging.Logger {
+        override fun log(message: String) {
+            block(message)
+        }
     }
 }
 
@@ -55,11 +62,7 @@ fun String.trimString(size: Int = 100) = if (this.length > size + 20) this.subst
 
 fun Boolean.toInt() = if (this) 1 else 0
 
-fun String.urlBase64(): String = Base64.getUrlEncoder().encodeToString(this.toByteArray())
-
 fun String.encodeUrl(): String = URLEncoder.encode(this, "utf-8")
-
-fun ByteArray.md5() = MessageDigest.getInstance("MD5").digest(this)
 
 fun Duration.formatToTime(): String {
     return this.toComponents { h, m, s, _ ->

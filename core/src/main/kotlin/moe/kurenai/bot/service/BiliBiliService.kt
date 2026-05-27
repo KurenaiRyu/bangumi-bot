@@ -77,7 +77,7 @@ internal object BiliBiliService {
     }
     private val client = HttpClient(OkHttp) {
         install(Logging) {
-            logger = httpLogger
+            logger = buildKtorLogger { log.debug(it) }
             level = LogLevel.ALL
             sanitizeHeader { header -> header == HttpHeaders.Cookie }
         }

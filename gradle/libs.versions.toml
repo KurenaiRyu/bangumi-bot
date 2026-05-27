@@ -7,6 +7,7 @@ coroutines = "1.10.2"
 ktor = "3.4.2"
 log4j = "2.20.0"
 jimmer = "0.9.96"
+okio = "3.16.4"
 
 [libraries]
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "ktolin" }
@@ -39,6 +40,7 @@ jimmer-kotlin = { module = "org.babyfish.jimmer:jimmer-sql-kotlin", version.ref 
 jimmer-ksp = { module = "org.babyfish.jimmer:jimmer-ksp", version.ref = "jimmer" }
 hikaricp = { module = "com.zaxxer:HikariCP", version = "6.3.0" }
 sqlite = { module = "org.xerial:sqlite-jdbc", version = "3.47.0.0" }
+okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
 [bundles]
 ktorClient = ["ktor-client-core", "ktor-client-okhttp", "ktor-serialization-kotlinx-json", "ktor-client-negotiation", "ktor-client-logging"]
