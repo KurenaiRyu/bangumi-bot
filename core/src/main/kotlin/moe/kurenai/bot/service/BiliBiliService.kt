@@ -157,12 +157,11 @@ internal object BiliBiliService {
 
         val playCount = "${((videoInfo.data.stat.view / 10.0).roundToInt() / 100.0)}K 播放"
         val videoTitle = videoInfo.data.title.trim()
-        val linkWithoutPage = "https://www.bilibili.com/video/${videoInfo.data.bvid}"
+        val url = "https://www.bilibili.com/video/${videoInfo.data.bvid}"
 
-        val parameters = mutableListOf<String>()
-        if (p > 0) parameters.add("p=$p")
-        if (t > 0) parameters.add("t=$t")
-        val parameterStr = parameters.joinToString("&")
+        val queryParams = ""
+        if (p > 0) queryParams + "p=$p"
+        if (t > 0) queryParams + "t=$t"
 
         val rank =
             if (videoInfo.data.stat.nowRank == 0) "" else "/ ${videoInfo.data.stat.nowRank} 名 / 历史最高 ${videoInfo.data.stat.nowRank} 名"
@@ -182,18 +181,25 @@ internal object BiliBiliService {
             val builder = FormattedTextBuilder()
 
             val inlineTitle: String
-            if (p == 0 && videoInfo.data.pages.size == 1) { // no specific page
+            val fullUrl = URLBuilder(url).apply {
+                if (t > 0) parameters["t"] = t.toString()
+                if (pageNum > 1) parameters["p"] = pageNum.toString()
+            }.build()
+            if (videoInfo.data.pages.size == 1) {
                 inlineTitle = videoTitle
-                builder.appendLink(videoTitle, "$linkWithoutPage?$parameterStr")
+                builder.appendLink(videoTitle, fullUrl.toString())
             } else  {
                 val pTitle = if (videoTitle.trim() == pageTitle.trim()) {
                     "P$p"
                 } else {
                     removeOverlap(pageTitle, videoTitle).trim()
                 }
-                builder.appendLink(videoTitle, linkWithoutPage)
-                    .appendText(" / ")
-                    .appendLink(pTitle, "$linkWithoutPage?p=$pageNum&t=$t")
+
+                builder.appendLink(videoTitle, fullUrl.toString())
+                if (p != 0 || index != 0) {
+                    builder.appendText(" / ")
+                        .appendLink(pTitle, fullUrl.toString())
+                }
 
                 inlineTitle = "${pTitle}_$videoTitle"
             }
@@ -215,7 +221,8 @@ internal object BiliBiliService {
                     appendText(videoInfo.data.desc)
                 }.build()
 
-            val canShowVideo = fetchStreamLength(streamInfo.data!!.durl.first().url) in 1..12*1024*1024
+            val streamLength = fetchStreamLength(streamInfo.data!!.durl.first().url)
+            val canShowVideo = streamLength in 1..12*1024*1024
             val id = "${videoInfo.data.bvid.substring(2)}${page.cid.toHexString(hexFormat)}"
             results.add(
                 InputInlineQueryResultArticle().apply {
@@ -236,7 +243,7 @@ internal object BiliBiliService {
                 InputInlineQueryResultVideo().apply {
                     this.id = "V$id"
                     this.title = inlineTitle
-                    this.description = "With Video"
+                    this.description =  "With Video [${"%.2f".format(streamLength.toFloat() / 1024 / 1024)}MB]"
                     if (!canShowVideo) this.description += " (May not be able to show)"
                     videoUrl = streamInfo.data.durl.first().url
                     thumbnailUrl = videoInfo.data.pic
