@@ -31,6 +31,10 @@ kotlin {
     }
 }
 
+tasks.withType<JavaExec> {
+    systemProperty("project.name", project.name)
+}
+
 tasks.test {
     useJUnitPlatform()
 }

@@ -1,14 +1,21 @@
-package moe.kurenai.skyland.moe.kurenai.skyland
+package moe.kurenai.skyland
+
+import moe.kurenai.common.util.getLogger
+import kotlin.collections.joinToString
 
 class SkylandService(
     private val client: SkylandClient,
 ) {
+    private val log = getLogger()
 
     context(ctx: SkylandContext)
-    private suspend fun doSign() {
+    suspend fun doSign() {
         val grantCode = client.grantCode()
+        log.info("Grant code: $grantCode")
         ctx.credInfo = client.authByCode(grantCode)
-        client.getBindingList()
+        log.info("Cred info: ${ctx.credInfo}")
+        val bindingList = client.getBindingList()
+        log.info("Binding list: ${bindingList.joinToString(", ")}")
     }
 
 }

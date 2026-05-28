@@ -1,36 +1,30 @@
-package moe.kurenai.skyland.moe.kurenai.skyland
+package moe.kurenai.skyland
 
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HeadersBuilder
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
-import io.ktor.http.Url
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.http.headers
-import io.ktor.http.isSuccess
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.serialization.kotlinx.json.*
+import jdk.internal.org.jline.utils.AttributedStringBuilder.append
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import moe.kurenai.common.util.buildKtorLogger
 import moe.kurenai.common.util.getLogger
-import moe.kurenai.skyland.moe.kurenai.skyland.model.AuthByCodeRequest
-import moe.kurenai.skyland.moe.kurenai.skyland.model.CredInfo
-import moe.kurenai.skyland.moe.kurenai.skyland.model.DidResponse
-import moe.kurenai.skyland.moe.kurenai.skyland.model.Grant
-import moe.kurenai.skyland.moe.kurenai.skyland.model.GrantRequest
-import moe.kurenai.skyland.moe.kurenai.skyland.model.SkylandResponse
+import moe.kurenai.skyland.model.*
+import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.time.ZonedDateTime
 
 class SkylandClient {
 
@@ -39,10 +33,8 @@ class SkylandClient {
     private val client = HttpClient(OkHttp) {
         defaultRequest {
             headers {
-                append(HttpHeaders.Accept, "application/json")
-                append(HttpHeaders.AcceptEncoding, "gzip")
-                append(HttpHeaders.UserAgent, "Skland/1.0.1 (com.hypergryph.skland; build:100001014; Android 31; ) Okhttp/4.11.0")
-                append(HttpHeaders.Connection, "close")
+                append(HttpHeaders.Accept, "application/json;text/plain")
+                append(HttpHeaders.ContentType, "application/json")
             }
         }
         install(ContentNegotiation) {
@@ -55,16 +47,26 @@ class SkylandClient {
     }
 
     context(ctx: SkylandContext)
-    private fun HttpRequestBuilder.resolveSignHeader(url: String, body: String) {
-        val url = Url(url)
+    private fun HttpRequestBuilder.resolveSignHeader(json: String? = null) {
         headers {
             append("cred", ctx.credInfo.cred)
 
-            when (method) {
-                HttpMethod.Get -> append("sign", "client_credentials")
+            val (sign, t) = when (method) {
+                HttpMethod.Get -> generateSignature(url.encodedPath, url.toString().substringAfter('?'))
+                else -> generateSignature(url.encodedPath, json!!)
             }
-
+            append("sign", sign.utf8())
+            append("platform", "")
+            append("timestamp", t.toString())
+            append("dId", "")
+            append("vName", "")
         }
+    }
+
+    private fun HeadersBuilder.appendNormalHeader() {
+        append(HttpHeaders.AcceptEncoding, "gzip")
+        append(HttpHeaders.UserAgent, "Skland/1.0.1 (com.hypergryph.skland; build:100001014; Android 31; ) Okhttp/4.11.0")
+        append(HttpHeaders.Connection, "close")
     }
 
     /**
@@ -79,9 +81,17 @@ class SkylandClient {
      * @return: 计算完毕的sign
      */
     context(ctx: SkylandContext)
-    private fun generateSignature(path: String, params: String) {
+    private fun generateSignature(path: String, params: String): Pair<ByteString, Long> {
         // 总是说请勿修改设备时间，怕不是yj你的服务器有问题吧，所以这里特地-2
-        val t = LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(8))
+        val t = LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(8)) - 2
+        val signJsonStr =  buildJsonObject {
+            put("platform", "")
+            put("timestamp", t.toString())
+            put("dId", "")
+            put("vName", "")
+        }.toString()
+        val s = (path + params + t + signJsonStr).encodeUtf8()
+        return s.hmacSha256(ctx.credInfo.token.encodeUtf8()).md5() to t
     }
 
     context(ctx: SkylandContext)
@@ -89,6 +99,7 @@ class SkylandClient {
         val did = getDId()
         val httpRes = client.post(URL.OAUTH2_GRANT) {
             headers {
+                appendNormalHeader()
                 append("dId", did)
             }
 
@@ -98,8 +109,8 @@ class SkylandClient {
             error("Grant code failed: ${httpRes.bodyAsText()}")
         }
         val res = httpRes.body<SkylandResponse<Grant>>()
-        if (res.status != 0) {
-            error("Grant code failed: ${res.msg}")
+        if (res.code != 0) {
+            error("Grant code failed: ${res.message}")
         }
         return res.data!!.code
     }
@@ -109,14 +120,15 @@ class SkylandClient {
         val dId = getDId()
         val res = client.post(URL.AUTH_GENERATE_CRED_BY_CODE) {
             headers {
+                appendNormalHeader()
                 append("dId", dId)
             }
 
             setBody(AuthByCodeRequest(code = grantCode))
         }.body<SkylandResponse<CredInfo>>()
 
-        if (res.status != 0) {
-            error("Auth code failed: ${res.msg}")
+        if (res.code != 0) {
+            error("Auth code failed: ${res.message}")
         }
 
         return res.data!!
@@ -127,22 +139,23 @@ class SkylandClient {
 
         val response = client.post(URL.DEVICES_INFO_URL) {
             setBody(req)
-        }.body<DidResponse>()
+        }.body<SkylandResponse<DidInfo>>()
 
         if (response.code != 1100) {
             error("Unexpected response code ${response.code}")
         }
 
-        return "B" + response.detail.deviceId
+        // 开头必须是B
+        return "B" + response.data!!.deviceId
     }
 
-    suspend fun getBindingList() {
-        client.get(URL.GAME_PLAYER_BINDING) {
-            headers {
-
-            }
-        }
-        TODO("Not yet implemented")
+    context(ctx: SkylandContext)
+    suspend fun getBindingList(): List<BindingList.Binding> {
+        val res = client.get(URL.GAME_PLAYER_BINDING) {
+            resolveSignHeader()
+        }.body<SkylandResponse<BindingList>>()
+        if (res.code != 0) error("Binding list failed: ${res.message}")
+        return res.data!!.list
     }
 
     companion object {

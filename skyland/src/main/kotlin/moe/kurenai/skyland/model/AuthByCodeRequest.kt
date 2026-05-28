@@ -1,4 +1,4 @@
-package moe.kurenai.skyland.moe.kurenai.skyland.model
+package moe.kurenai.skyland.model
 
 data class AuthByCodeRequest(
     val code: String,

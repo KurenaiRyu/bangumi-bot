@@ -1,5 +1,6 @@
-package moe.kurenai.skyland.moe.kurenai.skyland
+package moe.kurenai.skyland
 
+import io.ktor.http.decodeURLPart
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -39,7 +40,7 @@ object SecuritySM {
     @OptIn(ExperimentalSerializationApi::class)
     private val SM_CONFIG by lazy {
         val fs = FileSystem.RESOURCES
-        val config = if (fs.exists(SM_PATH.toPath())) {
+        if (fs.exists(SM_PATH.toPath())) {
             val jsonStr = fs.read("sm_config.json".toPath()) {
                 String(readByteArray(), StandardCharsets.UTF_8)
             }
@@ -47,10 +48,8 @@ object SecuritySM {
                 json.decodeFromString<SMConfig>(jsonStr)
             }.onFailure {
                 log.error("Error while reading sm config file", it)
-            }.getOrNull()
-        } else null
-
-        config?: SMConfig()
+            }.getOrThrow()
+        } else SMConfig()
     }
 
     private val PK by lazy { loadPublicKey(SM_CONFIG.publicKey) }
@@ -227,21 +226,22 @@ object SecuritySM {
         for ((key, value) in o) {
             if (key in DES_RULE) {
                 val rule = DES_RULE[key]!!
-                var res: Any? = value
-                if ((rule["is_encrypt"] as Int) == 1) {
+                val res = if ((rule["is_encrypt"] as Int) == 1) {
                     val keyStr = rule["key"] as String
-                    val data = (res.toString()).toByteArray(Charsets.UTF_8)
-                    // 补足字节
-                    val paddedData = (data + ByteArray(8)).toByteString()
                     val cipher = Cipher.getInstance("DESede/ECB/NoPadding")
-                    val keySpec = SecretKeySpec(keyStr.toByteArray(Charsets.UTF_8), 0, 24, "DESede")
+                    val keySpec = SecretKeySpec(keyStr.toByteArray().copyOf(24), "DESede")
                     cipher.init(Cipher.ENCRYPT_MODE, keySpec)
+
+                    val data = value.toString().toByteArray()
+                    // 补足字节
+                    val remain = data.size % cipher.blockSize
+                    val paddedData = data.copyOf(data.size + (cipher.blockSize - remain))
                     val encrypted = Buffer()
                     encrypted.cipherSink(cipher).buffer().use {
-                        it.write(paddedData.substring(0, ((paddedData.size + 7) / 8) * 8))
+                        it.write(paddedData)
                     }
-                    res = encrypted.md5().hex()
-                }
+                    encrypted.md5().hex()
+                } else value
                 result[rule["obfuscated_name"] as String] = res
             } else {
                 result[key] = value
@@ -327,11 +327,7 @@ object SecuritySM {
         val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
         cipher.init(Cipher.ENCRYPT_MODE, PK)
 
-        val encrypted = Buffer()
-        encrypted.cipherSink(cipher).buffer().use {
-            it.write(uuid)
-        }
-        return encrypted.snapshot().base64()
+        return cipher.doFinal(uuid.toByteArray()).toByteString().base64()
     }
 
     fun buildDidRequest(): JsonObject {
@@ -367,7 +363,7 @@ object SecuritySM {
             put("subVersion", "1.0.0")
             put("time", 0)
         }
-        desTarget["tn"] = getTn(desTarget).encodeUtf8().md5()
+        desTarget["tn"] = getTn(desTarget).encodeUtf8().md5().hex()
 
         val desResult = des(desTarget)
         val gzipData = gzip(desResult).encodeUtf8()

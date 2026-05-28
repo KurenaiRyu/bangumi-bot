@@ -1,6 +1,6 @@
-package moe.kurenai.skyland.moe.kurenai.skyland.model
+package moe.kurenai.skyland.model
 
-import moe.kurenai.skyland.moe.kurenai.skyland.SkylandClient
+import moe.kurenai.skyland.SkylandClient
 
 data class GrantRequest(
     val appCode: String = SkylandClient.APP_CODE,
